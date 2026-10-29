@@ -25,7 +25,7 @@ export class HttpExceptionFilter implements ExceptionFilter<unknown> {
         event: 'http_error',
         request_id: request.requestId,
         status,
-        code: 'INTERNAL_SERVER_ERROR',
+        code: createApiError(status, request.requestId).error.code,
       });
     }
 

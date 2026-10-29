@@ -28,10 +28,12 @@ class RecordingLogger extends ConsoleLogger {
 export async function createTestApplication(
   environment: NodeEnvironment = 'test',
   controllers: Type<unknown>[] = [],
+  databaseUrl = 'postgresql://unused:unused@127.0.0.1:1/unused_test',
 ): Promise<{ app: INestApplication; logger: RecordingLogger }> {
   const logger = new RecordingLogger();
   const config = new ConfigService<Environment, true>({
     PORT: 3001,
+    DATABASE_URL: databaseUrl,
     NODE_ENV: environment,
   });
   const module = await Test.createTestingModule({

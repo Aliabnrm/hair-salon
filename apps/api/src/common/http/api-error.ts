@@ -20,6 +20,10 @@ export class ApiErrorDto {
 }
 
 const HTTP_ERRORS: Record<number, { code: string; message: string }> = {
+  503: {
+    code: 'SERVICE_UNAVAILABLE',
+    message: 'سرویس موقتاً آماده پاسخ‌گویی نیست.',
+  },
   400: { code: 'BAD_REQUEST', message: 'درخواست نامعتبر است.' },
   401: { code: 'UNAUTHORIZED', message: 'ورود به حساب لازم است.' },
   403: { code: 'FORBIDDEN', message: 'دسترسی به این بخش مجاز نیست.' },

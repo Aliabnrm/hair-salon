@@ -1,9 +1,16 @@
-import 'dotenv/config';
+import { config as loadEnvironmentFile } from 'dotenv';
 import { fileURLToPath } from 'node:url';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';
 import { validateDatabaseUrl } from '../config/environment.js';
+
+if (process.env.NODE_ENV !== 'test') {
+  loadEnvironmentFile({
+    path: fileURLToPath(new URL('../../.env', import.meta.url)),
+    quiet: true,
+  });
+}
 
 let pool: Pool | undefined;
 try {

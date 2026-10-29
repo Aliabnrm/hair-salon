@@ -6,7 +6,7 @@ import { Pool } from 'pg';
 import { describe, expect, it } from 'vitest';
 import { createTestDatabase } from './helpers/test-database.js';
 
-async function runMigration(url: string) {
+async function runMigration(url: string | undefined) {
   return new Promise<{ status: number | null; output: string }>(
     (resolve, reject) => {
       const child = spawn(process.execPath, ['dist/database/migrate.js'], {
@@ -90,6 +90,7 @@ describe('real PostgreSQL migrations', () => {
 
   it('fails cleanly without echoing invalid or unreachable migration targets', async () => {
     for (const url of [
+      undefined,
       'https://migration-sensitive-sentinel@localhost/db',
       'postgresql://migration-sensitive-sentinel:fake@127.0.0.1:1/local_test',
     ]) {

@@ -1,5 +1,7 @@
 # Hair Salon
 
+A modular NestJS API for a salon booking platform in Iran, developed incrementally with documented decisions and automated tests.
+
 پلتفرم رزرو و مدیریت سالن برای ایران؛ توسعه مرحله‌ای با NestJS و آموزش معماری بک‌اند. اسپرینت ۱ پایه API را فراهم می‌کند: تنظیمات معتبر، شناسه درخواست، خطای امن، OpenAPI و liveness. این endpoint فقط زنده‌بودن فرایند را نشان می‌دهد؛ اتصال دیتابیس، SMS یا آمادگی production را بررسی نمی‌کند.
 
 ## اجرای محلی
@@ -61,5 +63,6 @@ curl -i -H 'X-Request-Id: local-demo' http://127.0.0.1:3001/api/v1/health/livene
 - [گزارش اجرا و شواهد](docs/planning/sprints/sprint-01-report.md) و [طرح اسپرینت](docs/planning/sprints/sprint-01-plan.md).
 - [ساختار و جهت وابستگی](docs/architecture/codebase-structure.md)، [ابزارها و نسخه‌ها](docs/architecture/adr/ADR-003-sprint-01-tooling.md) و [قواعد عامل](AGENTS.md).
 - [راهنمای مستندات](docs/README.md)، [روش همکاری](docs/planning/collaboration-workflow.md) و [برنامه اسپرینت‌ها](docs/planning/sprint-plan.md).
+- [روند Git و Pull Request](docs/engineering/git-workflow.md): تغییرهای کوچک، دلیل تصمیم، بررسی خودکار و تاریخچه قابل مرور.
 
 دیتابیس، احراز هویت، رزرو و UI در اسپرینت‌های بعد و پس از تأیید طرح مربوط اضافه می‌شوند. این پایه محلی، اثبات عملکرد در بار واقعی یا مجوز انتشار عمومی نیست.

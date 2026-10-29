@@ -64,5 +64,6 @@ curl -i -H 'X-Request-Id: local-demo' http://127.0.0.1:3001/api/v1/health/livene
 - [ساختار و جهت وابستگی](docs/architecture/codebase-structure.md)، [ابزارها و نسخه‌ها](docs/architecture/adr/ADR-003-sprint-01-tooling.md) و [قواعد عامل](AGENTS.md).
 - [راهنمای مستندات](docs/README.md)، [روش همکاری](docs/planning/collaboration-workflow.md) و [برنامه اسپرینت‌ها](docs/planning/sprint-plan.md).
 - [روند Git و Pull Request](docs/engineering/git-workflow.md): تغییرهای کوچک، دلیل تصمیم، بررسی خودکار و تاریخچه قابل مرور.
+- [طرح اسپرینت ۲](docs/planning/sprints/sprint-02-plan.md)، [پرامپت اجرایی](docs/prompts/sprint-02.md) و [تصمیم دیتابیس](docs/architecture/adr/ADR-004-database-foundation.md): محدوده تأییدشده و آماده اجرا؛ اتصال DB هنوز پیاده‌سازی نشده است.
 
-دیتابیس، احراز هویت، رزرو و UI در اسپرینت‌های بعد و پس از تأیید طرح مربوط اضافه می‌شوند. این پایه محلی، اثبات عملکرد در بار واقعی یا مجوز انتشار عمومی نیست.
+پایه دیتابیس در محدوده تأییدشده اسپرینت ۲ اضافه می‌شود؛ احراز هویت، رزرو و UI تابع طرح اسپرینت خود هستند. این پایه محلی، اثبات عملکرد در بار واقعی یا مجوز انتشار عمومی نیست.

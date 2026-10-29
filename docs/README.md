@@ -6,6 +6,8 @@
 
 مرور فعلی را از [روش همکاری](planning/collaboration-workflow.md)، [برنامه اسپرینت‌ها](planning/sprint-plan.md) و [طرح اسپرینت ۱](planning/sprints/sprint-01-plan.md) آغاز کنید. [دفتر یادگیری](learning/README.md) پس از هر اسپرینت با کد واقعی تکمیل می‌شود.
 
+اکنون محدوده اسپرینت ۲ و روند Git/PR تأیید شده‌اند؛ [طرح اسپرینت ۲](planning/sprints/sprint-02-plan.md)، [پرامپت](prompts/sprint-02.md)، [ADR-004](architecture/adr/ADR-004-database-foundation.md) و [روند Git](engineering/git-workflow.md) آماده‌اند. این مرحله ثبت baseline و برنامه‌ریزی است؛ دیتابیس پروژه هنوز نصب/اجرا نشده است.
+
 ## مراجع اجرای اسپرینت‌ها
 [روش ساخت پرامپت‌های بعدی](prompts/README.md) و [پرامپت آماده اسپرینت ۱](prompts/sprint-01.md).
 [AGENTS.md](../AGENTS.md) راهنمای کوتاه عامل؛ [سازمان‌دهی کد](architecture/adr/ADR-002-code-organization.md)،[ابزار اسپرینت ۱](architecture/adr/ADR-003-sprint-01-tooling.md)،[ساختار فایل‌ها](architecture/codebase-structure.md)،[استاندارد بک‌اند](engineering/backend-standards.md)،[استاندارد فرانت](engineering/frontend-standards.md)،[کیفیت و تحویل](engineering/quality-gates.md) و [منابع بررسی‌شده](references/engineering-sources.md).
@@ -18,7 +20,7 @@
 ## وضعیت جاری
 - قطعی از کارفرما: ایران، مخاطب ایرانی، مستندات فارسی، هر دو گروه مردانه و زنانه؛ سپس NestJS و همکاری کارفرما/دستیار با هدف یادگیری انتخاب شد. طرح هر اسپرینت پیش از پرامپت اجرایی و کدنویسی باید تأیید شود.
 - پاسخ کارفرما: شهر «فعلاً قطعی نیست» و «فعلاً رایگان». جزئیات هزینه پلتفرم در برابر هزینه خدمت و نیاز بیعانه هنوز باز است؛ طرح موقت بدون دریافت وجه در سامانه است و خدمات سالن رایگان فرض نمی‌شوند.
-- پیشنهاد نیازمند تأیید: فارسی/RTL و شمسی، تومان نمایشی/ریال ذخیره، Asia/Tehran، وب واکنش‌گرا، یک محل و تیم کوچک، یک خدمت پیوسته و یک متخصص/رزرو، PostgreSQL و فرانت React/Next.js. TypeScript و پایه ماژولار بک‌اند در محدوده اسپرینت ۱ تأیید شده‌اند؛ NestJS مصوب و طرح قبلی Next.js full-stack جایگزین شده است.
+- پیشنهاد نیازمند تأیید: فارسی/RTL و شمسی، تومان نمایشی/ریال ذخیره، Asia/Tehran، وب واکنش‌گرا، یک محل و تیم کوچک، یک خدمت پیوسته و یک متخصص/رزرو و فرانت React/Next.js. NestJS/TypeScript پایه اجرا شده و PostgreSQL در محدوده اسپرینت ۲ تأیید شده است؛ طرح قبلی Next.js full-stack جایگزین شده است.
 - شرط مهم: انتخاب هر دو گروه به معنای حل خدمات چندمرحله‌ای، دستگاه و اتاق مشترک نیست؛ Q-15 پیش از تأیید فنی باید حل شود.
 
 ترتیب مرور: vision → mvp-scope → open-questions → functional/non-functional → domain/data/API → implementation-plan. در صورت اختلاف، ابتدا دفتر تصمیم‌ها بررسی و سندهای متأثر با هم اصلاح شوند؛ هیچ پیش‌فرضی جانشین تأیید کارفرما نیست.

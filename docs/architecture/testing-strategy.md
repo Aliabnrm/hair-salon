@@ -1,5 +1,5 @@
 # راهبرد آزمون
-این سند برنامه آزمون قابلیت‌های محصول است؛ بخش زیرساخت اسپرینت ۱ اجرا شده و [گزارش واقعی](../planning/sprints/sprint-01-report.md) دارد. تست‌های رزرو، هویت و دیتابیس جدول زیر هنوز برنامه آینده‌اند. صحت رزرو و tenant isolation با mock DB اثبات نمی‌شوند؛ DB واقعی همان خانواده/نسخه هدف لازم است.
+این سند برنامه آزمون قابلیت‌های محصول است؛ بخش زیرساخت اسپرینت ۱ اجرا شده و [گزارش واقعی](../planning/sprints/sprint-01-report.md) دارد. پایه PostgreSQL نیز در اسپرینت ۲ آزموده شده؛ تست‌های رزرو، هویت و رقابت دامنه در جدول زیر هنوز برنامه آینده‌اند. صحت رزرو و tenant isolation با mock DB اثبات نمی‌شوند؛ DB واقعی همان خانواده/نسخه هدف لازم است.
 
 | دسته/شناسه | چه چیزی و کدام ریسک | زمان و روش |
 |---|---|---|
@@ -29,3 +29,9 @@
 
 ## ابزار و معیار پایه
 ابزار پایه فعلی Vitest/Supertest مطابق [ADR-003](adr/ADR-003-sprint-01-tooling.md) است؛ پیشنهاد قبلی Jest جاری نیست. [S1-T01..06](../engineering/quality-gates.md) و S1-AC اسپرینت ۱ بررسی شدند: ۲۷ تست واحد تنظیمات و ۱۹ تست HTTP/startup، همراه build/typecheck/lint/format و اجرای زنده موفق بودند. ابزارهای UI/DB در اسپرینت مرتبط تعیین می‌شوند.
+
+## اجرای واقعی پایه PostgreSQL — اسپرینت ۲
+
+Vitest config جدا در `apps/api/vitest.config.integration.ts`، بدون runner/transformer تازه؛ `npm run test:integration` و check کامل نیازمند `TEST_DATABASE_URL` صریح‌اند. روش ساخت مقصد، CREATEDB، allowlist میزبان/نام و cleanup در [README](../../README.md#دیتابیس-و-تست-واقعی) است. هر suite DB با UUID دارد؛ query parameter برای جلوگیری از override مقصد رد می‌شود و فایل‌ها به‌ترتیب اجرا می‌شوند.
+
+`database.integration-spec.ts` اجرای CLI واقعی از صفر، namespace/extension/journal/hash واقعی و اجرای دوم بدون تغییر را بررسی می‌کند. `readiness.integration-spec.ts` wiring واقعی Nest و Pool، پاسخ 200، قطع DB اختصاصی، idle error، 503 امن، recovery همان app، اشباع Pool، handshake بی‌پاسخ و query timeout روی relay به PostgreSQL واقعی را بررسی می‌کند. اتصال‌های timeout‌شده و صف Pool بررسی و همه منابع بسته می‌شوند. نبود اتصال نیز با پورت بسته و credential sentinel جدا آزموده می‌شود. unit/HTTPهای مستقل از DB واقعی قابل اجرا مانده‌اند. نتیجه محلی و CI در [گزارش](../planning/sprints/sprint-02-report.md) تفکیک شده‌اند.

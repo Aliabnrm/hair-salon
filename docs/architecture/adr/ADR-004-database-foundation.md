@@ -1,6 +1,6 @@
 # ADR-004 — پایه PostgreSQL و مرز دسترسی داده
 
-تاریخ: ۲۰۲۶-۱۰-۲۹. وضعیت: **انتخاب فنی برای اجرای اسپرینت ۲ با محدوده تأییدشده؛ هنوز نصب یا آزمون پروژه انجام نشده است**. این ADR تصمیم طراحی را ثبت می‌کند؛ گزارش اجرا بعداً شاهد سازگاری خواهد بود. نتیجه بار و مقیاس‌پذیری از این انتخاب استنباط نشود.
+تاریخ: ۲۰۲۶-۱۰-۲۹. وضعیت: **اجراشده در محدوده مصوب اسپرینت ۲**. [گزارش اجرا](../../planning/sprints/sprint-02-report.md) شاهد نصب و آزمون واقعی است. نتیجه بار و مقیاس‌پذیری از این انتخاب استنباط نشود.
 
 ## نیاز تعیین‌کننده
 
@@ -16,9 +16,9 @@
 
 انتخاب برای اجرا: **PostgreSQL 17.x، Drizzle ORM و درایور `pg`**؛ `drizzle-kit` فقط برای ساخت/مدیریت artifactهای migration. این انتخاب برتری عملکردی اندازه‌گیری‌شده بر دو گزینه دیگر را ادعا نمی‌کند. دلیل اصلی، تطبیق با SQL و قیود برنامه رزرو و هدف آموزشی است. Nest DI با provider کوچک این adapter را مدیریت می‌کند؛ ORM جای transaction، index یا constraint را نمی‌گیرد.
 
-در این محیط PostgreSQL 17.11 نصب است؛ این نتیجه preflight است، نه راه‌اندازی دیتابیس پروژه. patch پشتیبانی‌شده و image رسمی متناظر هنگام اجرا بررسی، نسخه دقیق یا digest ثبت و همان نسخه در توسعه/تست/CI استفاده شود. PostgreSQL جدیدتر فقط با نیاز یا دلیل سازگاری انتخاب شود، نه برای تازگی شماره نسخه.
+در preflight، PostgreSQL 17.11 فقط نصب بود؛ هنگام اجرای اسپرینت، cluster اختصاصی همان patch واقعاً راه‌اندازی و تست شد و image رسمی متناظر با digest در توسعه/CI ثبت شد. PostgreSQL جدیدتر فقط با نیاز یا دلیل سازگاری انتخاب شود، نه برای تازگی شماره نسخه.
 
-snapshot registry در تاریخ بررسی: `drizzle-orm=0.45.4`، `drizzle-kit=0.31.11` و `pg/@types/pg=8.23.1`. pg نیازمند Node >=16 و Drizzle دارای peer برای pg >=8 است؛ patch نهایی و تمام peer/engineها قبل نصب با Node 24.22.2 و TypeScript 6 بررسی شوند. این اعداد اثبات build نیستند. prerelease وارد پروژه نشود و راهنمای online جدیدتر از نسخه نصب‌شده، بدون کنترل سازگاری کپی نشود.
+نسخه‌های exact نصب‌شده و بررسی‌شده با Node 24.22.2/npm 11.19.1 و TypeScript 6.0.2: `drizzle-orm=0.45.4`، `drizzle-kit=0.31.11` و `pg/@types/pg=8.23.1`. pg نیازمند Node >=16 و Drizzle دارای peer برای pg >=8 است؛ patch نهایی و peer/engineهای مرتبط قبل نصب با Node 24.22.2 و TypeScript 6 بررسی شدند. نسخه‌ها در lockfile ریشه ثبت و build/typecheck و تست واقعی اجرا شدند. prerelease وارد پروژه نشود و راهنمای online جدیدتر از نسخه نصب‌شده، بدون کنترل سازگاری کپی نشود.
 
 ## مرزها و مالکیت
 
@@ -48,4 +48,13 @@ Pool اولیه کوچک و محدود باشد؛ اعداد منتخب و عل�
 - [Drizzle PostgreSQL](https://orm.drizzle.team/docs/get-started-postgresql)، [transactions](https://orm.drizzle.team/docs/transactions)، [migrations](https://orm.drizzle.team/docs/migrations)، [custom generate](https://orm.drizzle.team/docs/drizzle-kit-generate): صفحات رسمی دریافت شدند؛ query/migration و SQL سفارشی مبنای انتخاب‌اند. فرمت artifact نسخه نصب‌شده در اجرا کنترل شود.
 - [Prisma unsupported database features](https://www.prisma.io/docs/orm/prisma-migrate/workflows/unsupported-database-features): SQL سفارشی برای قابلیت‌های خارج schema ممکن است؛ نبود پشتیبانی کامل در schema به معنی ناممکن‌بودن قابلیت نیست.
 - [node-postgres Pool](https://node-postgres.com/apis/pool): حد اتصال، timeout، release، end و event خطای idle.
-- metadata رسمی npm برای نسخه‌های ذکرشده خوانده شد. کد نصب‌شده/آزموده‌شده اسپرینت ۲ هنوز نداریم؛ جایگزین‌کردن runner یا تغییر تصمیم اصلی با علت و اصلاح همین ADR انجام شود.
+- metadata رسمی npm شامل engine، peer و optional بودن adapterهای دیگر خوانده شد؛ نصب بدون force/legacy-peer-deps انجام شد. جایگزین‌کردن runner یا تغییر تصمیم اصلی با علت و اصلاح همین ADR انجام شود.
+
+## جزئیات اجرای ثبت‌شده
+
+- PostgreSQL **17.11**؛ image رسمی `postgres:17.11-bookworm@sha256:839fbb5a4942a7758dd93e18b42ea5649807491a0545b5eeeb8f0b8bb11857a5` از Docker Hub بررسی و در Compose/CI یکسان ثبت شد. Docker daemon محلی در دسترس نبود؛ آزمون محلی روی cluster اختصاصی Homebrew همان patch اجرا شد. اجرای اولیه همین image در CI موفق شد؛ نتیجه آخرین commit در PR checks و گزارش ارجاع شده است.
+- `DatabaseProvider` فقط یک Pool lazy و client typed Drizzle می‌سازد. max=5 برای بودجه کوچک توسعه، idle=10s برای آزادشدن اتصال بلااستفاده، acquire/connect=1s، statement_timeout=1s و query_timeout=1.2s. probe مهلت query را صریح روی همان درخواست اعمال می‌کند تا URL آن را خنثی نکند. بدترین بودجه معمول probe حدود 2.2s است، بدون تضمین زمان‌بندی سیستم یا ظرفیت production.
+- در query failure/timeout، `release(true)` socket را حذف می‌کند؛ خطای idle فقط event ثابت دارد. shutdown از hook رسمی Nest، `pool.end()` را اجرا می‌کند. migration CLI نیز در finally Pool خودش را می‌بندد و شکست exit غیرصفر دارد.
+- `drizzle-kit 0.31.11 generate --custom` artifact نسخه 7 تولید کرد؛ SQL اولیه namespace و extension را دارد. snapshot namespace با خروجی واقعی generate همین نسخه هماهنگ شد؛ اجرای generate بعدی «No schema changes» داد. custom extension بیرون مدل declarative ابزار است و در SQL حفظ می‌شود.
+- `dotenv 18.0.9` وابستگی مستقیم CLI برای خواندن `.env` است؛ validation URL همان تابع مرکزی runtime باقی می‌ماند. `TEST_DATABASE_URL` فقط runner integration می‌خواند و guard میزبان/نام/parameter دارد.
+- audit زمان اجرا: dependencyهای runtime بدون advisory شناخته‌شده؛ چهار moderate در زنجیره dev-only `drizzle-kit → @esbuild-kit/esm-loader → core-utils → esbuild 0.18.20` (GHSA-67mh-4wv8-2f99). ریسک مربوط به dev server esbuild است؛ پروژه آن server را اجرا نمی‌کند. پیشنهاد خودکار npm downgrade ناسازگار است؛ force/override آزموده‌نشده اعمال نشد. هنگام patch ابزار دوباره بررسی شود.

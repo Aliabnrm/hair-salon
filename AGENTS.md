@@ -9,7 +9,7 @@
 - docs/architecture/adr/ADR-002-code-organization.md و docs/architecture/codebase-structure.md: معماری و importها.
 - docs/engineering/backend-standards.md؛ برای UI همچنین frontend-standards.md؛ برای تحویل quality-gates.md.
 - نسخه و ابزار اسپرینت ۱: docs/architecture/adr/ADR-003-sprint-01-tooling.md؛ شواهد: docs/references/engineering-sources.md.
-- اسپرینت ۲: محدوده تأییدشده؛ docs/planning/sprints/sprint-02-plan.md و docs/prompts/sprint-02.md؛ انتخاب DB در ADR-004 است و هنوز نصب/تست آن انجام نشده است. آماده‌بودن طرح را اجرای DB گزارش نکن.
+- اسپرینت ۲: محدوده تأییدشده؛ docs/planning/sprints/sprint-02-plan.md و docs/prompts/sprint-02.md؛ انتخاب DB در ADR-004 است و نتیجه نصب/تست واقعی در docs/planning/sprints/sprint-02-report.md ثبت می‌شود. آماده‌بودن طرح را جای شاهد اجرای DB نگیر.
 - فقط اسناد مرتبط وظیفه را بخوان؛ مستندات کامل محصول را در هر نوبت تکرار نکن. دستور اجرایی هر اسپرینت در docs/prompts/ است.
 - روند branch/commit/PR: docs/engineering/git-workflow.md؛ کارفرما commit/push و PR روی origin همین پروژه را مجاز کرده است. تغییر را روی branch مرتبط ببر، CI را بررسی و PR قابل مرور تحویل بده؛ main را مستقیم تغییر نده و PR را خودکار merge نکن.
 

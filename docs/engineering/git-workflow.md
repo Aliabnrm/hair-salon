@@ -24,11 +24,11 @@
 
 ## بررسی خودکار
 
-Workflow `.github/workflows/ci.yml` روی PR و push به main اجرا می‌شود: Node از `.nvmrc`، بررسی npm مطابق packageManager، نصب از lockfile و `npm run check`. check فعلی build، typecheck، lint، format و ۴۶ تست پایه را اجرا می‌کند؛ تعداد تست ثابت نیست و با قابلیت واقعی رشد می‌کند.
+Workflow `.github/workflows/ci.yml` روی PR و push به main اجرا می‌شود: Node از `.nvmrc`، بررسی npm مطابق packageManager، نصب از lockfile و `npm run check`. check فعلی build، typecheck، lint، format و unit/HTTP/integration واقعی را اجرا می‌کند؛ تعداد تست ثابت نیست و با قابلیت واقعی رشد می‌کند.
 
 GitHub Actions رسمی با SHA دقیق بررسی‌شده pin شده‌اند؛ checkout v7.0.1 و setup-node v7.1.0 هر دو runtime node24 دارند. workflow فقط `contents: read` دارد و credential در checkout نگه نمی‌دارد. dependencyهای اجرایی هم در lockfile ثبت شده‌اند. موفقیت محلی و موفقیت GitHub دو شاهد جدا هستند؛ تا اجرای واقعی CI، موفقیت remote ادعا نشود.
 
-تست دیتابیس و سرویس PostgreSQL در اسپرینت ۲ به همین workflow اضافه می‌شوند؛ اکنون workflow وانمود نمی‌کند DB را آزمایش کرده است. نصب و build از clone تمیز بررسی شود و به work/runtime شخصی تکیه نکند.
+تست دیتابیس و سرویس PostgreSQL 17.11 با image/digest هماهنگ Compose در اسپرینت ۲ به همین workflow اضافه شدند؛ env فقط تست و دیتابیس‌های موقت مستقل‌اند. نصب و build از clone تمیز بررسی شود و به work/runtime شخصی تکیه نکند.
 
 محافظت main پس از اولین CI موفق در ۲۰۲۶-۱۰-۲۹ واقعاً فعال شد: اجبار PR و check با نام `API quality`، به‌روز بودن با base، حل گفتگوها و منع force-push/حذف branch؛ شامل admin هم می‌شود. برای تیم یک‌نفره انسانی، تعداد approval اجباری صفر است تا تأیید خود به‌جای بازبینی مستقل جا زده نشود؛ کارفرما می‌تواند PR سبز را مرور و merge کند. signed commit بدون زیرساخت مرتبط تحمیل نمی‌شود. وضعیت واقعی از API GitHub بررسی شد؛ وجود این متن به‌تنهایی جای enforce سرور نیست.
 

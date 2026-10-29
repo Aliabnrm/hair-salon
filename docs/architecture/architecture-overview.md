@@ -1,5 +1,5 @@
 # معماری پیشنهادی
-بک‌اند NestJS انتخاب کارفرماست؛ سازمان‌دهی ماژولار طبق ADR-002 و ابزار پایه طبق ADR-003 مرجع جاری‌اند. PostgreSQL و فرانت مستقل React/Next.js هنوز پیشنهادند؛ وضعیت هر انتخاب در [ADR-001](adr/ADR-001-technology-selection.md) ثبت شده. worker در صورت نیاز فرایند جدا با همان کد/مدل و انتشار هماهنگ است؛ microservice مستقل نیست.
+بک‌اند NestJS انتخاب کارفرماست؛ سازمان‌دهی ماژولار طبق ADR-002 و ابزار پایه طبق ADR-003 مرجع جاری‌اند. پایه PostgreSQL اسپرینت ۲ تأیید و انتخاب Drizzle در [ADR-004](adr/ADR-004-database-foundation.md) ثبت شده؛ هنوز اجرا نشده است. فرانت مستقل React/Next.js پیشنهادی است؛ وضعیت هر انتخاب در [ADR-001](adr/ADR-001-technology-selection.md) ثبت شده. worker در صورت نیاز فرایند جدا با همان کد/مدل و انتشار هماهنگ است؛ microservice مستقل نیست.
 
 ```mermaid
 flowchart TB

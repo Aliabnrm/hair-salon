@@ -6,6 +6,9 @@ describe('compiled application startup', () => {
   it.each([
     { PORT: 'test-only-invalid-port', NODE_ENV: 'test' },
     { PORT: '3001', NODE_ENV: 'test-only-invalid-environment' },
+    { DATABASE_URL: '' },
+    { DATABASE_URL: 'https://test-only-invalid-secret@localhost/db' },
+    { DATABASE_URL: undefined },
   ])('fails before listening with invalid configuration %j', (settings) => {
     const result = spawnSync(process.execPath, ['dist/main.js'], {
       cwd: fileURLToPath(new URL('../', import.meta.url)),

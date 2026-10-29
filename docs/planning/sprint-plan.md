@@ -1,10 +1,10 @@
 # برنامه اسپرینت‌ها — نسخه ۰٫۱
-این برنامه برای کارفرما و دستیار با هدف یادگیری حین ساخت تنظیم شده است. شماره Sprint با شماره برش‌های S در implementation-plan متفاوت است. اسپرینت ۱ اجرا و بررسی شد؛ محدوده اسپرینت ۲ و روند Git/PR در ۲۰۲۶-۱۰-۲۹ تأیید شدند و طرح دقیق/پرامپت آماده است. اجرا و تست DB هنوز انجام نشده‌اند. اسپرینت‌های بعد نیازمند تأیید طرح خود هستند. مدت/تاریخ بدون ظرفیت واقعی تعیین نمی‌شود.
+این برنامه برای کارفرما و دستیار با هدف یادگیری حین ساخت تنظیم شده است. شماره Sprint با شماره برش‌های S در implementation-plan متفاوت است. اسپرینت ۱ اجرا و بررسی شد؛ محدوده اسپرینت ۲ و روند Git/PR در ۲۰۲۶-۱۰-۲۹ تأیید شدند و پیاده‌سازی و تست واقعی PostgreSQL اسپرینت ۲ انجام شده؛ [گزارش](sprints/sprint-02-report.md) مرجع نتیجه محلی و CI است. اسپرینت‌های بعد نیازمند تأیید طرح خود هستند. مدت/تاریخ بدون ظرفیت واقعی تعیین نمی‌شود.
 
 | اسپرینت | خروجی قابل نمایش | مفاهیم آموزشی اصلی | وابستگی و وضعیت |
 |---|---|---|---|
 | ۱ | API پایه Nest، تنظیمات معتبر، خطای استاندارد و health endpoint | Module،Controller،Provider،DI و مسیر درخواست | تکمیل‌شده؛ [گزارش و شواهد](sprints/sprint-01-report.md)، [درس](../learning/sprint-01.md)، [طرح](sprints/sprint-01-plan.md) |
-| ۲ | اتصال PostgreSQL، migration و readiness واقعی با تست DB | schema،Pool،migration و مرز دسترسی داده؛ معرفی FK/index | محدوده تأییدشده؛ [طرح](sprints/sprint-02-plan.md)، [پرامپت](../prompts/sprint-02.md) و [تصمیم DB](../architecture/adr/ADR-004-database-foundation.md) آماده؛ اجرا نشده |
+| ۲ | اتصال PostgreSQL، migration و readiness واقعی با تست DB | schema،Pool،migration و مرز دسترسی داده؛ معرفی FK/index | محدوده تأییدشده؛ [طرح](sprints/sprint-02-plan.md)، [پرامپت](../prompts/sprint-02.md) و [تصمیم DB](../architecture/adr/ADR-004-database-foundation.md)؛ اجراشده، [گزارش](sprints/sprint-02-report.md) و [درس](../learning/sprint-02.md) |
 | ۳ | ورود موبایلی و نشست، احراز چندمرحله‌ای نقش ممتاز، ساخت draft سالن با مرز دسترسی | authentication در برابر authorization،Guard،session و tenant | ۲؛ ابتدا adapter آزمایشی SMS در محیط محلی، اتصال واقعی قبل پایلوت؛ در صورت بزرگی به دو اسپرینت شکسته شود |
 | ۴ | خدمت، متخصص، ساعات و تعطیلی با مجوز و تست | DTO/validation،application service،قانون دامنه و رابطه داده | ۳؛ دامنه تیم/خدمت قبل schema نهایی تصویب شود |
 | ۵ | ورود طراحی فیگما، design system و مسیر واقعی انتشار/کشف/پروفایل متصل به API | component،token،server/client state و قرارداد فرانت/بک‌اند | ۴؛ دریافت فایل/کد فیگما و انتخاب ابزار فرانت؛ بررسی انتشار پیش از عرضه عمومی |

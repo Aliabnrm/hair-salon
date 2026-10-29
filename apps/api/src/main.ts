@@ -22,7 +22,7 @@ try {
 } catch {
   // Do not echo the configuration or an arbitrary exception containing secrets.
   process.stderr.write(
-    'API startup failed. Check PORT, NODE_ENV and local setup.\n',
+    'API startup failed. Check PORT, NODE_ENV, DATABASE_URL and local setup.\n',
   );
   process.exitCode = 1;
 }

@@ -1,5 +1,5 @@
 # ساختار کد و جهت وابستگی
-مرجع: ADR-002. درخت اسپرینت ۱ زیر، ساختار واقعی کد است. درخت‌های رزرو و فرانت در بخش‌های بعد صرفاً الگوی رشد آینده‌اند و ایجاد نشده‌اند.
+مرجع: ADR-002. درخت اسپرینت‌های ۱ و ۲ زیر، ساختار واقعی کد است. درخت‌های رزرو و فرانت در بخش‌های بعد صرفاً الگوی رشد آینده‌اند و ایجاد نشده‌اند.
 
 ## سطح مخزن
 یک مخزن و npm workspaces؛ بدون Nx/Turborepo. یک package-lock.json در ریشه، package.json ریشه private و apps/api با نام @hair-salon/api داریم. apps/web و packages/* فقط در اسپرینت مرتبط ایجاد شوند. npm scripts ریشه اجرای ابزارهای API را delegate می‌کنند؛ فایل اجرایی frontend فعلاً نداریم.
@@ -13,6 +13,7 @@ hair-salon/
   .npmrc
   .gitignore
   .nvmrc                    # نسخه دقیق Node انتخاب‌شده در اجرا
+  compose.yml               # PostgreSQL 17.11، localhost و volume پایدار
   apps/
     api/
       package.json
@@ -22,6 +23,13 @@ hair-salon/
       tsconfig.test.json     # typecheck تست جدا از build
       vitest.config.ts
       vitest.config.e2e.ts
+      vitest.config.integration.ts # PostgreSQL واقعی، suiteهای متوالی
+      drizzle.config.ts
+      drizzle/
+        0000_database_foundation.sql
+        meta/
+          _journal.json
+          0000_snapshot.json
       .prettierrc.json
       .env.example
       src/
@@ -37,11 +45,19 @@ hair-salon/
             request-context.ts
             request-id.middleware.ts
             http-exception.filter.ts
+        database/
+          database.module.ts
+          database.provider.ts     # مالک یک Pool و دسترسی typed به Drizzle
+          database-health.port.ts
+          postgres-health-check.ts # SELECT 1 محدود، cleanup و log امن
+          schema.ts                # namespace مشترک app، بدون جدول محصول
+          migrate.ts               # CLI رسمی و بستن Pool در finally
         modules/
           health/
             health.module.ts
             health.controller.ts
             health.service.ts
+            health.service.spec.ts
             dto/
               health-response.dto.ts
       test/
@@ -49,8 +65,12 @@ hair-salon/
         errors.e2e-spec.ts
         openapi.e2e-spec.ts
         startup.e2e-spec.ts
+        test-database-guard.e2e-spec.ts
+        database.integration-spec.ts
+        readiness.integration-spec.ts
         helpers/
           create-test-application.ts
+          test-database.ts         # guard مقصد و مالکیت DB موقت
         fixtures/
           failure.controller.ts  # فقط fixture خطا در تست، خارج از src
   docs/
@@ -63,7 +83,7 @@ hair-salon/
   work/                     # پژوهش و فایل واسط؛ در .gitignore
 ```
 
-درخت مربوط به اسپرینت ۱ است. تغییر جزئی نام فایل در اجرا مجاز است، به شرط حفظ مسئولیت و به‌روزرسانی همین درخت؛ ایجاد لایه/ابزار جدید صرفاً برای پرکردن الگو مجاز نیست. فایل اپ نباید با نتیجه تست یا متن مستند مخلوط شود.
+درخت مربوط به اسپرینت‌های ۱ و ۲ است. تغییر جزئی نام فایل در اجرا مجاز است، به شرط حفظ مسئولیت و به‌روزرسانی همین درخت؛ ایجاد لایه/ابزار جدید صرفاً برای پرکردن الگو مجاز نیست. فایل اپ نباید با نتیجه تست یا متن مستند مخلوط شود.
 
 ## رشد یک قابلیت پیچیده بک‌اند — مثال آینده، فعلاً نسازید
 ```text
@@ -107,3 +127,5 @@ apps/web/src/
 ```
 
 components/ui و lib به features وابسته نمی‌شوند. ویژگی‌ها از shared استفاده می‌کنند؛ ترکیب ویژگی‌ها در app انجام می‌شود. نام server/client و روش data fetching تابع انتخاب Next.js/React و نیاز واقعی در اسپرینت فرانت است. ذخیره‌سازی shared state و ابزار query پیشاپیش تحمیل نمی‌شود.
+
+HealthModule فقط `DatabaseHealthCheck` را در Service مصرف می‌کند؛ DatabaseModule adapter PostgreSQL و مالکیت Pool را ثبت و Port/دسترسی typed را export می‌کند. Controller فاقد SQL/pg/Drizzle است؛ queryهای قابلیت‌های آینده کنار همان قابلیت قرار می‌گیرند. database/schema.ts برای namespace واقعی و ورودی Drizzle Kit مصرف می‌شود؛ namespace app با tenant سالن یکی نیست.

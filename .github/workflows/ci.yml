@@ -18,6 +18,20 @@ jobs:
     name: API quality
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.11-bookworm@sha256:839fbb5a4942a7758dd93e18b42ea5649807491a0545b5eeeb8f0b8bb11857a5
+        env:
+          POSTGRES_USER: hair_salon_test
+          POSTGRES_PASSWORD: ci_only_password
+          POSTGRES_DB: hair_salon_test_admin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U hair_salon_test -d hair_salon_test_admin"
+          --health-interval 2s --health-timeout 3s --health-retries 15
+    env:
+      TEST_DATABASE_URL: postgresql://hair_salon_test:ci_only_password@127.0.0.1:5432/hair_salon_test_admin
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

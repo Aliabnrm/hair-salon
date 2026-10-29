@@ -14,6 +14,10 @@ GET /api/v1/health/liveness عمومی و بی‌اثر است؛ HTTP 200 با d
 
 request-id تک‌مقداری [A-Za-z0-9_-] با طول ۱..۶۴ پذیرفته،و در حالت دیگر UUID تولید می‌شود؛ شناسه مدرک هویت نیست. GET /api/docs و GET /api/openapi.json فقط development/test ثبت و در production غیرفعال‌اند. معیار و schema دقیق در [پرامپت اسپرینت ۱](../prompts/sprint-01.md)؛ middleware/filter/prefix در runtime و تست از app.setup مشترک استفاده می‌کنند.
 
+## پایه اسپرینت ۲ — readiness دیتابیس
+
+`GET /api/v1/health/readiness` عمومی و بی‌اثر، با `SELECT 1` واقعی و timeout محدود است. موفقیت 200: `{"data":{"status":"ok"},"meta":{"request_id":"same-as-header"}}`. شکست اتصال/query/timeout، 503: `{"error":{"code":"SERVICE_UNAVAILABLE","message":"سرویس موقتاً آماده پاسخ‌گویی نیست.","request_id":"same-as-header","retryable":false}}`. این false به معنی دائمی‌بودن اختلال نیست. hostname، نام DB، URL، SQL و exception خام در پاسخ/log عمومی نیستند. liveness هنگام قطعی 200 باقی می‌ماند و readiness پس از برگشت DB در همان app بازیابی می‌شود. DTO/decorator واقعی schemaهای 200/503 را در OpenAPI فقط dev/test ارائه می‌کنند. این probe نسخه migration آینده یا SMS را بررسی نمی‌کند.
+
 ## هویت و مشتری
 | روش/مسیر | مجوز | ورودی → خروجی | validation/قاعده اختصاصی و خطا |
 |---|---|---|---|

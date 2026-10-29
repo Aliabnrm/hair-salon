@@ -13,12 +13,25 @@ describe('OpenAPI availability and schema', () => {
           .get('/api/openapi.json')
           .expect(200);
         expect(Object.keys(response.body.paths)).toEqual([
+          '/api/v1/health/readiness',
           '/api/v1/health/liveness',
         ]);
         expect(
           response.body.paths['/api/v1/health/liveness'].get.responses['200']
             .content['application/json'].schema,
         ).toEqual({ $ref: '#/components/schemas/HealthResponseDto' });
+        for (const status of ['200', '503']) {
+          expect(
+            response.body.paths['/api/v1/health/readiness'].get.responses[
+              status
+            ].content['application/json'].schema,
+          ).toEqual({
+            $ref:
+              status === '200'
+                ? '#/components/schemas/HealthResponseDto'
+                : '#/components/schemas/ApiErrorDto',
+          });
+        }
         expect(
           response.body.components.schemas.HealthResponseDto.required,
         ).toEqual(['data', 'meta']);

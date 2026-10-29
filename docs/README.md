@@ -2,11 +2,11 @@
 نسخه ۰٫۳ — ۲۰۲۶-۱۰-۲۹ — مستندات منتقل‌شده به hair-salon؛ NestJS برای بک‌اند انتخاب شده؛ اجرای هر اسپرینت تابع تأیید طرح همان اسپرینت است.
 
 ## وضعیت مخزن جاری
-پوشه hair-salon در شروع خالی بود و مستندات قبلی به آن منتقل شدند؛ docs/ همین پروژه مرجع جاری است و نسخه کشف اولیه تاریخی محسوب می‌شود. اکنون اسپرینت ۱ طبق [پرامپت اجرایی](prompts/sprint-01.md) اجرا شده: API در apps/api، lockfile ریشه، بررسی‌ها و آموزش آماده‌اند. [گزارش اجرا](planning/sprints/sprint-01-report.md)، [درس](learning/sprint-01.md) و [اجرای محلی](../README.md) نقطه شروع فعلی‌اند. دیتابیس و migration هنوز وارد پروژه نشده‌اند.
+پوشه hair-salon در شروع خالی بود و مستندات قبلی به آن منتقل شدند؛ docs/ همین پروژه مرجع جاری است و نسخه کشف اولیه تاریخی محسوب می‌شود. اکنون اسپرینت ۱ طبق [پرامپت اجرایی](prompts/sprint-01.md) اجرا شده: API در apps/api، lockfile ریشه، بررسی‌ها و آموزش آماده‌اند. [گزارش اجرا](planning/sprints/sprint-01-report.md)، [درس](learning/sprint-01.md) و [اجرای محلی](../README.md) نقطه شروع فعلی‌اند. پایه PostgreSQL، migration و readiness در اسپرینت ۲ با تست واقعی اضافه شدند؛ [گزارش](planning/sprints/sprint-02-report.md) و [درس](learning/sprint-02.md) مرجع نتیجه‌اند.
 
 مرور فعلی را از [روش همکاری](planning/collaboration-workflow.md)، [برنامه اسپرینت‌ها](planning/sprint-plan.md) و [طرح اسپرینت ۱](planning/sprints/sprint-01-plan.md) آغاز کنید. [دفتر یادگیری](learning/README.md) پس از هر اسپرینت با کد واقعی تکمیل می‌شود.
 
-اکنون محدوده اسپرینت ۲ و روند Git/PR تأیید شده‌اند؛ [طرح اسپرینت ۲](planning/sprints/sprint-02-plan.md)، [پرامپت](prompts/sprint-02.md)، [ADR-004](architecture/adr/ADR-004-database-foundation.md) و [روند Git](engineering/git-workflow.md) آماده‌اند. این مرحله ثبت baseline و برنامه‌ریزی است؛ دیتابیس پروژه هنوز نصب/اجرا نشده است.
+اکنون محدوده اسپرینت ۲ و روند Git/PR تأیید شده‌اند؛ [طرح اسپرینت ۲](planning/sprints/sprint-02-plan.md)، [پرامپت](prompts/sprint-02.md)، [ADR-004](architecture/adr/ADR-004-database-foundation.md) و [روند Git](engineering/git-workflow.md) آماده‌اند. اسپرینت ۲ اجرا شده؛ نتیجه check، PostgreSQL محلی و CI به‌طور جدا در گزارش ثبت شده‌اند.
 
 ## مراجع اجرای اسپرینت‌ها
 [روش ساخت پرامپت‌های بعدی](prompts/README.md) و [پرامپت آماده اسپرینت ۱](prompts/sprint-01.md).

@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:17.11-bookworm@sha256:839fbb5a4942a7758dd93e18b42ea5649807491a0545b5eeeb8f0b8bb11857a5
+    environment:
+      POSTGRES_USER: hair_salon_local
+      POSTGRES_PASSWORD: local_only_password
+      POSTGRES_DB: hair_salon
+    ports:
+      - '127.0.0.1:54329:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U hair_salon_local -d hair_salon']
+      interval: 2s
+      timeout: 3s
+      retries: 15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:

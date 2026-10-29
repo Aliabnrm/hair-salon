@@ -10,7 +10,7 @@
 - public API و راه اجرای محلی،اسناد اثرپذیرفته و ADR تصمیم مهم به‌روز؛ هیچ سند جاری متناقض باقی نماند.
 
 ## قرارداد commandها پس از اجرای اسپرینت ۱
-در ریشه npm run dev/build/typecheck/lint/format:check/test/test:e2e/check، با delegation به @hair-salon/api تعریف شوند. lint و format:check بدون mutation؛ lint:fix/format در صورت نیاز صریح‌اند. check مجموعه بررسی‌های build/typecheck/lint/format:check و تست‌های unit/HTTP را با شکست قابل مشاهده اجرا کند. npm ci از lockfile برای نصب تکرارپذیر در محیط قابل نوشتن استفاده شود؛ در محیط بسته، مانع گزارش و مشکل با حذف بررسی پنهان نشود.
+در ریشه npm run dev/build/typecheck/lint/format:check/test/test:e2e/check، با delegation به @hair-salon/api تعریف شوند. lint و format:check بدون mutation؛ lint:fix/format در صورت نیاز صریح‌اند. check مجموعه بررسی‌های build/typecheck/lint/format:check و تست‌های unit/HTTP/integration PostgreSQL واقعی را با شکست قابل مشاهده اجرا کند. npm ci از lockfile برای نصب تکرارپذیر در محیط قابل نوشتن استفاده شود؛ در محیط بسته، مانع گزارش و مشکل با حذف بررسی پنهان نشود.
 
 ## تست‌های حداقلی اسپرینت ۱
 | شناسه | ریسک/شاهد |
@@ -28,3 +28,5 @@ assert فقط وجود status نیست؛ payload و privacy لازم نیز بر
 نام‌گذاری،branchهای پنهان،catchهای بلعنده،اثر جانبی خارج transaction،import cycle،تکرار rule،config پراکنده و وابستگی بی‌مصرف بررسی شوند. در UI،loading/error/empty/focus/RTL و state ownership نیز بررسی شود. dependency تازه با دلیل،peer/engine و حداقل scope اضافه شود؛ ابزار برای نیاز فرضی وارد نشود.
 
 گزارش پایان: هدف و تغییر→فایل‌های اصلی→چرایی تصمیم→command و نتیجه واقعی→چیزهای اجرا‌نشده/محدودیت→نحوه امتحان→درس ساده با مثال کد. docs/planning/sprints/sprint-01-report.md و docs/learning/sprint-01.md فقط پس از اجرای اسپرینت ایجاد شوند. وضعیت Done با داشتن فایل و script اثبات نمی‌شود.
+
+اسپرینت ۲: `npm run test:integration` و check کامل با `TEST_DATABASE_URL` اختصاصی الزامی‌اند؛ CI همان PostgreSQL 17.11 را اجرا می‌کند. نتیجه check و CI آخرین SHA، اجرای زنده پس از check و توقف تمیز در گزارش اسپرینت ثبت شوند. unit/HTTP مستقل به DB توسعه وابسته نشوند.

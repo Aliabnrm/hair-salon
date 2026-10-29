@@ -1,0 +1,22 @@
+{
+  "name": "hair-salon",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": ["apps/api"],
+  "engines": { "node": ">=24.15.0 <25" },
+  "packageManager": "npm@11.19.1",
+  "scarfSettings": { "enabled": false },
+  "allowScripts": { "@scarf/scarf": false },
+  "scripts": {
+    "dev": "npm run start:dev --workspace @hair-salon/api",
+    "start": "npm run start --workspace @hair-salon/api",
+    "build": "npm run build --workspace @hair-salon/api",
+    "typecheck": "npm run typecheck --workspace @hair-salon/api",
+    "lint": "npm run lint --workspace @hair-salon/api",
+    "format": "npm run format --workspace @hair-salon/api",
+    "format:check": "npm run format:check --workspace @hair-salon/api",
+    "test": "npm run test --workspace @hair-salon/api",
+    "test:e2e": "npm run test:e2e --workspace @hair-salon/api",
+    "check": "npm run build && npm run typecheck && npm run lint && npm run format:check && npm run test && npm run test:e2e"
+  }
+}

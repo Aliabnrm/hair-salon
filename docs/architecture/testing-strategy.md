@@ -32,6 +32,10 @@
 
 ## اجرای واقعی پایه PostgreSQL — اسپرینت ۲
 
-Vitest config جدا در `apps/api/vitest.config.integration.ts`، بدون runner/transformer تازه؛ `npm run test:integration` و check کامل نیازمند `TEST_DATABASE_URL` صریح‌اند. روش ساخت مقصد، CREATEDB، allowlist میزبان/نام و cleanup در [README](../../README.md#دیتابیس-و-تست-واقعی) است. هر suite DB با UUID دارد؛ query parameter برای جلوگیری از override مقصد رد می‌شود و فایل‌ها به‌ترتیب اجرا می‌شوند.
+Vitest config جدا در `backend/vitest.config.integration.ts`، بدون runner/transformer تازه؛ `npm run test:integration` و check کامل نیازمند `TEST_DATABASE_URL` صریح‌اند. روش ساخت مقصد، CREATEDB، allowlist میزبان/نام و cleanup در [README](../../README.md#دیتابیس-و-تست-واقعی) است. هر suite DB با UUID دارد؛ query parameter برای جلوگیری از override مقصد رد می‌شود و فایل‌ها به‌ترتیب اجرا می‌شوند.
 
 `database.integration-spec.ts` اجرای CLI واقعی از صفر، namespace/extension/journal/hash واقعی و اجرای دوم بدون تغییر را بررسی می‌کند. `readiness.integration-spec.ts` wiring واقعی Nest و Pool، پاسخ 200، قطع DB اختصاصی، idle error، 503 امن، recovery همان app، اشباع Pool، handshake بی‌پاسخ و query timeout روی relay به PostgreSQL واقعی را بررسی می‌کند. اتصال‌های timeout‌شده و صف Pool بررسی و همه منابع بسته می‌شوند. نبود اتصال نیز با پورت بسته و credential sentinel جدا آزموده می‌شود. unit/HTTPهای مستقل از DB واقعی قابل اجرا مانده‌اند. نتیجه محلی و CI در [گزارش](../planning/sprints/sprint-02-report.md) تفکیک شده‌اند.
+
+## مرورگر اسپرینت ۳
+
+`frontend/e2e/fixtures/test-stack.ts` از guard دیتابیس موجود استفاده می‌کند؛ DB UUID، migration رسمی، Nest و Next production روی پورت آزاد می‌سازد و در همه مسیرها منابع خودش را می‌بندد. تست فرم هویت به شبکه mock وابسته نیست. قطع شبکه و تأخیر کنترل‌شده صرفاً سناریو شکست‌اند؛ نتیجه ساختگی موفق تولید نمی‌شود. `check` شامل browser و PG واقعی است. مقایسه تصویری منبع و اجرا و حد ادعای آن در [شاهد فیگما](../references/sprint-03-figma.md) ثبت است.

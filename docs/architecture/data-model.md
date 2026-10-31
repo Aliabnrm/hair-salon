@@ -1,9 +1,9 @@
 # مدل داده پیشنهادی
-PostgreSQL، طرح اولیه غیرقابل اجرا. migration یا پایگاه داده ساخته نشده است. PKها UUID؛ زمان رویداد timestamptz، روز برنامه date و ساعت برنامه time در timezone کسب‌وکار است. همه FKها پیش‌فرض RESTRICT؛ حذف آبشاری تاریخچه رزرو ممنوع. NN=غیرnullable، ?=nullable. فیلدهای created_at/updated_at در رکوردهای mutable پیش‌فرض NN هستند.
+پایه app/btree_gist و journal در اسپرینت ۲، و schema محدود هویت در اسپرینت ۳ ساخته و با PostgreSQL واقعی بررسی شدند. جدول اجرایی identity پایین این صفحه تفکیک شده است؛ مدل کامل رزرو/سالن در جدول اول همچنان طرح آینده است. PKها UUID و timestampها timestamptz هستند؛ جزئیات DDL اجرایی در migration رسمی است. قواعد RESTRICT/tenant/تاریخچه برای جدول‌های آینده پیشنهادند و نباید به FKهای هویت جاری نسبت داده شوند. NN=غیرnullable و ?=nullable.
 
 | جدول | ستون‌های کلیدی/لازم | nullable و integrity/شاخص |
 |---|---|---|
-| User | id PK، phone_e164 NN unique، display_name NN، state NN | phone برای حساب فعال لازم؛ هنگام ناشناس‌سازی از جدول هویت جدا/توکن‌سازی شود؛ MFA credential رمزگذاری‌شده در لایه auth جدا |
+| User / users | id PK؛ در طرح اسپرینت ۳ email canonical NN unique، email_verified_at? و created_at | phone برای حساب ایمیلی الزامی نیست و این مرحله ستون آن را نمی‌سازد؛ credential و session مستقل در identity؛ display_name/state/روش موبایلی و MFA در طرح قابلیت مربوط نهایی شوند |
 | Business | id PK، name، category، city، district، public_address، public_phone، timezone، state، booking_policy/version NN | cover_key?، description?؛ timezone=Asia/Tehran در P0؛ index(state,city,district,category)، normalized_name برای جست‌وجو؛ یک محل، بدون مختصات الزامی |
 | BusinessMembership | id PK، business_id FK، user_id FK، role، active NN | unique(business_id,user_id)؛ index(user_id,active)؛ آخرین مالک در transaction و قفل Business حفظ شود |
 | StaffProfile | id PK، business_id FK، display_name، active NN | user_id?؛ FK(business_id,user_id)→Membership(business_id,user_id)، unique فعال(user_id) WHERE user_id IS NOT NULL؛ unique(business_id,id) |
@@ -23,10 +23,23 @@ PostgreSQL، طرح اولیه غیرقابل اجرا. migration یا پایگ�
 
 Appointment snapshot_*: نام خدمت، قیمت IRR، currency=IRR، مدت، بافرها، نسخه خدمت، متن/نسخه سیاست لغو، cancel_deadline_at و timezone ثبت. اصول قیمت/تاریخچه در domain-model مرجعند. برای AppointmentRevision جزئیات مالی جدید از client پذیرفته نشود.
 
-OTPChallenge و Session و MFA recovery در schema ماژول identity با شناسه کاربر و سیاست retention امنیت نگهداری می‌شوند؛ انتخاب کتابخانه auth بعد از ADR انجام می‌شود. مسئولیت آن‌ها: challenge hash/expiry/attempts و نشست قابل revoke؛ استفاده از auth به معنی حذف نیاز به authorization دامنه نیست. هیچ Password سفارشی لازم نیست.
+هویت در یک دامنه identity می‌ماند: credential ایمیل/رمز و نشست قابل revoke طبق طرح اسپرینت ۳، با Argon2id کتابخانه معتبر و نه الگوریتم hash سفارشی. OTPChallenge، روش موبایلی و MFA recovery به طرح بعدی منتقل شده‌اند؛ بعداً همان User را مصرف می‌کنند. استفاده از auth نیاز authorization دامنه را حذف نمی‌کند. schema محدود بخش بعد در اسپرینت ۳ با migration جدید ساخته شد؛ مدل رزرو/موبایل پایین هنوز اجرایی نیست.
+
+## schema اجرایی هویت در اسپرینت ۳
+
+`backend/drizzle/0001_identity.sql` به‌صورت رسمی از schema دامنه generate و با migrator رسمی اجرا شد. این جدول‌ها واقعی‌اند؛ مدل گسترده جدول قبل هنوز طرح آینده است.
+
+| جدول app | داده و قید مهم |
+|---|---|
+| users | UUID، email canonical یکتا و check، email_verified_at nullable، created_at؛ projection بدون نقش فرضی |
+| password_credentials | user_id کلید اصلی و FK با RESTRICT، password_hash Argon2id غیرخام |
+| sessions | UUID، user_id FK، token_hash یکتای SHA256، expires_at/created_at/revoked_at و قید ترتیب زمانی؛ index برای expiry/user |
+| auth_attempt_buckets | کلید HMAC+operation+window_started_at مرکب، attempts مثبت در DB و اشباع‌شده در adapter، expires_at؛ index cleanup |
+
+ایجاد user و credential در transaction واحد است؛ onConflictDoNothing فقط ایمیل یکتا را پوشش می‌دهد و duplicate credential را overwrite نمی‌کند. session token خام وارد DB نمی‌شود. در login قبلیِ ارائه‌شده revoke و نشست جدید در transaction ساخته می‌شود. resolve فقط unrevoked/unexpired است. cleanup محدود بدون scheduler تازه، ۱۰۰ bucket منقضی در consume و ۱۰۰ نشست با گذشت ۲۴ ساعت از expiry/revoke در login انجام می‌شود؛ کاربر/credential با این cleanup حذف نمی‌شوند. SQL/snapshot اسپرینت ۲ byte-identical باقی ماندند و journal قدیمی فقط entry جدید گرفت.
 
 ## قیود تعیین‌کننده
-پیشنهاد PostgreSQL: extension استاندارد btree_gist در محیط منتخب باید پیش از تصویب زیرساخت آزمایش شود. روی **همان جدول ScheduleAllocation** قید EXCLUDE USING gist (business_id WITH =, staff_id WITH =, occupied_range WITH &&) WHERE (released_at IS NULL) برقرار شود. این شبه‌طرح است؛ DDL اجرایی در این مرحله نداریم. اگر extension فراهم نباشد، پیش از توسعه راهکار معادل با قفل و transaction اثبات و ADR اصلاح شود.
+extension استاندارد btree_gist در پایه اسپرینت ۲ واقعاً ساخته و آزموده شده؛ قید رزرو زیر هنوز پیشنهاد است و تست واقعی آن به اسپرینت رزرو تعلق دارد. روی **همان جدول ScheduleAllocation** قید EXCLUDE USING gist (business_id WITH =, staff_id WITH =, occupied_range WITH &&) WHERE (released_at IS NULL) برقرار شود. این شبه‌طرح است؛ DDL اجرایی در این مرحله نداریم. اگر extension فراهم نباشد، پیش از توسعه راهکار معادل با قفل و transaction اثبات و ADR اصلاح شود.
 
 قید overlap دو جدول مستقل Appointment و BlockedTime کافی نیست؛ به همین دلیل دفتر اشغال یکی است. FK تضمین می‌کند allocation متعلق به متخصص و رزرو همان tenant باشد. یک deferred consistency trigger یا معادل enforceشده در DB باید هنگام commit تطابق محدوده allocation با زمان+بافر Appointment، وجود دقیقاً یک allocation برای confirmed/completed/no_show و release برای cancelled را بررسی کند؛ یکتایی و FK به‌تنهایی این تطابق را تضمین نمی‌کنند. تمام نویسندگان فقط از سرویس دامنه می‌نویسند؛ حساب DB برنامه اجازه دورزدن کنترل‌ها/حذف history نداشته باشد.
 

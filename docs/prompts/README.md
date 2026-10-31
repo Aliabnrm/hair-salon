@@ -14,3 +14,5 @@
 [پرامپت اسپرینت ۱](sprint-01.md) اجرا شده؛ [گزارش نتیجه](../planning/sprints/sprint-01-report.md) و [درس](../learning/sprint-01.md) ثبت شده‌اند. [طرح](../planning/sprints/sprint-01-plan.md) و [روش همکاری](../planning/collaboration-workflow.md) مرجع وضعیت/چرخه‌اند. promptها تاریخچه دستورند و جای گزارش نتیجه را نمی‌گیرند.
 
 [پرامپت اسپرینت ۲](sprint-02.md) طبق محدوده تأییدشده، [طرح دقیق](../planning/sprints/sprint-02-plan.md) و ADR-004 آماده است؛ اجرای DB و تست واقعی انجام شده و [گزارش](../planning/sprints/sprint-02-report.md)/[درس](../learning/sprint-02.md) مرجع نتیجه‌اند. تأیید محدوده معتبر است و برای تصمیم‌های عادی همان طرح تأیید دوباره لازم نیست.
+
+[پرامپت اسپرینت ۳](sprint-03.md) و [طرح](../planning/sprints/sprint-03-plan.md) با پیوست اجرایی کارفرما اجرا شدند: backend/frontend ریشه، کشف آراسته و ورود ایمیل/رمز. [گزارش](../planning/sprints/sprint-03-report.md) نتیجه را ثبت می‌کند؛ commit/push با کارفرماست. [ساختار هدف](../architecture/sprint-03-structure.md) و [حد شواهد طراحی](../references/sprint-03-figma.md) بخشی از context اجرایی‌اند.

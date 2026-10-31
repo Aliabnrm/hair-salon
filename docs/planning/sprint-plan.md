@@ -1,13 +1,15 @@
 # برنامه اسپرینت‌ها — نسخه ۰٫۱
 این برنامه برای کارفرما و دستیار با هدف یادگیری حین ساخت تنظیم شده است. شماره Sprint با شماره برش‌های S در implementation-plan متفاوت است. اسپرینت ۱ اجرا و بررسی شد؛ محدوده اسپرینت ۲ و روند Git/PR در ۲۰۲۶-۱۰-۲۹ تأیید شدند و پیاده‌سازی و تست واقعی PostgreSQL اسپرینت ۲ انجام شده؛ [گزارش](sprints/sprint-02-report.md) مرجع نتیجه محلی و CI است. اسپرینت‌های بعد نیازمند تأیید طرح خود هستند. مدت/تاریخ بدون ظرفیت واقعی تعیین نمی‌شود.
 
+در ۲۰۲۶-۱۰-۲۹، با دستور صریح کارفرما، PRهای [۱](https://github.com/Aliabnrm/hair-salon/pull/1)، [۲](https://github.com/Aliabnrm/hair-salon/pull/2) و [۳](https://github.com/Aliabnrm/hair-salon/pull/3) به‌ترتیب در main ادغام شدند. [CI نسخه نهایی main](https://github.com/Aliabnrm/hair-salon/actions/runs/40848639575) روی `7360ce9` موفق است. شاخه dev از همان نسخه ساخته شد؛ ادامه کار از dev و طبق [روند جدید Git](../engineering/git-workflow.md)، با commit/push توسط کارفرما انجام می‌شود. اسپرینت ۳ با پرامپت پیوست کارفرما اجرا شد؛ [گزارش محلی](sprints/sprint-03-report.md) و [درس](../learning/sprint-03.md) مرجع نتیجه‌اند. تغییرها هنوز commit/push نشده و CI تازه اجرا نشده است.
+
 | اسپرینت | خروجی قابل نمایش | مفاهیم آموزشی اصلی | وابستگی و وضعیت |
 |---|---|---|---|
 | ۱ | API پایه Nest، تنظیمات معتبر، خطای استاندارد و health endpoint | Module،Controller،Provider،DI و مسیر درخواست | تکمیل‌شده؛ [گزارش و شواهد](sprints/sprint-01-report.md)، [درس](../learning/sprint-01.md)، [طرح](sprints/sprint-01-plan.md) |
 | ۲ | اتصال PostgreSQL، migration و readiness واقعی با تست DB | schema،Pool،migration و مرز دسترسی داده؛ معرفی FK/index | محدوده تأییدشده؛ [طرح](sprints/sprint-02-plan.md)، [پرامپت](../prompts/sprint-02.md) و [تصمیم DB](../architecture/adr/ADR-004-database-foundation.md)؛ اجراشده، [گزارش](sprints/sprint-02-report.md) و [درس](../learning/sprint-02.md) |
-| ۳ | ورود موبایلی و نشست، احراز چندمرحله‌ای نقش ممتاز، ساخت draft سالن با مرز دسترسی | authentication در برابر authorization،Guard،session و tenant | ۲؛ ابتدا adapter آزمایشی SMS در محیط محلی، اتصال واقعی قبل پایلوت؛ در صورت بزرگی به دو اسپرینت شکسته شود |
+| ۳ | انتقال به backend/frontend، کشف نمایشی آراسته مطابق فیگما، ثبت‌نام/ورود ایمیل و حساب واقعی | domain/feature، component/token/state، hash/session، transaction و تست مرورگر | ۲؛ [طرح](sprints/sprint-03-plan.md)، [پرامپت](../prompts/sprint-03.md) و [ساختار](../architecture/sprint-03-structure.md) اجراشده؛ [گزارش](sprints/sprint-03-report.md) و [درس](../learning/sprint-03.md)، آماده مرور محلی |
 | ۴ | خدمت، متخصص، ساعات و تعطیلی با مجوز و تست | DTO/validation،application service،قانون دامنه و رابطه داده | ۳؛ دامنه تیم/خدمت قبل schema نهایی تصویب شود |
-| ۵ | ورود طراحی فیگما، design system و مسیر واقعی انتشار/کشف/پروفایل متصل به API | component،token،server/client state و قرارداد فرانت/بک‌اند | ۴؛ دریافت فایل/کد فیگما و انتخاب ابزار فرانت؛ بررسی انتشار پیش از عرضه عمومی |
+| ۵ | پیشنهاد پس از جلوآمدن پایه UI: اتصال کشف/پروفایل به کاتالوگ واقعی و مسیر بررسی/انتشار سالن | server state، projection عمومی و مجوز انتشار | ۴؛ وابسته به تصویب طرح تازه ۳ و دامنه ۴، بازبینی پیش از اجرا |
 | ۶ | محاسبه و نمایش وقت آزاد مطابق برنامه واقعی | interval،بافر،timezone و تابع دامنه قابل تست | ۴/۵؛ Q-15 درباره خدمات چندمرحله‌ای پیش از شروع بسته شود |
 | ۷ | ثبت کامل رزرو از UI تا DB و تأیید اولیه پیامکی | transaction،constraint،race condition،idempotency و outbox | ۶؛ قبل شروع، MVP اصلی/سیاست/قیمت تثبیت شود |
 | ۸ | نوبت‌های مشتری، لغو و جابه‌جایی امن با اعلان تغییر | state machine،version و عملیات اتمیک | ۷ |
@@ -20,3 +22,7 @@
 اسپرینت ۱ یک استثنای زیرساختی کوچک برای قابل اجراشدن API و فهم جریان درخواست است؛ خروجی health ادعای آمادگی دیتابیس یا production ندارد. از اولین قابلیت کسب‌وکاری، برش کامل و قابل نمایش هدف است.
 
 تغییر مهمِ پاسخ Q-15 می‌تواند اسپرینت ۴/۶/۷ را بازطراحی کند. شهر، درآمد و زیرساخت منتشرنشده، در اسپرینت پایه hard-code نمی‌شوند.
+
+## نتیجه اسپرینت ۳
+
+انتقال به backend/frontend، discovery نمایشی و identity ایمیل/رمز در محدوده مصوب اجرا شدند. منبع Make از برنامه باز فیگما با مجوز computer use خوانده شد؛ token، فونت، icon و تصاویر اصلی در [شواهد طراحی](../references/sprint-03-figma.md) ثبت‌اند. تغییرها فقط محلی‌اند؛ commit/push با کارفرماست. MFA، ساخت/مدیریت سالن، tenant و رزرو واقعی جزو این اسپرینت نیستند؛ اسپرینت ۴ هنوز شروع نشده و نیازمند طرح/تأیید جداست.

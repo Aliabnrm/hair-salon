@@ -1,5 +1,5 @@
 # استاندارد فرانت‌اند و Design System
-این قرارداد برای اسپرینت‌های آینده است؛ در اسپرینت ۱ apps/web ساخته نمی‌شود. فناوری نهایی فرانت پس از دریافت فایل/کد فیگما تصمیم‌گیری می‌شود. ساختار feature-first طبق ADR-002 و codebase-structure مرجع است.
+فرانت در `frontend/` با Next.js App Router/React/TypeScript strict ساخته شده است. [ADR-005](../architecture/adr/ADR-005-frontend-backend-layout.md)، [ساختار واقعی](../architecture/sprint-03-structure.md) و [شاهد طراحی](../references/sprint-03-figma.md) مرجع‌اند. CSS با Tailwind 4 و tokenهای منبع Make، نشست با SessionProvider و داده کشف با fixture مشخص مدیریت می‌شود.
 
 ## جداسازی UI و منطق
 route/page ترکیب‌کننده صفحه و boundary داده است. component مسئول بخش معنادار UI و تعامل محلی باشد؛ rules رزرو،تبدیل داده و API client در JSX پخش نشوند. component با چند نقش به container کوچک و اجزای معنادار شکسته شود. renderXهای تو در تو را به component مستقل تبدیل کنیم، نه تابع‌های داخلی طولانی.

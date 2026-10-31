@@ -1,5 +1,10 @@
 # درس اسپرینت ۲ — دیتابیس، Pool و آمادگی برنامه
 
+> مدیر بسته جاری از ۲۰۲۶-۱۰-۳۱ pnpm است؛ برای تمرین جدید، معادل `pnpm run` فرمان‌های تاریخی npm را طبق [README](../../README.md) اجرا کنید. نتیجه تست‌های قبلی بازنویسی نشده است.
+
+
+یادداشت مسیر: کد در اسپرینت ۳ از apps/api به backend منتقل شد؛ لینک‌ها به محل جاری اشاره می‌کنند و نتیجه تست‌های این درس تاریخی است.
+
 تاریخ: ۲۰۲۶-۱۰-۲۹. این درس بر اساس کد و تست اجراشده همین اسپرینت است؛ [گزارش](../planning/sprints/sprint-02-report.md) نتیجه بررسی‌ها و محدودیت‌ها را جدا ثبت می‌کند.
 
 ## مسئله‌ای که حل کردیم
@@ -8,9 +13,9 @@ API می‌تواند روشن باشد، ولی دیتابیس قطع شده ب
 
 ## schema و migration چرا لازم‌اند؟
 
-در PostgreSQL، database یک پایگاه داده و schema یک فضای نام داخل آن است؛ مثل پوشه برای نام جدول‌ها. namespace مشترک ما `app` است و در [schema.ts](../../apps/api/src/database/schema.ts) با `pgSchema('app')` تعریف شده. همه سالن‌های آینده از همین فضای نام استفاده می‌کنند؛ schema به معنی tenant یا مجوز یک سالن نیست. جداسازی داده سالن‌ها بعداً با `business_id`، مجوز سروری و قیود واقعی بررسی می‌شود.
+در PostgreSQL، database یک پایگاه داده و schema یک فضای نام داخل آن است؛ مثل پوشه برای نام جدول‌ها. namespace مشترک ما `app` است و در [schema.ts](../../backend/src/database/schema.ts) با `pgSchema('app')` تعریف شده. همه سالن‌های آینده از همین فضای نام استفاده می‌کنند؛ schema به معنی tenant یا مجوز یک سالن نیست. جداسازی داده سالن‌ها بعداً با `business_id`، مجوز سروری و قیود واقعی بررسی می‌شود.
 
-migration مثل دستور تغییر ثبت‌شده در تاریخچه است: هر دستگاه می‌تواند همان تغییر را به ترتیب اجرا کند. [0000_database_foundation.sql](../../apps/api/drizzle/0000_database_foundation.sql) فعلاً فقط دو کار دارد:
+migration مثل دستور تغییر ثبت‌شده در تاریخچه است: هر دستگاه می‌تواند همان تغییر را به ترتیب اجرا کند. [0000_database_foundation.sql](../../backend/drizzle/0000_database_foundation.sql) فعلاً فقط دو کار دارد:
 
 ```sql
 CREATE SCHEMA IF NOT EXISTS "app";
@@ -19,29 +24,29 @@ CREATE EXTENSION IF NOT EXISTS "btree_gist";
 
 extension قابلیت بیشتری به PostgreSQL می‌دهد؛ `btree_gist` برای برخی قیود GiST آینده مفید است. نصب آن به‌تنهایی مانع رزرو هم‌زمان نمی‌شود؛ هنوز هیچ جدول رزرو یا constraint آن نساخته‌ایم.
 
-در [migrate.ts](../../apps/api/src/database/migrate.ts)، runner رسمی Drizzle فایل‌ها را می‌خواند و در journal خودش ثبت می‌کند. تست واقعی بررسی کرد که namespace و extension ساخته شده‌اند، یک سطر journal با hash همان SQL وجود دارد و اجرای دوم آن سطر را تغییر نمی‌دهد. snapshot ابزار نمای ساختار declarative است و باید با تغییر SQL سفارشی هماهنگ بماند؛ در این نسخه namespace `app` در snapshot هم ثبت شده و generate بعدی تغییری پیشنهاد نمی‌کند.
+در [migrate.ts](../../backend/src/database/migrate.ts)، runner رسمی Drizzle فایل‌ها را می‌خواند و در journal خودش ثبت می‌کند. تست واقعی بررسی کرد که namespace و extension ساخته شده‌اند، یک سطر journal با hash همان SQL وجود دارد و اجرای دوم آن سطر را تغییر نمی‌دهد. snapshot ابزار نمای ساختار declarative است و باید با تغییر SQL سفارشی هماهنگ بماند؛ در این نسخه namespace `app` در snapshot هم ثبت شده و generate بعدی تغییری پیشنهاد نمی‌کند.
 
 فرمان migration مستقل است تا هر web instance هنگام روشن‌شدن DDL اجرا نکند. در هر زمان یک فرایند migration اجرا می‌کنیم. بعد از اعمال، فایل قبلی را اصلاح نمی‌کنیم؛ تغییر تازه با migration تازه انجام می‌شود. حذف یک ستون می‌تواند داده را از بین ببرد؛ وعده rollback جادویی نداریم و برای تغییر عملیاتی backup/restore لازم است.
 
 ## Pool شبیه چند خط تلفن مشترک است
 
-برقراری اتصال هزینه دارد. اگر هر درخواست اتصال جدید بسازد، تعداد اتصال‌ها می‌تواند بی‌حد رشد کند. [DatabaseProvider](../../apps/api/src/database/database.provider.ts) یک Pool با حداکثر پنج اتصال می‌سازد. درخواست اتصال را قرض می‌گیرد و پس می‌دهد؛ درخواست بعدی همان اتصال سالم را دوباره استفاده می‌کند. Drizzle نیز از همین Pool استفاده می‌کند و Pool دوم نمی‌سازد.
+برقراری اتصال هزینه دارد. اگر هر درخواست اتصال جدید بسازد، تعداد اتصال‌ها می‌تواند بی‌حد رشد کند. [DatabaseProvider](../../backend/src/database/database.provider.ts) یک Pool با حداکثر پنج اتصال می‌سازد. درخواست اتصال را قرض می‌گیرد و پس می‌دهد؛ درخواست بعدی همان اتصال سالم را دوباره استفاده می‌کند. Drizzle نیز از همین Pool استفاده می‌کند و Pool دوم نمی‌سازد.
 
 Pool ما lazy است: ساخت آن هنوز به معنی اتصال به DB نیست. به همین دلیل URL معتبر با DB خاموش مانع روشن‌شدن HTTP نمی‌شود. پنج اتصال و timeoutهای فعلی بودجه کوچک توسعه‌اند؛ ظرفیت production اندازه‌گیری نشده است.
 
-در [PostgresHealthCheck](../../apps/api/src/database/postgres-health-check.ts)، ابتدا حداکثر حدود یک ثانیه برای گرفتن اتصال منتظر می‌مانیم؛ سپس `SELECT 1` با مهلت خواندن ۱٫۲ ثانیه اجرا می‌شود. DB نیز statement timeout یک ثانیه دارد. اگر شبکه ساکت شود، timeout سمت client همچنان لازم است. پس از موفقیت اتصال پس داده می‌شود؛ پس از خطا یا timeout، `release(true)` اتصال خراب را حذف می‌کند تا query نیمه‌کاره به درخواست بعدی نرسد. فقط زود جواب‌دادن با `Promise.race` کافی نیست؛ منبع هم باید جمع شود.
+در [PostgresHealthCheck](../../backend/src/database/postgres-health-check.ts)، ابتدا حداکثر حدود یک ثانیه برای گرفتن اتصال منتظر می‌مانیم؛ سپس `SELECT 1` با مهلت خواندن ۱٫۲ ثانیه اجرا می‌شود. DB نیز statement timeout یک ثانیه دارد. اگر شبکه ساکت شود، timeout سمت client همچنان لازم است. پس از موفقیت اتصال پس داده می‌شود؛ پس از خطا یا timeout، `release(true)` اتصال خراب را حذف می‌کند تا query نیمه‌کاره به درخواست بعدی نرسد. فقط زود جواب‌دادن با `Promise.race` کافی نیست؛ منبع هم باید جمع شود.
 
 خطای اتصال بیکار می‌تواند بدون درخواست HTTP رخ دهد. listener Pool آن را با event ثابت و بدون متن خام DB ثبت می‌کند. در پایان، hook رسمی Nest و `pool.end()` اتصال‌ها را می‌بندند. CLI هم در `finally` این کار را انجام می‌دهد؛ حتی وقتی migration شکست بخورد.
 
 ## چرا Health به Port وابسته است؟
 
-[DatabaseHealthCheck](../../apps/api/src/database/database-health.port.ts) فقط این قول را می‌دهد:
+[DatabaseHealthCheck](../../backend/src/database/database-health.port.ts) فقط این قول را می‌دهد:
 
 ```ts
 abstract isAvailable(): Promise<boolean>;
 ```
 
-[HealthService](../../apps/api/src/modules/health/health.service.ts) همین سؤال را از وابستگی constructor می‌پرسد. SQL، password و Pool را نمی‌شناسد. [DatabaseModule](../../apps/api/src/database/database.module.ts) این قرارداد را به adapter PostgreSQL وصل می‌کند. Nest نمونه را می‌سازد و تزریق می‌کند؛ Controller یا Service خودش adapter نمی‌سازد.
+[HealthService](../../backend/src/modules/health/health.service.ts) همین سؤال را از وابستگی constructor می‌پرسد. SQL، password و Pool را نمی‌شناسد. [DatabaseModule](../../backend/src/database/database.module.ts) این قرارداد را به adapter PostgreSQL وصل می‌کند. Nest نمونه را می‌سازد و تزریق می‌کند؛ Controller یا Service خودش adapter نمی‌سازد.
 
 Port اینجا ارزش دارد چون مرز واقعی با I/O است. برای هر کلاس ساده interface تازه نساخته‌ایم. تست واحد Service یک probe ساده با نتیجه true/false تزریق می‌کند تا رفتار مستقل بررسی شود؛ صحت واقعی اتصال را تست PostgreSQL جدا ثابت می‌کند. mock به‌تنهایی شاهد کارکرد دیتابیس نیست.
 

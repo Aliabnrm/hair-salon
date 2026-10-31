@@ -1,0 +1,12 @@
+packages:
+  - backend
+  - frontend
+
+saveExact: true
+strictPeerDependencies: true
+strictDepBuilds: true
+allowBuilds:
+  argon2: true
+  esbuild: true
+  "@scarf/scarf": false
+  fsevents: false

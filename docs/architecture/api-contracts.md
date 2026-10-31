@@ -1,10 +1,26 @@
 # قراردادهای اولیه API
 وضعیت: پایه Health/error/request-id اسپرینت ۱ پیاده‌سازی شده؛ سایر جدول‌های REST v1 طرح پیشنهادی‌اند، مستقل از UI و وابسته به تصویب ADR. payload قابلیت‌های آینده قرارداد پیشنهادی است و endpointهای آن‌ها پیاده‌سازی نشده‌اند. تاریخ canonical در API میلادی ISO، timestamp با offset یا Z، timezone کسب‌وکار Asia/Tehran؛ UI شمسی است. مبلغ integer با currency=IRR؛ هیچ مبلغ client-authoritative نیست.
 
+## تقدم تصمیم احراز هویت فعلی
+
+طبق D-011، روش اولیه ایمیل/رمز در اسپرینت ۳ اجرا شد. جدول‌های OTP/MFA و projection کامل آینده در پایین، اجراشده نیستند. OpenAPI واقعی در development/test مرجع schema جاری است.
+
+| مسیر زیر `/api/v1` | قرارداد جاری |
+|---|---|
+| POST /auth/register | JSON email/password، 202 یکسان `{data:{registration:"received"},meta:{request_id}}` برای تازه/موجود؛ بدون login/شناسه کاربر؛ duplicate رمز را تغییر نمی‌دهد |
+| POST /auth/login | 200 `{data:{user:{id,email,email_verified:false}},meta:{request_id}}` و cookie HttpOnly؛ 401 یکسان برای ایمیل ناشناخته/رمز اشتباه |
+| GET /me | فقط actor نشست جاری؛ همان projection کوچک، بدون نشست معتبر 401 |
+| POST /auth/logout | JSON، 200 `{data:{signed_out:true},meta:{request_id}}`، ابطال نشست جاری و پاک‌کردن cookie؛ تکرار امن |
+
+برای تمام mutationهای auth، Origin دقیق allowlist و application/json لازم است؛ غایب/null/بیگانه 403 و content-type نامناسب 415. credentials ناشناخته/نامعتبر 422، JSON خراب 400، body بیش از ۱۶KiB برابر 413، rate برابر 429 با Retry-After، DB خطادار 503 عمومی است. تمام پاسخ‌های auth و me حتی خطا no-store دارند. قالب خطای قبلی و X-Request-Id حفظ شدند؛ fields حساس، stack و SQL افشا نمی‌شوند. این چهار عملیات Idempotency-Key رزرو را ندارند.
+
+ایمیل ASCII تا ۲۵۴ و local تا ۶۴ نویسه، trim حاشیه/lowercase کل آدرس؛ dot/plus یکسان‌سازی provider-specific ندارد. رمز ۱۲–۱۲۸ Unicode code point، حداکثر ۵۱۲ بایت UTF8، بدون trim. UI راهنما می‌دهد و سرور منبع نهایی policy است. قرارداد امنیتی/سهمیه در [security](security-and-privacy.md) و [گزارش](../planning/sprints/sprint-03-report.md) آمده است.
+
+
 ## قواعد مشترک قابل اعمال به تمام ردیف‌ها
 - پیشوند /api/v1؛ JSON؛ شناسه UUID؛ فیلد ناشناخته رد شود. تمام routeهای مدیریتی business با membership فعال همان b و مجوز نقش و FK tenant کنترل می‌شوند؛ query/body با business_id دیگر رد می‌شود. داده عمومی فقط published projection است. /me فقط actor جاری؛ admin نیازمند MFA و permission مشخص است.
 - GET بی‌اثر و قابل تکرار؛ بدون کلید. فهرست‌ها cursor opaque و limit پیش‌فرض ۲۰/حداکثر ۵۰، ترتیب پایدار (فیلد مرتب‌سازی،id)، خروجی items,next_cursor؛ cursor خارج از فیلتر/tenant رد شود. صفحه تقویم بازه حداکثر هفت روز دارد. فیلتر خارج allowlist=422.
-- mutationها به جز OTP نیازمند Idempotency-Key؛ key+actor+operation با hash بدنه طبق domain-model. PATCH/DELETE روی منبع mutable همچنین If-Match: version؛ نبود آن 428، ناسازگاری 409 VERSION_CONFLICT. replay همان mutation نتیجه قبلی می‌دهد و اثر جدید ندارد. برای OTP challenge_id و request_id کنترل تکرار مخصوص جریان اعمال می‌شود؛ retry ارسال بی‌قید ممنوع.
+- mutationهای کسب‌وکاری به جز OTP و چهار endpoint auth طرح اسپرینت ۳ نیازمند Idempotency-Key؛ key+actor+operation با hash بدنه طبق domain-model. PATCH/DELETE روی منبع mutable همچنین If-Match: version؛ نبود آن 428، ناسازگاری 409 VERSION_CONFLICT. replay همان mutation نتیجه قبلی می‌دهد و اثر جدید ندارد. برای OTP challenge_id و request_id کنترل تکرار مخصوص جریان اعمال می‌شود؛ retry ارسال بی‌قید ممنوع.
 - HTTP: 200 خواندن/تغییر/لغو، 201 ایجاد، 202 صف بررسی/درخواست حریم خصوصی؛ 400 JSON نامعتبر، 401 بدون نشست، 403 مجوز ناکافی برای resource قابل مشاهده، 404 منبع ناموجود یا خارج tenant، 409 تعارض slot/وضعیت/quote/version/key، 422 validation، 428 version لازم، 429 rate با Retry-After، 503 وابستگی ضروری موقتاً unavailable. GET مسیر عمومی draft همیشه 404.
 - ساختار موفقیت data و meta.request_id؛ version در منابع mutable و ETag عددی. ساختار خطا {error:{code,message,request_id,retryable}}؛ fields فقط برای validation مرتبط اضافه می‌شود. message فارسی و code ثابت انگلیسی؛ جزئیات DB/وجود حساب افشا نشود. validation جزئیات غیرحساس فیلدها را می‌دهد.
 - لیست خطاهای ستون آخر، علاوه بر قواعد مشترک است. «مجوز» در هر ردیف بخشی از قرارداد است؛ مسیر فرانت‌اند مجوز ایجاد نمی‌کند. نرخ و idempotency در mutationهای ادمین نیز لازم است. نسخه شکستن قرارداد /v2 یا دوره مهاجرت با اطلاع‌رسانی؛ تغییر افزایشی فیلد اختیاری سازگار است.
@@ -18,7 +34,7 @@ request-id تک‌مقداری [A-Za-z0-9_-] با طول ۱..۶۴ پذیرفته
 
 `GET /api/v1/health/readiness` عمومی و بی‌اثر، با `SELECT 1` واقعی و timeout محدود است. موفقیت 200: `{"data":{"status":"ok"},"meta":{"request_id":"same-as-header"}}`. شکست اتصال/query/timeout، 503: `{"error":{"code":"SERVICE_UNAVAILABLE","message":"سرویس موقتاً آماده پاسخ‌گویی نیست.","request_id":"same-as-header","retryable":false}}`. این false به معنی دائمی‌بودن اختلال نیست. hostname، نام DB، URL، SQL و exception خام در پاسخ/log عمومی نیستند. liveness هنگام قطعی 200 باقی می‌ماند و readiness پس از برگشت DB در همان app بازیابی می‌شود. DTO/decorator واقعی schemaهای 200/503 را در OpenAPI فقط dev/test ارائه می‌کنند. این probe نسخه migration آینده یا SMS را بررسی نمی‌کند.
 
-## هویت و مشتری
+## هویت و مشتری — نقشه آینده، به‌جز قرارداد محدود اسپرینت ۳ بالا
 | روش/مسیر | مجوز | ورودی → خروجی | validation/قاعده اختصاصی و خطا |
 |---|---|---|---|
 | POST /auth/otp/challenges | عمومی با rate limit | phone,request_id → challenge_id,expires_in,retry_after | نرمال شماره ایرانی؛ پاسخ یکسان برای وجود/عدم وجود حساب؛ 429،503؛ تکرار request_id همان challenge و بدون ارسال دوباره |

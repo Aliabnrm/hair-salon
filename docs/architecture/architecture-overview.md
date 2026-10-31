@@ -1,5 +1,5 @@
-# معماری پیشنهادی
-بک‌اند NestJS انتخاب کارفرماست؛ سازمان‌دهی ماژولار طبق ADR-002 و ابزار پایه طبق ADR-003 مرجع جاری‌اند. پایه PostgreSQL اسپرینت ۲ تأیید و انتخاب Drizzle در [ADR-004](adr/ADR-004-database-foundation.md) ثبت شده؛ هنوز اجرا نشده است. فرانت مستقل React/Next.js پیشنهادی است؛ وضعیت هر انتخاب در [ADR-001](adr/ADR-001-technology-selection.md) ثبت شده. worker در صورت نیاز فرایند جدا با همان کد/مدل و انتشار هماهنگ است؛ microservice مستقل نیست.
+# نمای معماری و وضعیت اجرا
+بک‌اند NestJS در `backend/` و فرانت Next.js/React در `frontend/` اجرا شده‌اند؛ سازمان‌دهی ماژولار طبق ADR-002 و ابزار پایه طبق ADR-003 مرجع جاری‌اند. پایه PostgreSQL/Drizzle اسپرینت ۲ و هویت ایمیل/رمز اسپرینت ۳ با دیتابیس واقعی آزموده شدند. [ADR-004](adr/ADR-004-database-foundation.md)، [ADR-005](adr/ADR-005-frontend-backend-layout.md) و [گزارش اسپرینت ۳](../planning/sprints/sprint-03-report.md) انتخاب و نتیجه را ثبت می‌کنند. کشف سالن فعلاً داده نمایشی دارد. نمودارها و مسیر رزرو پایین، معماری هدف قابلیت‌های آینده‌اند؛ Catalog، Booking، Membership، Outbox، worker و SMS هنوز اجرا نشده‌اند. worker در صورت نیاز فرایند جدا با همان کد/مدل و انتشار هماهنگ است؛ microservice مستقل نیست.
 
 ```mermaid
 flowchart TB

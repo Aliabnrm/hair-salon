@@ -9,8 +9,8 @@
 - تست رفتار تغییر با ارزش واقعی: موفقیت، شکست مهم و invariant مرتبط؛ تست بازگویی implementation یا coverage مصنوعی ننویسیم.
 - public API و راه اجرای محلی،اسناد اثرپذیرفته و ADR تصمیم مهم به‌روز؛ هیچ سند جاری متناقض باقی نماند.
 
-## قرارداد commandها پس از اجرای اسپرینت ۱
-در ریشه npm run dev/build/typecheck/lint/format:check/test/test:e2e/check، با delegation به @hair-salon/api تعریف شوند. lint و format:check بدون mutation؛ lint:fix/format در صورت نیاز صریح‌اند. check مجموعه بررسی‌های build/typecheck/lint/format:check و تست‌های unit/HTTP/integration PostgreSQL واقعی را با شکست قابل مشاهده اجرا کند. npm ci از lockfile برای نصب تکرارپذیر در محیط قابل نوشتن استفاده شود؛ در محیط بسته، مانع گزارش و مشکل با حذف بررسی پنهان نشود.
+## قرارداد commandهای جاری
+در ریشه pnpm run dev/build/typecheck/lint/format:check/test/test:e2e/check، با delegation به workspaceهای واقعی تعریف شده‌اند. lint و format:check بدون mutation؛ lint:fix/format در صورت نیاز صریح‌اند. check مجموعه بررسی‌های build/typecheck/lint/format:check و تست‌های unit/HTTP/integration PostgreSQL واقعی و browser را با شکست قابل مشاهده اجرا کند. pnpm install --frozen-lockfile از lockfile برای نصب تکرارپذیر در محیط قابل نوشتن استفاده شود؛ در محیط بسته، مانع گزارش و مشکل با حذف بررسی پنهان نشود.
 
 ## تست‌های حداقلی اسپرینت ۱
 | شناسه | ریسک/شاهد |
@@ -29,4 +29,6 @@ assert فقط وجود status نیست؛ payload و privacy لازم نیز بر
 
 گزارش پایان: هدف و تغییر→فایل‌های اصلی→چرایی تصمیم→command و نتیجه واقعی→چیزهای اجرا‌نشده/محدودیت→نحوه امتحان→درس ساده با مثال کد. docs/planning/sprints/sprint-01-report.md و docs/learning/sprint-01.md فقط پس از اجرای اسپرینت ایجاد شوند. وضعیت Done با داشتن فایل و script اثبات نمی‌شود.
 
-اسپرینت ۲: `npm run test:integration` و check کامل با `TEST_DATABASE_URL` اختصاصی الزامی‌اند؛ CI همان PostgreSQL 17.11 را اجرا می‌کند. نتیجه check و CI آخرین SHA، اجرای زنده پس از check و توقف تمیز در گزارش اسپرینت ثبت شوند. unit/HTTP مستقل به DB توسعه وابسته نشوند.
+اسپرینت ۲: `pnpm run test:integration` و check کامل با `TEST_DATABASE_URL` اختصاصی الزامی‌اند؛ CI همان PostgreSQL 17.11 را اجرا می‌کند. نتیجه check و CI آخرین SHA، اجرای زنده پس از check و توقف تمیز در گزارش اسپرینت ثبت شوند. unit/HTTP مستقل به DB توسعه وابسته نشوند.
+
+اسپرینت ۳: check فعلی دو workspace، PostgreSQL واقعی و مرورگر واقعی را پوشش می‌دهد؛ [S3-AC-01..09 و قرارداد تست](../planning/sprints/sprint-03-plan.md) و [تطبیق فیگما](../references/sprint-03-figma.md) مرجع‌اند. قبل push دستی کارفرما، remote CI نسخه تازه اجرا نشده است؛ CI قبلی جای آن نیست.

@@ -1,0 +1,498 @@
+[
+  {
+    "width": 360,
+    "regions": [
+      {
+        "selector": "header > div",
+        "reference": {
+          "x": 20,
+          "y": 20,
+          "width": 320,
+          "height": 44
+        },
+        "implementation": {
+          "x": 20,
+          "y": 20,
+          "width": 320,
+          "height": 44
+        },
+        "changedPixels": 59,
+        "totalPixels": 14080
+      },
+      {
+        "selector": "header h1",
+        "reference": {
+          "x": 20,
+          "y": 92,
+          "width": 320,
+          "height": 84
+        },
+        "implementation": {
+          "x": 20,
+          "y": 92,
+          "width": 320,
+          "height": 84
+        },
+        "changedPixels": 0,
+        "totalPixels": 26880
+      },
+      {
+        "selector": "header label",
+        "reference": {
+          "x": 20,
+          "y": 260,
+          "width": 320,
+          "height": 56
+        },
+        "implementation": {
+          "x": 20,
+          "y": 260,
+          "width": 320,
+          "height": 56
+        },
+        "changedPixels": 58,
+        "totalPixels": 17920
+      },
+      {
+        "selector": "[aria-label=\"نوع سالن\"]",
+        "reference": {
+          "x": 20,
+          "y": 340,
+          "width": 320,
+          "height": 52
+        },
+        "implementation": {
+          "x": 20,
+          "y": 340,
+          "width": 320,
+          "height": 52
+        },
+        "changedPixels": 619,
+        "totalPixels": 16640
+      },
+      {
+        "selector": "[aria-label=\"فیلتر خدمت\"]",
+        "reference": {
+          "x": 0,
+          "y": 404,
+          "width": 360,
+          "height": 52
+        },
+        "implementation": {
+          "x": 0,
+          "y": 404,
+          "width": 360,
+          "height": 52
+        },
+        "changedPixels": 8,
+        "totalPixels": 18720
+      },
+      {
+        "selector": "#results-title",
+        "reference": {
+          "x": 196.265625,
+          "y": 480,
+          "width": 143.734375,
+          "height": 28
+        },
+        "implementation": {
+          "x": 196.265625,
+          "y": 480,
+          "width": 143.734375,
+          "height": 28
+        },
+        "changedPixels": 0,
+        "totalPixels": 4032
+      },
+      {
+        "selector": "nav[aria-label=\"ناوبری اصلی\"]",
+        "reference": {
+          "x": 0,
+          "y": 835,
+          "width": 360,
+          "height": 65
+        },
+        "implementation": {
+          "x": 0,
+          "y": 835,
+          "width": 360,
+          "height": 65
+        },
+        "changedPixels": 405,
+        "totalPixels": 23400
+      }
+    ]
+  },
+  {
+    "width": 390,
+    "regions": [
+      {
+        "selector": "header > div",
+        "reference": {
+          "x": 20,
+          "y": 20,
+          "width": 350,
+          "height": 44
+        },
+        "implementation": {
+          "x": 20,
+          "y": 20,
+          "width": 350,
+          "height": 44
+        },
+        "changedPixels": 59,
+        "totalPixels": 15400
+      },
+      {
+        "selector": "header h1",
+        "reference": {
+          "x": 20,
+          "y": 92,
+          "width": 350,
+          "height": 84
+        },
+        "implementation": {
+          "x": 20,
+          "y": 92,
+          "width": 350,
+          "height": 84
+        },
+        "changedPixels": 0,
+        "totalPixels": 29400
+      },
+      {
+        "selector": "header label",
+        "reference": {
+          "x": 20,
+          "y": 232,
+          "width": 350,
+          "height": 56
+        },
+        "implementation": {
+          "x": 20,
+          "y": 232,
+          "width": 350,
+          "height": 56
+        },
+        "changedPixels": 59,
+        "totalPixels": 19600
+      },
+      {
+        "selector": "[aria-label=\"نوع سالن\"]",
+        "reference": {
+          "x": 20,
+          "y": 312,
+          "width": 350,
+          "height": 52
+        },
+        "implementation": {
+          "x": 20,
+          "y": 312,
+          "width": 350,
+          "height": 52
+        },
+        "changedPixels": 667,
+        "totalPixels": 18200
+      },
+      {
+        "selector": "[aria-label=\"فیلتر خدمت\"]",
+        "reference": {
+          "x": 0,
+          "y": 376,
+          "width": 390,
+          "height": 52
+        },
+        "implementation": {
+          "x": 0,
+          "y": 376,
+          "width": 390,
+          "height": 52
+        },
+        "changedPixels": 8,
+        "totalPixels": 20280
+      },
+      {
+        "selector": "#results-title",
+        "reference": {
+          "x": 226.265625,
+          "y": 452,
+          "width": 143.734375,
+          "height": 28
+        },
+        "implementation": {
+          "x": 226.265625,
+          "y": 452,
+          "width": 143.734375,
+          "height": 28
+        },
+        "changedPixels": 0,
+        "totalPixels": 4032
+      },
+      {
+        "selector": "nav[aria-label=\"ناوبری اصلی\"]",
+        "reference": {
+          "x": 0,
+          "y": 835,
+          "width": 390,
+          "height": 65
+        },
+        "implementation": {
+          "x": 0,
+          "y": 835,
+          "width": 390,
+          "height": 65
+        },
+        "changedPixels": 405,
+        "totalPixels": 25350
+      }
+    ]
+  },
+  {
+    "width": 430,
+    "regions": [
+      {
+        "selector": "header > div",
+        "reference": {
+          "x": 20,
+          "y": 20,
+          "width": 390,
+          "height": 44
+        },
+        "implementation": {
+          "x": 20,
+          "y": 20,
+          "width": 390,
+          "height": 44
+        },
+        "changedPixels": 74,
+        "totalPixels": 17160
+      },
+      {
+        "selector": "header h1",
+        "reference": {
+          "x": 20,
+          "y": 92,
+          "width": 390,
+          "height": 84
+        },
+        "implementation": {
+          "x": 20,
+          "y": 92,
+          "width": 390,
+          "height": 84
+        },
+        "changedPixels": 0,
+        "totalPixels": 32760
+      },
+      {
+        "selector": "header label",
+        "reference": {
+          "x": 20,
+          "y": 232,
+          "width": 390,
+          "height": 56
+        },
+        "implementation": {
+          "x": 20,
+          "y": 232,
+          "width": 390,
+          "height": 56
+        },
+        "changedPixels": 56,
+        "totalPixels": 21840
+      },
+      {
+        "selector": "[aria-label=\"نوع سالن\"]",
+        "reference": {
+          "x": 20,
+          "y": 312,
+          "width": 390,
+          "height": 52
+        },
+        "implementation": {
+          "x": 20,
+          "y": 312,
+          "width": 390,
+          "height": 52
+        },
+        "changedPixels": 758,
+        "totalPixels": 20280
+      },
+      {
+        "selector": "[aria-label=\"فیلتر خدمت\"]",
+        "reference": {
+          "x": 0,
+          "y": 376,
+          "width": 430,
+          "height": 52
+        },
+        "implementation": {
+          "x": 0,
+          "y": 376,
+          "width": 430,
+          "height": 52
+        },
+        "changedPixels": 8,
+        "totalPixels": 22360
+      },
+      {
+        "selector": "#results-title",
+        "reference": {
+          "x": 266.265625,
+          "y": 452,
+          "width": 143.734375,
+          "height": 28
+        },
+        "implementation": {
+          "x": 266.265625,
+          "y": 452,
+          "width": 143.734375,
+          "height": 28
+        },
+        "changedPixels": 0,
+        "totalPixels": 4032
+      },
+      {
+        "selector": "nav[aria-label=\"ناوبری اصلی\"]",
+        "reference": {
+          "x": 0,
+          "y": 835,
+          "width": 430,
+          "height": 65
+        },
+        "implementation": {
+          "x": 0,
+          "y": 835,
+          "width": 430,
+          "height": 65
+        },
+        "changedPixels": 405,
+        "totalPixels": 27950
+      }
+    ]
+  },
+  {
+    "width": 1440,
+    "regions": [
+      {
+        "selector": "header > div",
+        "reference": {
+          "x": 132,
+          "y": 52,
+          "width": 792,
+          "height": 44
+        },
+        "implementation": {
+          "x": 324,
+          "y": 52,
+          "width": 792,
+          "height": 44
+        },
+        "changedPixels": 74,
+        "totalPixels": 34848
+      },
+      {
+        "selector": "header h1",
+        "reference": {
+          "x": 132,
+          "y": 124,
+          "width": 792,
+          "height": 84
+        },
+        "implementation": {
+          "x": 324,
+          "y": 124,
+          "width": 792,
+          "height": 84
+        },
+        "changedPixels": 0,
+        "totalPixels": 66528
+      },
+      {
+        "selector": "header label",
+        "reference": {
+          "x": 132,
+          "y": 264,
+          "width": 792,
+          "height": 56
+        },
+        "implementation": {
+          "x": 324,
+          "y": 264,
+          "width": 792,
+          "height": 56
+        },
+        "changedPixels": 57,
+        "totalPixels": 44352
+      },
+      {
+        "selector": "[aria-label=\"نوع سالن\"]",
+        "reference": {
+          "x": 132,
+          "y": 344,
+          "width": 792,
+          "height": 52
+        },
+        "implementation": {
+          "x": 324,
+          "y": 344,
+          "width": 792,
+          "height": 52
+        },
+        "changedPixels": 1529,
+        "totalPixels": 41184
+      },
+      {
+        "selector": "[aria-label=\"فیلتر خدمت\"]",
+        "reference": {
+          "x": 112,
+          "y": 408,
+          "width": 832,
+          "height": 52
+        },
+        "implementation": {
+          "x": 304,
+          "y": 408,
+          "width": 832,
+          "height": 52
+        },
+        "changedPixels": 8,
+        "totalPixels": 43264
+      },
+      {
+        "selector": "#results-title",
+        "reference": {
+          "x": 780.265625,
+          "y": 484,
+          "width": 143.734375,
+          "height": 28
+        },
+        "implementation": {
+          "x": 972.265625,
+          "y": 484,
+          "width": 143.734375,
+          "height": 28
+        },
+        "changedPixels": 0,
+        "totalPixels": 4032
+      },
+      {
+        "selector": "nav[aria-label=\"ناوبری اصلی\"]",
+        "reference": {
+          "x": 112,
+          "y": 803,
+          "width": 832,
+          "height": 65
+        },
+        "implementation": {
+          "x": 304,
+          "y": 803,
+          "width": 832,
+          "height": 65
+        },
+        "changedPixels": 609,
+        "totalPixels": 54080
+      }
+    ]
+  }
+]

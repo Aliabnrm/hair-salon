@@ -9,21 +9,14 @@ import { Button } from '../ui/button';
 
 const itemClass =
   'relative flex h-16 flex-col items-center justify-center gap-1 text-xs font-bold transition-colors';
-function NavContent({
-  label,
-  icon,
-  active,
-}: {
-  label: string;
-  icon: IconName;
-  active: boolean;
-}) {
+function NavContent({ label, icon, active }: { label: string; icon: IconName; active: boolean }) {
   return (
     <>
-      {active && (
-        <span className="absolute top-0 h-0.5 w-10 rounded-full bg-petrol" />
-      )}
-      <Icon name={icon} size={22} />
+      {active && <span className="absolute top-0 h-0.5 w-10 rounded-full bg-petrol" />}
+      <Icon
+        name={icon}
+        size={22}
+      />
       {label}
     </>
   );
@@ -31,6 +24,8 @@ function NavContent({
 export function BottomNavigation() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const accountActive =
+    pathname === '/account' || pathname === '/manage' || pathname.startsWith('/manage/');
   return (
     <>
       <nav
@@ -42,28 +37,40 @@ export function BottomNavigation() {
           aria-current={pathname === '/' ? 'page' : undefined}
           className={`${itemClass} ${pathname === '/' ? 'text-petrol' : 'text-muted hover:text-ink'}`}
         >
-          <NavContent label="کاوش" icon="search" active={pathname === '/'} />
+          <NavContent
+            label="کاوش"
+            icon="search"
+            active={pathname === '/'}
+          />
         </Link>
         <button
           type="button"
           className={`${itemClass} text-muted hover:text-ink`}
           onClick={() => setOpen(true)}
         >
-          <NavContent label="نوبت‌های من" icon="ticket" active={false} />
+          <NavContent
+            label="نوبت‌های من"
+            icon="ticket"
+            active={false}
+          />
         </button>
         <Link
           href="/account"
-          aria-current={pathname === '/account' ? 'page' : undefined}
-          className={`${itemClass} ${pathname === '/account' ? 'text-petrol' : 'text-muted hover:text-ink'}`}
+          aria-current={accountActive ? 'page' : undefined}
+          className={`${itemClass} ${accountActive ? 'text-petrol' : 'text-muted hover:text-ink'}`}
         >
           <NavContent
             label="حساب"
             icon="user"
-            active={pathname === '/account'}
+            active={accountActive}
           />
         </Link>
       </nav>
-      <Sheet open={open} onClose={() => setOpen(false)} title="نوبت‌های من">
+      <Sheet
+        open={open}
+        onClose={() => setOpen(false)}
+        title="نوبت‌های من"
+      >
         <StatePanel
           icon="calendar"
           title="رزرو هنوز فعال نیست"

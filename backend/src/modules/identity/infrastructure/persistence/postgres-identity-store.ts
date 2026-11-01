@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import { DatabaseProvider } from '../../../../database/database.provider.js';
 import { IdentityUnavailableError } from '../../domain/identity-errors.js';
-import {
-  IdentityStore,
-  type IdentityUser,
-} from '../../application/ports/identity-store.port.js';
+import { IdentityStore, type IdentityUser } from '../../application/ports/identity-store.port.js';
 import { passwordCredentials, sessions, users } from './identity.schema.js';
 const projection = {
   id: users.id,
@@ -25,10 +22,7 @@ export class PostgresIdentityStore extends IdentityStore {
           .values({ email })
           .onConflictDoNothing({ target: users.email })
           .returning({ id: users.id });
-        if (user)
-          await tx
-            .insert(passwordCredentials)
-            .values({ userId: user.id, passwordHash });
+        if (user) await tx.insert(passwordCredentials).values({ userId: user.id, passwordHash });
       }),
     );
   }
@@ -40,10 +34,7 @@ export class PostgresIdentityStore extends IdentityStore {
           passwordHash: passwordCredentials.passwordHash,
         })
         .from(users)
-        .innerJoin(
-          passwordCredentials,
-          eq(users.id, passwordCredentials.userId),
-        )
+        .innerJoin(passwordCredentials, eq(users.id, passwordCredentials.userId))
         .where(eq(users.email, email))
         .limit(1);
       return row

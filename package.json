@@ -15,8 +15,8 @@
     "build": "pnpm --recursive --workspace-concurrency=1 run build",
     "typecheck": "pnpm --recursive --workspace-concurrency=1 run typecheck",
     "lint": "pnpm --recursive --workspace-concurrency=1 run lint",
-    "format": "pnpm --recursive --workspace-concurrency=1 run format",
-    "format:check": "pnpm --recursive --workspace-concurrency=1 run format:check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "pnpm --recursive --workspace-concurrency=1 run test",
     "test:e2e": "pnpm --filter @hair-salon/api run test:e2e",
     "check": "pnpm run build && pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run test:e2e && pnpm run test:integration && pnpm run test:browser",
@@ -26,5 +26,8 @@
     "test:integration": "pnpm --filter @hair-salon/api run test:integration",
     "dev:frontend": "pnpm --filter @hair-salon/frontend run dev",
     "test:browser": "pnpm --filter @hair-salon/frontend run test:browser"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
   }
 }

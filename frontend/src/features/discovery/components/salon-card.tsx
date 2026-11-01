@@ -43,16 +43,20 @@ export function SalonCard({
         <span className="block p-4">
           <span className="flex items-start justify-between gap-3">
             <span className="min-w-0">
-              <span className="block truncate text-lg font-extrabold text-ink">
-                {salon.name}
-              </span>
+              <span className="block truncate text-lg font-extrabold text-ink">{salon.name}</span>
               <span className="mt-1 flex items-center gap-1 text-sm text-ink-soft">
-                <Icon name="pin" size={15} />
+                <Icon
+                  name="pin"
+                  size={15}
+                />
                 {salon.neighborhood}
               </span>
             </span>
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-petrol-soft px-2.5 py-1 text-sm font-bold text-petrol-deep">
-              <Icon name="clock" size={14} />
+              <Icon
+                name="clock"
+                size={14}
+              />
               {salon.hours}
             </span>
           </span>
@@ -64,7 +68,10 @@ export function SalonCard({
               </strong>
             </span>
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-muted">
-              <Icon name="info" size={14} />
+              <Icon
+                name="info"
+                size={14}
+              />
               داده نمایشی
             </span>
           </span>

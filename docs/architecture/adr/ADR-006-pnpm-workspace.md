@@ -45,18 +45,21 @@ URL بالا فقط credential ساختگی محلی تست است. ابتدا i
 
 نصب نخست و نصب frozen دوباره موفق بودند. سپس همه node_modulesهای قبلی، از جمله چیدمان npm ریشه، به backup ignored در `work/pnpm-migration-backup/` منتقل و نصب از پوشه‌های خالی با همان lockfile تکرار شد؛ ۳۵۶ بسته مورد نیاز این پلتفرم از store نصب شدند. بنابراین وجود تصادفی root node_modules/next شاهد موفقیت تست نشد. Next فقط از dependency اعلام‌شده frontend resolve شد. دانلود اولیه برخی بسته‌ها کند بود؛ بررسی integrity غیرفعال و registry جایگزین نشد.
 
-| بررسی تازه با pnpm | نتیجه واقعی |
-|---|---|
-| نصب تمیز frozen | موفق؛ بدون اصلاح lockfile |
-| build و typecheck هر دو بخش | موفق |
-| lint و format:check هر دو بخش | موفق؛ بدون mutation |
-| unit backend / frontend | ۷۳ / ۲۰ موفق |
-| HTTP مستقل Nest | ۴۸ موفق |
-| integration PostgreSQL واقعی | ۲۳ موفق |
-| مرورگر با Next production، API و PG واقعی | ۱۷ موفق |
-| کنترل نسخه دقیق و قالب فایل‌های ریشه/CI | موفق |
+| بررسی تازه با pnpm                        | نتیجه واقعی               |
+| ----------------------------------------- | ------------------------- |
+| نصب تمیز frozen                           | موفق؛ بدون اصلاح lockfile |
+| build و typecheck هر دو بخش               | موفق                      |
+| lint و format:check هر دو بخش             | موفق؛ بدون mutation       |
+| unit backend / frontend                   | ۷۳ / ۲۰ موفق              |
+| HTTP مستقل Nest                           | ۴۸ موفق                   |
+| integration PostgreSQL واقعی              | ۲۳ موفق                   |
+| مرورگر با Next production، API و PG واقعی | ۱۷ موفق                   |
+| کنترل نسخه دقیق و قالب فایل‌های ریشه/CI   | موفق                      |
 
 مجموع **۱۸۱ تست** در check تازه با pnpm عبور کردند؛ خروجی محلی `work/pnpm-check.log`، نصب در `work/pnpm-install.log` و نصب تمیز در `work/pnpm-clean-install.log` است. runner اصلی مرورگر پس از انتقال مسیر CLI و symlink وابستگی‌ها، ثبت‌نام/ورود/reload/خروج، امنیت proxy، فیلترها و RTL را با stack واقعی اجرا کرد. مرز تست و private env توسعه حفظ شد. داده محصول یا migration SQL تغییر نکرد.
 
 شاخه `feat/sprint-03-frontend-auth` به‌دلیل وجود تغییرهای ثبت‌نشده همین اسپرینت حفظ شد؛ checkout اجباری، stash/reset/clean، stage، commit، push یا PR انجام نشد. backup نصب قبلی فقط زیر work است. [درس مهاجرت](../../learning/pnpm-migration.md) و [README](../../../README.md) مرجع استفاده جاری‌اند؛ گزارش‌های اسپرینت‌های قبلی، شواهد npm همان زمان را نگه می‌دارند. **remote CI جدید اجرا نشده است**؛ بررسی روی Linux یا مرورگر دیگر به نتیجه محلی macOS/Chrome نسبت داده نمی‌شود. تغییر فقط مدیر بسته و زیرساخت مرتبط است و اسپرینت بعد شروع نشده است.
 
+## تکمیل ابزار قالب‌بندی مشترک
+
+پس از اسپرینت۴ و با درخواست کارفرما برای تنظیم Prettier، همان نسخه۳.۹.۱۰ از devDependencies تکراری دو workspace به devDependency ریشه منتقل شد؛ نسخه ابزار و وابستگی‌های محصول تغییر نکردند. format/format:check ریشه مستقیماً Prettier را با config/ignore مشترک اجرا می‌کنند؛ script هر workspace نیز همان تنظیم را مصرف می‌کند. جزئیات در [قرارداد قالب‌بندی](../../engineering/code-formatting.md).

@@ -1,6 +1,6 @@
 # Hair Salon
 
-A Persian salon discovery frontend and modular NestJS API, developed incrementally with documented decisions and real PostgreSQL/browser tests.
+A Persian salon discovery and private management frontend with a modular NestJS API, developed incrementally with documented decisions and real PostgreSQL/browser tests.
 
 پلتفرم رزرو و مدیریت سالن برای ایران؛ توسعه مرحله‌ای با NestJS و آموزش معماری بک‌اند. اسپرینت‌های ۱ و ۲ پایه API و PostgreSQL را فراهم می‌کنند: تنظیمات معتبر، شناسه درخواست، خطای امن، OpenAPI و liveness. این endpoint فقط زنده‌بودن فرایند را نشان می‌دهد؛ برای بررسی اتصال دیتابیس، readiness جداگانه داریم؛ SMS یا آمادگی production در این پایه اثبات نشده است.
 
@@ -53,7 +53,7 @@ curl -i -H 'X-Request-Id: local-demo' http://127.0.0.1:3001/api/v1/health/livene
 در ترمینال اول، از ریشه پروژه:
 
 ```sh
-cd /Users/a.abnar/Documents/ChatGPT/hair-salon
+cd /Users/a.abnar/Desktop/hair-salon
 export PATH="$PWD/work/runtime/node-v24.22.2-darwin-arm64/bin:$PWD/work/tools/bin:$PATH"
 /opt/homebrew/opt/postgresql@17/bin/pg_ctl -D "$PWD/work/sprint-02-postgres/data" status || /opt/homebrew/opt/postgresql@17/bin/pg_ctl -D "$PWD/work/sprint-02-postgres/data" -l "$PWD/work/development-postgres.log" -o '-p 55432 -h 127.0.0.1' start
 pnpm db:migrate
@@ -63,12 +63,12 @@ pnpm dev
 در ترمینال دوم:
 
 ```sh
-cd /Users/a.abnar/Documents/ChatGPT/hair-salon
+cd /Users/a.abnar/Desktop/hair-salon
 export PATH="$PWD/work/runtime/node-v24.22.2-darwin-arm64/bin:$PWD/work/tools/bin:$PATH"
 pnpm dev:frontend
 ```
 
-[برنامه](http://127.0.0.1:3000) و [Swagger](http://127.0.0.1:3001/api/docs) در دسترس‌اند. از نشانی 127.0.0.1 استفاده کنید تا Origin/cookie با تنظیمات یکی باشد. یک ایمیل آزمایشی و رمز حداقل ۱۲ نویسه ثبت کنید؛ سپس وارد شوید، صفحه را reload و خروج را امتحان کنید. کد تأیید ایمیل/پیامک نداریم و سالن‌ها نمونه‌اند.
+[برنامه](http://127.0.0.1:3000) و [Swagger](http://127.0.0.1:3001/api/docs) در دسترس‌اند. از نشانی 127.0.0.1 استفاده کنید تا Origin/cookie با تنظیمات یکی باشد. یک ایمیل آزمایشی و رمز حداقل ۱۲ نویسه ثبت کنید؛ سپس وارد شوید، صفحه را reload و خروج را امتحان کنید. کد تأیید ایمیل/پیامک نداریم؛ کشف عمومی نمونه است و پنل مالک سالن خصوصی واقعی ذخیره می‌کند.
 
 برای توقف API و فرانت در هر ترمینال Ctrl+C بزنید. در صورت نیاز، فقط همین نمونه PostgreSQL را با فرمان زیر متوقف کنید؛ داده‌ها حفظ می‌شوند:
 
@@ -80,24 +80,24 @@ pnpm dev:frontend
 
 در development/test: [Swagger UI](http://127.0.0.1:3001/api/docs) و [OpenAPI JSON](http://127.0.0.1:3001/api/openapi.json). این مسیرها در production ثبت نمی‌شوند. Schema از DTO و decoratorهای واقعی تولید می‌شود.
 
-| فرمان در ریشه | کاربرد |
-|---|---|
-| `pnpm run dev` | توسعه API با بازسازی پس از تغییر |
-| `pnpm run dev:frontend` | رابط Next.js روی 127.0.0.1:3000 |
-| `pnpm run build` | ساخت هر دو بخش؛ `backend/dist` و `frontend/.next` |
-| `pnpm start` | اجرای خروجی ساخته‌شده |
-| `pnpm run typecheck` | بررسی نوع کد و تست‌ها |
-| `pnpm run lint` | بررسی Oxlint، بدون ویرایش |
-| `pnpm run format:check` | بررسی Prettier، بدون ویرایش |
-| `pnpm run format` | قالب‌بندی صریح هر دو workspace |
-| `pnpm test` | تست واحد هر دو workspace، بدون watch |
-| `pnpm run test:e2e` | build و تست HTTP/شروع برنامه، بدون watch |
-| `pnpm run db:up` | PostgreSQL توسعه با Compose و انتظار healthcheck |
-| `pnpm run db:down` | توقف Compose؛ volume توسعه حفظ می‌شود |
-| `pnpm run db:migrate` | build و اجرای migration مستقل؛ web آن را خودکار اجرا نمی‌کند |
-| `pnpm run test:browser` | Playwright با Next production و Nest و PostgreSQL اختصاصی واقعی |
-| `pnpm run test:integration` | build و تست واقعی PostgreSQL با مقصد محافظت‌شده |
-| `pnpm run check` | build، typecheck، lint، format:check، unit، HTTP، PostgreSQL و مرورگر واقعی؛ نیازمند DB تست و Chromium |
+| فرمان در ریشه               | کاربرد                                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `pnpm run dev`              | توسعه API با بازسازی پس از تغییر                                                                       |
+| `pnpm run dev:frontend`     | رابط Next.js روی 127.0.0.1:3000                                                                        |
+| `pnpm run build`            | ساخت هر دو بخش؛ `backend/dist` و `frontend/.next`                                                      |
+| `pnpm start`                | اجرای خروجی ساخته‌شده                                                                                  |
+| `pnpm run typecheck`        | بررسی نوع کد و تست‌ها                                                                                  |
+| `pnpm run lint`             | بررسی Oxlint، بدون ویرایش                                                                              |
+| `pnpm run format:check`     | بررسی Prettier، بدون ویرایش                                                                            |
+| `pnpm run format`           | قالب‌بندی صریح هر دو workspace                                                                         |
+| `pnpm test`                 | تست واحد هر دو workspace، بدون watch                                                                   |
+| `pnpm run test:e2e`         | build و تست HTTP/شروع برنامه، بدون watch                                                               |
+| `pnpm run db:up`            | PostgreSQL توسعه با Compose و انتظار healthcheck                                                       |
+| `pnpm run db:down`          | توقف Compose؛ volume توسعه حفظ می‌شود                                                                  |
+| `pnpm run db:migrate`       | build و اجرای migration مستقل؛ web آن را خودکار اجرا نمی‌کند                                           |
+| `pnpm run test:browser`     | Playwright با Next production و Nest و PostgreSQL اختصاصی واقعی                                        |
+| `pnpm run test:integration` | build و تست واقعی PostgreSQL با مقصد محافظت‌شده                                                        |
+| `pnpm run check`            | build، typecheck، lint، format:check، unit، HTTP، PostgreSQL و مرورگر واقعی؛ نیازمند DB تست و Chromium |
 
 دو پکیج در یک pnpm workspace با نام‌های `@hair-salon/api` و `@hair-salon/frontend` و فقط یک `pnpm-lock.yaml` در ریشه داریم؛ اعضای workspace در `pnpm-workspace.yaml` مشخص‌اند و نصب از ریشه انجام شود. فایل package-lock.json دیگر استفاده نمی‌شود؛ سیاست اسکریپت نصب وابستگی‌ها نیز در همین YAML است و Scarf غیرفعال می‌ماند. [تصمیم و بررسی مهاجرت](docs/architecture/adr/ADR-006-pnpm-workspace.md). خروجی build، runtime محلی و پکیج‌های نصب‌شده نسخه‌بندی نمی‌شوند.
 
@@ -156,8 +156,22 @@ SQL، journal و snapshot را با هم مرور و commit کنید؛ custom SQ
 
 ## اسپرینت ۳ و محدودیت فعلی
 
-کد در `backend/` و `frontend/` است. صفحه کشف، جستجو/فیلتر و انتخاب مکان از Figma Make اقتباس شده‌اند؛ **۱۲ سالن و قیمت‌ها فقط نمونه‌اند**. نوبت، کاتالوگ سروری، رزرو، SMS، تأیید ایمیل و بازیابی رمز ساخته نشده‌اند. `/sign-up`، `/sign-in` و `/account` از API و PostgreSQL واقعی استفاده می‌کنند؛ ثبت‌نام خودکار وارد حساب نمی‌کند و پاسخ ایمیل تکراری با ایمیل تازه یکسان است.
+کد در `backend/` و `frontend/` است. صفحه کشف، جستجو/فیلتر و انتخاب مکان از Figma Make اقتباس شده‌اند؛ **۱۲ سالن و قیمت‌ها فقط نمونه‌اند**. این توضیح baseline اسپرینت۳ است؛ مدیریت و کاتالوگ خصوصی در اسپرینت۴ اضافه شدند. نوبت، رزرو، SMS، تأیید ایمیل و بازیابی رمز هنوز ساخته نشده‌اند. `/sign-up`، `/sign-in` و `/account` از API و PostgreSQL واقعی استفاده می‌کنند؛ ثبت‌نام خودکار وارد حساب نمی‌کند و پاسخ ایمیل تکراری با ایمیل تازه یکسان است.
 
 رمز ۱۲ تا ۱۲۸ نویسه، حداکثر ۵۱۲ بایت و بدون حذف فاصله است؛ Argon2id ذخیره می‌شود. نشست هفت‌روزه در PG قابل ابطال است و token خام فقط cookie HttpOnly می‌شود؛ frontend هیچ secret یا token در storage ندارد. پشت proxy محلی، سهمیه IP بین کاربران آن proxy مشترک است؛ این توپولوژی ادعای آمادگی انتشار عمومی ندارد.
 
-[گزارش اجرا](docs/planning/sprints/sprint-03-report.md)، [درس فارسی](docs/learning/sprint-03.md)، [ساختار واقعی](docs/architecture/sprint-03-structure.md)، [تصمیم‌ها](docs/architecture/adr/ADR-005-frontend-backend-layout.md) و [شواهد طراحی](docs/references/sprint-03-figma.md) مرجع مرورند. تغییرها commit/push نشده‌اند؛ remote CI تازه هنوز اجرا نشده و اسپرینت بعد شروع نشده است.
+[گزارش اجرا](docs/planning/sprints/sprint-03-report.md)، [درس فارسی](docs/learning/sprint-03.md)، [ساختار واقعی](docs/architecture/sprint-03-structure.md)، [تصمیم‌ها](docs/architecture/adr/ADR-005-frontend-backend-layout.md) و [شواهد طراحی](docs/references/sprint-03-figma.md) مرجع مرورند. اسپرینت۳ در PR #4 به dev منتظر رفع whitespace CI است؛ نتیجه اسپرینت۴ محلی و commit/push آن با کارفرماست.
+
+## اسپرینت ۴: مدیریت سالن خصوصی
+
+پس از ثبت‌نام و ورود با ایمیل/رمز، مستقیم وارد [مدیریت سالن](http://localhost:3000/manage) شوید. طبق درخواست جدید کارفرما، ورود دومرحله‌ای و صفحه امنیت حساب حذف شدند؛ برنامه Authenticator، کد شش‌رقمی یا کلید MFA لازم نیست. [ADR-008](docs/architecture/adr/ADR-008-remove-owner-mfa.md) مرجع تصمیم جاری است.
+
+سالن تک‌محل، زنانه یا مردانه، فعلاً draft و خصوصی است. خدمات با قیمت تومان، مدت/بافر، متخصص بدون حساب مستقل، ساعات هفتگی و روزهای خاص شمسی به PostgreSQL متصل‌اند. بررسی مالکیت سالن در سرور برقرار است. این داده‌ها به کشف نمونه و رزرو وصل نشده‌اند.
+
+برای دیتابیس موجود، `pnpm run db:migrate` را پیش از اجرای API اجرا کنید. migration جدید `0003_remove_mfa.sql` فقط اطلاعات عامل دوم و ستون‌های مربوط را حذف می‌کند؛ حساب‌ها، نشست‌ها و اطلاعات سالن حفظ می‌شوند. فایل env موجود را بازنویسی نکنید. migrationهای قبلی و قید/triggerهای مدیریت حفظ شده‌اند.
+
+پس از ورود، سالن، خدمت و متخصص بسازید، برنامه و تعطیلی ثبت و reload کنید. [گزارش/راهنمای امتحان](docs/planning/sprints/sprint-04-report.md)، [درس فارسی](docs/learning/sprint-04.md) و [ساختار](docs/architecture/sprint-04-structure.md) مرجع‌اند.
+
+## قالب‌بندی کد
+
+تنظیم Prettier در `.prettierrc.json` ریشه برای هر دو workspace مشترک است؛ `pnpm run format` قالب را اعمال و `pnpm run format:check` بدون ویرایش بررسی می‌کند. خطوط هدف۱۰۰کاراکتر، تورفتگی دو فاصله و ویژگی‌های متعدد JSX جدا هستند. [قرارداد و فایل‌های مستثنا](docs/engineering/code-formatting.md).

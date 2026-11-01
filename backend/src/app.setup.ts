@@ -10,14 +10,12 @@ import type { RequestContext } from './common/http/request-context.js';
 import type { Response } from 'express';
 import type { Environment } from './config/environment.js';
 
-export async function configureApplication(
-  app: NestExpressApplication,
-): Promise<void> {
+export async function configureApplication(app: NestExpressApplication): Promise<void> {
   const config = app.get(ConfigService<Environment, true>);
   app.setGlobalPrefix('api/v1');
   app.use(requestIdMiddleware(app.get(ConsoleLogger)));
   app.use((request: Request, response: Response, next: NextFunction) => {
-    if (/^\/api\/v1\/(?:auth(?:\/|$)|me(?:\/|$))/.test(request.path))
+    if (/^\/api\/v1\/(?:auth(?:\/|$)|me(?:\/|$)|businesses(?:\/|$))/.test(request.path))
       response.setHeader('Cache-Control', 'no-store');
     next();
   });

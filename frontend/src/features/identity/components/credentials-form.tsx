@@ -28,9 +28,7 @@ export function CredentialsForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
     setInvalidPassword(validation);
     setError(null);
     if (validation) {
-      event.currentTarget
-        .querySelector<HTMLInputElement>('[name="password"]')
-        ?.focus();
+      event.currentTarget.querySelector<HTMLInputElement>('[name="password"]')?.focus();
       return;
     }
     busy.current = true;
@@ -59,7 +57,10 @@ export function CredentialsForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
         title="درخواست ثبت‌نام دریافت شد"
         description="اگر این ایمیل قابل ثبت باشد، حساب ساخته شده است. برای ادامه با ایمیل و رمز خود وارد شوید. مالکیت ایمیل هنوز تأیید نمی‌شود."
       >
-        <Link href="/sign-in" className={buttonStyles.primary}>
+        <Link
+          href="/sign-in"
+          className={buttonStyles.primary}
+        >
           رفتن به ورود
         </Link>
       </StatePanel>
@@ -71,7 +72,10 @@ export function CredentialsForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
       aria-label={signingUp ? 'ثبت‌نام با ایمیل' : 'ورود با ایمیل'}
       aria-busy={pending}
     >
-      <fieldset disabled={pending} className="min-w-0 space-y-5">
+      <fieldset
+        disabled={pending}
+        className="min-w-0 space-y-5"
+      >
         <legend className="sr-only">ایمیل و رمز عبور</legend>
         <TextField
           label="ایمیل"
@@ -113,7 +117,11 @@ export function CredentialsForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
           {error}
         </div>
       )}
-      <Button type="submit" disabled={pending} className="w-full">
+      <Button
+        type="submit"
+        disabled={pending}
+        className="w-full"
+      >
         {pending ? 'در حال ارسال…' : signingUp ? 'ساخت حساب' : 'ورود'}
       </Button>
       <p className="text-center text-sm leading-7 text-ink-soft">

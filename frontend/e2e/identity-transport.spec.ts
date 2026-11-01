@@ -49,33 +49,26 @@ test('real browser preserves HttpOnly cookie through Next, reloads the same iden
   expect(login.data.meta.request_id).toBe(login.id);
   expect(login.cache).toBe('no-store');
   expect(login.data.data.user.email).toBe(credentials.email);
-  expect(await page.evaluate(() => document.cookie)).not.toContain(
-    'hair_salon_session',
-  );
-  const cookie = (await context.cookies()).find(
-    (value) => value.name === 'hair_salon_session',
-  );
-  if (!cookie)
-    throw new Error('The browser did not accept the test session cookie.');
+  expect(await page.evaluate(() => document.cookie)).not.toContain('hair_salon_session');
+  const cookie = (await context.cookies()).find((value) => value.name === 'hair_salon_session');
+  if (!cookie) throw new Error('The browser did not accept the test session cookie.');
   expect(cookie.httpOnly).toBe(true);
   expect(cookie.sameSite).toBe('Lax');
   expect(cookie.path).toBe('/');
-  const stored = await stack.pool.query('SELECT token_hash FROM app.sessions');
-  expect(stored.rows[0].token_hash).toBe(
-    createHash('sha256').update(cookie.value).digest('hex'),
-  );
+  const tokenHash = createHash('sha256').update(cookie.value).digest('hex');
+  const stored = await stack.pool.query('SELECT token_hash FROM app.sessions WHERE token_hash=$1', [
+    tokenHash,
+  ]);
+  expect(stored.rows).toHaveLength(1);
+  expect(stored.rows[0].token_hash).toBe(tokenHash);
   await page.reload();
-  const current = await page.evaluate(async () =>
-    (await fetch('/api/v1/me')).json(),
-  );
+  const current = await page.evaluate(async () => (await fetch('/api/v1/me')).json());
   expect(current.data).toEqual(login.data.data);
   const other = await browser.newContext();
   try {
     const otherPage = await other.newPage();
     await otherPage.goto(`${stack.origin}/api/v1/health/liveness`);
-    expect(
-      await otherPage.evaluate(async () => (await fetch('/api/v1/me')).status),
-    ).toBe(401);
+    expect(await otherPage.evaluate(async () => (await fetch('/api/v1/me')).status)).toBe(401);
   } finally {
     await other.close();
   }
@@ -91,15 +84,12 @@ test('real browser preserves HttpOnly cookie through Next, reloads the same iden
         ).status,
     ),
   ).toBe(200);
-  expect(
-    await page.evaluate(async () => (await fetch('/api/v1/me')).status),
-  ).toBe(401);
+  expect(await page.evaluate(async () => (await fetch('/api/v1/me')).status)).toBe(401);
   await context.addCookies([cookie]);
-  expect(
-    await page.evaluate(async () => (await fetch('/api/v1/me')).status),
-  ).toBe(401);
+  expect(await page.evaluate(async () => (await fetch('/api/v1/me')).status)).toBe(401);
   const counts = await stack.pool.query(
-    'SELECT count(*)::integer AS count FROM app.sessions WHERE revoked_at IS NOT NULL',
+    'SELECT count(*)::integer AS count FROM app.sessions WHERE revoked_at IS NOT NULL AND token_hash=$1',
+    [tokenHash],
   );
   expect(counts.rows[0].count).toBe(1);
 });
@@ -138,9 +128,7 @@ test('same-site cross-origin browser POST cannot revoke an authenticated session
       return response.type;
     }, stack.origin);
     expect(result).toBe('opaque');
-    expect(
-      await page.evaluate(async () => (await fetch('/api/v1/me')).status),
-    ).toBe(200);
+    expect(await page.evaluate(async () => (await fetch('/api/v1/me')).status)).toBe(200);
   } finally {
     await foreign.close();
   }
@@ -173,9 +161,7 @@ test('forwarded IP spoofing does not change the shared quota through the real pr
     }
     return status;
   });
-  expect(
-    responses.slice(0, 10).every((response) => response.status === 401),
-  ).toBe(true);
+  expect(responses.slice(0, 10).every((response) => response.status === 401)).toBe(true);
   expect(responses[10]?.status).toBe(429);
   expect(Number(responses[10]?.retry)).toBeGreaterThan(0);
 });

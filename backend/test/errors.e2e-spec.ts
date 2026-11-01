@@ -1,10 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  FailureController,
-  SENSITIVE_SENTINEL,
-} from './fixtures/failure.controller.js';
+import { FailureController, SENSITIVE_SENTINEL } from './fixtures/failure.controller.js';
 import { createTestApplication } from './helpers/create-test-application.js';
 
 describe('safe HTTP errors and logs', () => {
@@ -55,15 +52,11 @@ describe('safe HTTP errors and logs', () => {
       .set('X-Request-Id', 'bad/id')
       .expect(404);
     expect(response.headers['x-request-id']).not.toBe('bad/id');
-    expect(response.body.error.request_id).toBe(
-      response.headers['x-request-id'],
-    );
+    expect(response.body.error.request_id).toBe(response.headers['x-request-id']);
   });
 
   it('normalizes an unknown exception without exposing its text or stack', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/api/v1/_test/failure')
-      .expect(500);
+    const response = await request(app.getHttpServer()).get('/api/v1/_test/failure').expect(500);
     expect(response.body).toEqual({
       error: {
         code: 'INTERNAL_SERVER_ERROR',

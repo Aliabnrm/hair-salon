@@ -1,0 +1,23 @@
+# Dependencies, generated output and local artifacts.
+**/node_modules/
+**/dist/
+**/.next/
+**/coverage/
+**/test-results/
+**/playwright-report/
+work/
+
+# Private environment files and generated framework declarations.
+**/.env
+**/.env.*
+**/next-env.d.ts
+
+# Applied migration history, generated metadata and the package-manager lockfile.
+backend/drizzle/
+pnpm-lock.yaml
+
+# Vendored design assets and their upstream licenses.
+frontend/public/
+
+# Agent instructions are maintained separately from source formatting.
+**/AGENTS.md

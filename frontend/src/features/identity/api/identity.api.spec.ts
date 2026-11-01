@@ -52,10 +52,7 @@ describe('browser identity API contract', () => {
           response({ error: { code: 'UNAUTHORIZED', request_id: 'one' } }, 401),
         )
         .mockResolvedValueOnce(
-          response(
-            { error: { code: 'SERVICE_UNAVAILABLE', request_id: 'two' } },
-            503,
-          ),
+          response({ error: { code: 'SERVICE_UNAVAILABLE', request_id: 'two' } }, 503),
         ),
     );
     expect(await currentUser()).toBeNull();
@@ -71,9 +68,7 @@ describe('browser identity API contract', () => {
       vi
         .fn()
         .mockResolvedValueOnce(response({ data: { user: { id: 'partial' } } }))
-        .mockResolvedValueOnce(
-          new Response('<html>proxy failure</html>', { status: 502 }),
-        ),
+        .mockResolvedValueOnce(new Response('<html>proxy failure</html>', { status: 502 })),
     );
     await expect(
       signIn({ email: 'customer@example.com', password: 'test-only-password' }),
@@ -85,9 +80,7 @@ describe('browser identity API contract', () => {
       'fetch',
       vi
         .fn()
-        .mockResolvedValueOnce(
-          response({ data: { registration: 'received' } }, 202),
-        )
+        .mockResolvedValueOnce(response({ data: { registration: 'received' } }, 202))
         .mockResolvedValueOnce(response({ data: { signed_out: false } }))
         .mockResolvedValueOnce(response({ data: { signed_out: true } })),
     );
@@ -101,12 +94,9 @@ describe('browser identity API contract', () => {
     await expect(signOut()).resolves.toBeUndefined();
   });
   it('propagates aborted requests instead of reporting an anonymous or signed-out state', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockRejectedValue(new DOMException('Aborted', 'AbortError')),
-    );
-    await expect(
-      currentUser(new AbortController().signal),
-    ).rejects.toMatchObject({ name: 'AbortError' });
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new DOMException('Aborted', 'AbortError')));
+    await expect(currentUser(new AbortController().signal)).rejects.toMatchObject({
+      name: 'AbortError',
+    });
   });
 });

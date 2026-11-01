@@ -48,17 +48,14 @@ describe('environment validation', () => {
     );
   });
 
-  it.each(['development', 'test', 'production'])(
-    'accepts environment %s',
-    (nodeEnvironment) => {
-      expect(
-        validate({
-          NODE_ENV: nodeEnvironment,
-          AUTH_ALLOWED_ORIGINS: 'https://salon.example',
-        }).NODE_ENV,
-      ).toBe(nodeEnvironment);
-    },
-  );
+  it.each(['development', 'test', 'production'])('accepts environment %s', (nodeEnvironment) => {
+    expect(
+      validate({
+        NODE_ENV: nodeEnvironment,
+        AUTH_ALLOWED_ORIGINS: 'https://salon.example',
+      }).NODE_ENV,
+    ).toBe(nodeEnvironment);
+  });
 
   it.each(['', 'staging', 'Production', null, 1])(
     'rejects invalid environment %j',
@@ -98,9 +95,7 @@ describe('database URL validation', () => {
     expect(() => validateDatabaseUrl(value)).toThrow(
       'DATABASE_URL must be a PostgreSQL URL with a host and database.',
     );
-    expect(() => validateEnvironment({ DATABASE_URL: value })).toThrow(
-      'DATABASE_URL',
-    );
+    expect(() => validateEnvironment({ DATABASE_URL: value })).toThrow('DATABASE_URL');
   });
   it.each(['postgres:', 'postgresql:'])('accepts protocol %s', (protocol) => {
     const url = `${protocol}//local:fake@127.0.0.1:5432/local_test`;
@@ -119,14 +114,10 @@ describe('authentication configuration', () => {
     'https://u:p@salon.example',
     'https://salon.example?secret=sentinel',
   ])('rejects non-exact origins %s', (origin) => {
-    expect(() => validate({ AUTH_ALLOWED_ORIGINS: origin })).toThrow(
-      'AUTH_ALLOWED_ORIGINS',
-    );
+    expect(() => validate({ AUTH_ALLOWED_ORIGINS: origin })).toThrow('AUTH_ALLOWED_ORIGINS');
   });
   it('requires HTTPS origins and a private secret in production', () => {
-    expect(() => validate({ NODE_ENV: 'production' })).toThrow(
-      'AUTH_ALLOWED_ORIGINS',
-    );
+    expect(() => validate({ NODE_ENV: 'production' })).toThrow('AUTH_ALLOWED_ORIGINS');
     expect(() =>
       validate({
         NODE_ENV: 'production',

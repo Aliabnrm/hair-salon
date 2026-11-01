@@ -10,8 +10,6 @@ export default defineConfig({
     browserName: 'chromium',
     headless: true,
     trace: 'off',
-    ...(process.env.PLAYWRIGHT_CHANNEL
-      ? { channel: process.env.PLAYWRIGHT_CHANNEL }
-      : {}),
+    ...(process.env.PLAYWRIGHT_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHANNEL } : {}),
   },
 });

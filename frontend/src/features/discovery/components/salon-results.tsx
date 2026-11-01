@@ -18,12 +18,21 @@ export function SalonResults({
   onLocation: () => void;
 }) {
   return (
-    <section aria-labelledby="results-title" className="mt-6 px-5">
+    <section
+      aria-labelledby="results-title"
+      className="mt-6 px-5"
+    >
       <div className="mb-3 flex items-baseline justify-between gap-3">
-        <h2 className="text-lg font-extrabold text-ink" id="results-title">
+        <h2
+          className="text-lg font-extrabold text-ink"
+          id="results-title"
+        >
           سالن‌های پیشنهادی
         </h2>
-        <p aria-live="polite" className="text-sm text-muted">
+        <p
+          aria-live="polite"
+          className="text-sm text-muted"
+        >
           {new Intl.NumberFormat('fa-IR').format(results.length)} نتیجه
         </p>
       </div>
@@ -44,10 +53,17 @@ export function SalonResults({
           icon="search"
           title="نتیجه‌ای پیدا نشد"
         >
-          <Button className="w-full" onClick={onReset}>
+          <Button
+            className="w-full"
+            onClick={onReset}
+          >
             پاک کردن فیلترها
           </Button>
-          <Button variant="secondary" className="w-full" onClick={onLocation}>
+          <Button
+            variant="secondary"
+            className="w-full"
+            onClick={onLocation}
+          >
             تغییر شهر یا محله
           </Button>
         </StatePanel>

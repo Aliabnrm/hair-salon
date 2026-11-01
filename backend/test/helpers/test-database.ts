@@ -9,10 +9,7 @@ export function validateTestDatabaseUrl(input: unknown): string {
   // URL parameters could override host/database in node-postgres; disallow them.
   if (
     !['127.0.0.1', 'localhost', '[::1]', 'postgres'].includes(url.hostname) ||
-    !(
-      /^[a-z][a-z0-9_]*_test$/.test(name) ||
-      /^hair_salon_test_[a-z0-9_]+$/.test(name)
-    ) ||
+    !(/^[a-z][a-z0-9_]*_test$/.test(name) || /^hair_salon_test_[a-z0-9_]+$/.test(name)) ||
     url.search
   ) {
     throw new Error(

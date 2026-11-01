@@ -1,16 +1,9 @@
-import {
-  Injectable,
-  UnprocessableEntityException,
-  type PipeTransform,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException, type PipeTransform } from '@nestjs/common';
 import { normalizeEmail } from '../../domain/email-policy.js';
 import { isValidPassword } from '../../domain/password-policy.js';
 import { RegisterRequestDto } from './dto/register-request.dto.js';
 @Injectable()
-export class CredentialsPipe implements PipeTransform<
-  unknown,
-  RegisterRequestDto
-> {
+export class CredentialsPipe implements PipeTransform<unknown, RegisterRequestDto> {
   transform(input: unknown): RegisterRequestDto {
     if (
       input === null ||
@@ -24,8 +17,7 @@ export class CredentialsPipe implements PipeTransform<
     )
       throw new UnprocessableEntityException();
     const email = normalizeEmail(input.email);
-    if (!email || !isValidPassword(input.password))
-      throw new UnprocessableEntityException();
+    if (!email || !isValidPassword(input.password)) throw new UnprocessableEntityException();
     return { email, password: input.password };
   }
 }

@@ -12,8 +12,8 @@
     "start:dev": "nest start --watch",
     "typecheck": "tsc --noEmit -p tsconfig.build.json && tsc -p tsconfig.test.json",
     "lint": "oxlint --deny-warnings src test vitest.config.ts vitest.config.e2e.ts vitest.config.integration.ts drizzle.config.ts",
-    "format": "prettier --write src test drizzle *.ts *.json .prettierrc.json",
-    "format:check": "prettier --check src test drizzle *.ts *.json .prettierrc.json",
+    "format": "prettier --write --ignore-path ../.prettierignore .",
+    "format:check": "prettier --check --ignore-path ../.prettierignore .",
     "test": "vitest run --config vitest.config.ts",
     "test:e2e": "pnpm run build && vitest run --config vitest.config.e2e.ts",
     "db:up": "docker compose -f ../compose.yml up -d --wait",
@@ -43,7 +43,6 @@
     "@types/supertest": "7.2.1",
     "drizzle-kit": "0.31.11",
     "oxlint": "1.90.0",
-    "prettier": "3.9.10",
     "supertest": "7.3.1",
     "typescript": "6.0.2",
     "vitest": "4.1.12"

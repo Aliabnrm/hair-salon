@@ -10,9 +10,7 @@ function cookieOptions(environment: NodeEnvironment) {
   } as const;
 }
 function cookieName(environment: NodeEnvironment): string {
-  return environment === 'production'
-    ? '__Host-hair_salon_session'
-    : 'hair_salon_session';
+  return environment === 'production' ? '__Host-hair_salon_session' : 'hair_salon_session';
 }
 export function readSessionCookie(
   request: Pick<Request, 'headers'>,
@@ -36,10 +34,7 @@ export function setSessionCookie(
     maxAge: SESSION_LIFETIME_MS,
   });
 }
-export function clearSessionCookie(
-  response: Response,
-  environment: NodeEnvironment,
-): void {
+export function clearSessionCookie(response: Response, environment: NodeEnvironment): void {
   response.clearCookie(cookieName(environment), cookieOptions(environment));
 }
 // Trust the actual socket peer only. Forwarded headers from a browser are untrusted.

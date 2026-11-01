@@ -1,3 +1,4 @@
+import { SalonManagementModule } from './modules/salon-management/salon-management.module.js';
 import { ConsoleLogger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { environmentOptions } from './config/environment.js';
@@ -10,6 +11,7 @@ import { HealthModule } from './modules/health/health.module.js';
     ConfigModule.forRoot(environmentOptions()),
     HealthModule,
     IdentityModule,
+    SalonManagementModule,
   ],
   providers: [
     {

@@ -22,15 +22,14 @@ export function StatePanel({
       <span
         className={`grid size-16 place-items-center rounded-full ${tone === 'danger' ? 'bg-danger-soft text-danger' : 'bg-petrol-soft text-petrol'}`}
       >
-        <Icon name={icon} size={28} />
+        <Icon
+          name={icon}
+          size={28}
+        />
       </span>
       <h2 className="mt-5 text-lg font-bold text-ink">{title}</h2>
-      <p className="mt-2 max-w-72 text-sm leading-7 text-ink-soft">
-        {description}
-      </p>
-      {children && (
-        <div className="mt-6 flex w-full flex-col gap-2">{children}</div>
-      )}
+      <p className="mt-2 max-w-72 text-sm leading-7 text-ink-soft">{description}</p>
+      {children && <div className="mt-6 flex w-full flex-col gap-2">{children}</div>}
     </div>
   );
 }

@@ -1,12 +1,5 @@
 'use client';
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import * as api from '../api/identity.api';
 import type { Credentials, SessionUser } from '../model/identity.types';
@@ -60,8 +53,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     };
   }, [refresh, pathname]);
   const signIn = async (credentials: Credentials) => {
-    if (mutation.current)
-      throw new Error('An identity change is already pending.');
+    if (mutation.current) throw new Error('An identity change is already pending.');
     mutation.current = true;
     ++revision.current;
     request.current?.abort();
@@ -73,8 +65,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   };
   const signOut = async () => {
-    if (mutation.current)
-      throw new Error('An identity change is already pending.');
+    if (mutation.current) throw new Error('An identity change is already pending.');
     mutation.current = true;
     ++revision.current;
     request.current?.abort();

@@ -9,26 +9,18 @@ describe('discovery fixtures', () => {
       category: 'color' as const,
       query: 'نيلوفر',
     };
-    expect(filterSalons(demoSalons, filters).map((s) => s.id)).toEqual([
-      'niloufar',
-    ]);
+    expect(filterSalons(demoSalons, filters).map((s) => s.id)).toEqual(['niloufar']);
+    expect(filterSalons(demoSalons, { ...filters, neighborhood: 'ونک' })).toEqual([]);
     expect(
-      filterSalons(demoSalons, { ...filters, neighborhood: 'ونک' }),
-    ).toEqual([]);
-    expect(
-      filterSalons(demoSalons, { ...defaultFilters, query: 'سعادت آباد' }).map(
-        (s) => s.id,
-      ),
+      filterSalons(demoSalons, { ...defaultFilters, query: 'سعادت آباد' }).map((s) => s.id),
     ).toEqual(['mahour']);
   });
   it('clears an incompatible service when switching audience', () => {
     expect(
-      updateFilters({ ...defaultFilters, category: 'nails' }, { type: 'men' })
-        .category,
+      updateFilters({ ...defaultFilters, category: 'nails' }, { type: 'men' }).category,
     ).toBeNull();
-    expect(
-      updateFilters({ ...defaultFilters, category: 'color' }, { type: 'men' })
-        .category,
-    ).toBe('color');
+    expect(updateFilters({ ...defaultFilters, category: 'color' }, { type: 'men' }).category).toBe(
+      'color',
+    );
   });
 });

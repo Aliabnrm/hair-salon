@@ -1,6 +1,5 @@
 # گزارش اجرای اسپرینت ۱ — NestJS Foundation
 
-
 یادداشت مسیر: API در اسپرینت ۳ به backend منتقل شد؛ فرمان‌ها و نتیجه‌های این گزارش مربوط به زمان همان اجرا هستند.
 
 تاریخ: ۲۰۲۶-۱۰-۲۹، Asia/Tehran. وضعیت: **تکمیل‌شده** در محدوده [طرح مصوب](sprint-01-plan.md) و [پرامپت اجرایی](../../prompts/sprint-01.md). تمام بررسی‌های این گزارش واقعاً در همین پروژه اجرا شدند. اسپرینت بعد شروع نشده است.
@@ -34,18 +33,18 @@ Nest core/common/platform-express/testing هم‌نسخه **12.3.2**، config **
 
 تمام فرمان‌های npm از ریشه پروژه، با runtime منتخب روی PATH اجرا شدند.
 
-| فرمان / بررسی | نتیجه |
-|---|---|
-| `npm install` | نصب اولیه موفق؛ دو هشدار ابزار تست، سپس patch اصلاحی نصب شد |
-| `npm ci` | نصب مجدد از lockfile موفق، exit 0 |
-| `npm run build` | موفق؛ خروجی `apps/api/dist/main.js` |
-| `npm run typecheck` | موفق؛ کد src و فایل‌های test/config بررسی شدند |
-| `npm run lint` | موفق؛ بدون warning قابل قبول و بدون auto-fix |
-| `npm run format:check` | موفق؛ بدون ویرایش |
-| `npm test` | **۲۷ تست واحد** در یک فایل، همگی موفق |
-| `npm run test:e2e` | **۱۹ تست** در چهار فایل، همگی موفق؛ build پیش از اجرا |
-| `npm run check` پس از npm ci | تمام مراحل بالا موفق، exit 0؛ مجموع **۴۶ تست** |
-| `npm audit --json` پس از اصلاح | موفق، exit 0؛ صفر هشدار شناخته‌شده |
+| فرمان / بررسی                  | نتیجه                                                       |
+| ------------------------------ | ----------------------------------------------------------- |
+| `npm install`                  | نصب اولیه موفق؛ دو هشدار ابزار تست، سپس patch اصلاحی نصب شد |
+| `npm ci`                       | نصب مجدد از lockfile موفق، exit 0                           |
+| `npm run build`                | موفق؛ خروجی `apps/api/dist/main.js`                         |
+| `npm run typecheck`            | موفق؛ کد src و فایل‌های test/config بررسی شدند              |
+| `npm run lint`                 | موفق؛ بدون warning قابل قبول و بدون auto-fix                |
+| `npm run format:check`         | موفق؛ بدون ویرایش                                           |
+| `npm test`                     | **۲۷ تست واحد** در یک فایل، همگی موفق                       |
+| `npm run test:e2e`             | **۱۹ تست** در چهار فایل، همگی موفق؛ build پیش از اجرا       |
+| `npm run check` پس از npm ci   | تمام مراحل بالا موفق، exit 0؛ مجموع **۴۶ تست**              |
+| `npm audit --json` پس از اصلاح | موفق، exit 0؛ صفر هشدار شناخته‌شده                          |
 
 تست‌ها از `@nestjs/testing`، providerهای واقعی و همان app.setup استفاده کردند. فقط logger برای ثبت شواهد و config برای انتخاب محیط تست جایگزین شده‌اند؛ خود HealthService، Controller و filter واقعی‌اند. Controller خطاساز صرفاً در `test/fixtures` قرار دارد و در برنامه ساخته‌شده ثبت نشده است. تست startup نیز فرایند واقعی `dist/main.js` را با env نامعتبر اجرا می‌کند.
 
@@ -55,25 +54,25 @@ Nest core/common/platform-express/testing هم‌نسخه **12.3.2**، config **
 
 پس از گذر check، برنامه جدا از test runner در دو حالت روی پورت آزاد محلی بالا آمد:
 
-| حالت / روش اجرا | Health | مسیر ناموجود ریشه | docs | OpenAPI JSON | توقف |
-|---|---|---|---|---|---|
-| development، `npm run dev` | 200، body/header صحیح | 404، قالب error صحیح | 200 | 200، مسیر Health صحیح | SIGINT؛ پورت بسته شد |
-| production، `node apps/api/dist/main.js` | 200، body/header صحیح | 404، قالب error صحیح | 404 | 404 | SIGTERM؛ پورت بسته شد |
+| حالت / روش اجرا                          | Health                | مسیر ناموجود ریشه    | docs | OpenAPI JSON          | توقف                  |
+| ---------------------------------------- | --------------------- | -------------------- | ---- | --------------------- | --------------------- |
+| development، `npm run dev`               | 200، body/header صحیح | 404، قالب error صحیح | 200  | 200، مسیر Health صحیح | SIGINT؛ پورت بسته شد  |
+| production، `node apps/api/dist/main.js` | 200، body/header صحیح | 404، قالب error صحیح | 404  | 404                   | SIGTERM؛ پورت بسته شد |
 
 هر دو فرایند پس از بررسی متوقف شدند؛ سرور آزمایشی روشن باقی نماند. تست‌های HTTP نیز برنامه‌ها را در cleanup می‌بندند.
 
 ## نگاشت پذیرش
 
-| معیار | شاهد / نتیجه |
-|---|---|
-| S1-AC-01 / S1-T01 | boot واقعی، Health با قرارداد کامل و اجرای زنده؛ پاس |
-| S1-AC-02 / S1-T02 | ۲۷ تست validation و دو تست شکست startup ساخته‌شده؛ پاس |
-| S1-AC-03 / S1-T03 | 404، شناسه غایب/معتبر/نامعتبر/تکراری، هم‌زمانی و fallback ریشه؛ پاس |
-| S1-AC-04 / S1-T06 | check کامل پس از npm ci، cleanup و توقف زنده؛ پاس |
-| S1-AC-05 | liveness فقط فرایند را بیان می‌کند؛ DB/SMS/readiness در کد و پاسخ وجود ندارد؛ پاس |
-| S1-AC-06 | [درس اسپرینت](../../learning/sprint-01.md) با مسیر فایل واقعی و تمرین اختیاری؛ تحویل شد |
-| S1-AC-07 / S1-T05 | UI/spec در dev/test، schema مطابق route و نبود docs در production؛ پاس |
-| S1-AC-08 / S1-T04 | fixture خطای 500 خارج src؛ متن حساس در body و log ثبت‌شده وجود ندارد؛ پاس |
+| معیار             | شاهد / نتیجه                                                                            |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| S1-AC-01 / S1-T01 | boot واقعی، Health با قرارداد کامل و اجرای زنده؛ پاس                                    |
+| S1-AC-02 / S1-T02 | ۲۷ تست validation و دو تست شکست startup ساخته‌شده؛ پاس                                  |
+| S1-AC-03 / S1-T03 | 404، شناسه غایب/معتبر/نامعتبر/تکراری، هم‌زمانی و fallback ریشه؛ پاس                     |
+| S1-AC-04 / S1-T06 | check کامل پس از npm ci، cleanup و توقف زنده؛ پاس                                       |
+| S1-AC-05          | liveness فقط فرایند را بیان می‌کند؛ DB/SMS/readiness در کد و پاسخ وجود ندارد؛ پاس       |
+| S1-AC-06          | [درس اسپرینت](../../learning/sprint-01.md) با مسیر فایل واقعی و تمرین اختیاری؛ تحویل شد |
+| S1-AC-07 / S1-T05 | UI/spec در dev/test، schema مطابق route و نبود docs در production؛ پاس                  |
+| S1-AC-08 / S1-T04 | fixture خطای 500 خارج src؛ متن حساس در body و log ثبت‌شده وجود ندارد؛ پاس               |
 
 مرور دستی مرزها و importها انجام شد: Health به config/http middleware وابسته نیست، common به ماژول Health import ندارد، چرخه import بین قابلیت‌ها نداریم، ساخت دستی Service در Controller و abstraction بی‌مصرف ایجاد نشده است. context درخواست با افزودن صریح property و استنتاج نوع ساخته می‌شود؛ cast اجباری، any یا ts-ignore برای پنهان‌کردن خطای برنامه وارد نشده است.
 

@@ -5,8 +5,6 @@ import { hashSessionToken } from './session-token.js';
 export class ResolveSessionService {
   constructor(private readonly store: IdentityStore) {}
   async execute(token?: string) {
-    return token
-      ? this.store.resolveSession(hashSessionToken(token))
-      : undefined;
+    return token ? this.store.resolveSession(hashSessionToken(token)) : undefined;
   }
 }

@@ -3,9 +3,5 @@ export interface AuthAttemptResult {
   retryAfterSeconds: number;
 }
 export abstract class AuthAttemptStore {
-  abstract consume(
-    keyHash: string,
-    operation: string,
-    maximum: number,
-  ): Promise<AuthAttemptResult>;
+  abstract consume(keyHash: string, operation: string, maximum: number): Promise<AuthAttemptResult>;
 }

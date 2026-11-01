@@ -1,18 +1,11 @@
 import 'reflect-metadata';
-import {
-  ConsoleLogger,
-  type INestApplication,
-  type Type,
-} from '@nestjs/common';
+import { ConsoleLogger, type INestApplication, type Type } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module.js';
 import { configureApplication } from '../../src/app.setup.js';
-import type {
-  Environment,
-  NodeEnvironment,
-} from '../../src/config/environment.js';
+import type { Environment, NodeEnvironment } from '../../src/config/environment.js';
 
 class RecordingLogger extends ConsoleLogger {
   readonly entries: unknown[] = [];

@@ -1,20 +1,21 @@
 # ADR-001 — انتخاب فناوری
+
 نسخه ۰٫۳ — ۲۰۲۶-۱۰-۲۹
 
 وضعیت: **NestJS و PostgreSQL و Next.js اسپرینت‌های ۱ تا ۳ اجراشده‌اند**. [گزارش ۲](../../planning/sprints/sprint-02-report.md) و [گزارش ۳](../../planning/sprints/sprint-03-report.md) شاهد واقعی هر بخش‌اند؛ [ADR-005](ADR-005-frontend-backend-layout.md) انتقال backend/frontend و نسخه‌های exact را ثبت می‌کند. گزینه اولیه Next.js full-stack با Nest به‌عنوان مالک API جایگزین شد؛ کد آن گزینه وجود نداشت که مهاجرت داده شود.
 
-| بخش | انتخاب/پیشنهاد | وضعیت و دلیل |
-|---|---|---|
-| بک‌اند | NestJS | پذیرفته‌شده؛ درخواست مستقیم کارفرما برای پیاده‌سازی و یادگیری ساختار بک‌اند |
-| زبان بک‌اند | TypeScript با strict mode | در محدوده اسپرینت ۱ تأییدشده؛ تنظیم و نسخه دقیق مطابق ADR-003 |
-| معماری بک‌اند | Modular Monolith، ماژول‌بندی بر اساس قابلیت | قرارداد جاری ADR-002 بر اساس درخواست معماری منسجم؛ لایه‌ها متناسب پیچیدگی |
-| دیتابیس | PostgreSQL 17.x | PostgreSQL 17.11 در پایه اسپرینت ۲ با تست واقعی؛ image/digest و شواهد در ADR-004 و گزارش |
-| ابزار دیتابیس | Drizzle + node-postgres، migration با Drizzle Kit | اجراشده با Drizzle ORM/pg و migration رسمی؛ دلیل ADR-004 و شاهد گزارش اسپرینت ۲ |
-| فرانت‌اند | React/Next.js، TypeScript | Next.js App Router اجراشده در اسپرینت ۳ طبق ADR-005؛ Next.js 16.4.3/React 19.3.1 و Tailwind 4.3.3؛ منبع Make خوانده و تطبیق در سند فیگما ثبت شد |
-| runtime و package manager | Node 24.22.2 LTS و pnpm 12.16.1، workspace و lockfile واحد | نصب تکرارپذیر؛ ابزار پایه در ADR-003 و مهاجرت مدیر بسته در [ADR-006](ADR-006-pnpm-workspace.md) |
-| آزمون بک‌اند | Vitest 4.1.12 و Supertest با @nestjs/testing | جایگزین پیشنهاد قبلی Jest؛ boot واقعی و تست‌های HTTP اسپرینت ۱ اجرا شدند؛ جزئیات ADR-003 |
-| CI provider | GitHub Actions | اجراشده برای پایه API/PostgreSQL؛ فرانت/browser اسپرینت ۳ به workflow اضافه شده‌اند؛ CI تازه پیش از push اجرا نشده |
-| SMS، میزبانی و object storage | TBD | ارزیابی دسترسی ایران، هزینه، شرایط خدمات و قابلیت مهاجرت |
+| بخش                           | انتخاب/پیشنهاد                                             | وضعیت و دلیل                                                                                                                                    |
+| ----------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| بک‌اند                        | NestJS                                                     | پذیرفته‌شده؛ درخواست مستقیم کارفرما برای پیاده‌سازی و یادگیری ساختار بک‌اند                                                                     |
+| زبان بک‌اند                   | TypeScript با strict mode                                  | در محدوده اسپرینت ۱ تأییدشده؛ تنظیم و نسخه دقیق مطابق ADR-003                                                                                   |
+| معماری بک‌اند                 | Modular Monolith، ماژول‌بندی بر اساس قابلیت                | قرارداد جاری ADR-002 بر اساس درخواست معماری منسجم؛ لایه‌ها متناسب پیچیدگی                                                                       |
+| دیتابیس                       | PostgreSQL 17.x                                            | PostgreSQL 17.11 در پایه اسپرینت ۲ با تست واقعی؛ image/digest و شواهد در ADR-004 و گزارش                                                        |
+| ابزار دیتابیس                 | Drizzle + node-postgres، migration با Drizzle Kit          | اجراشده با Drizzle ORM/pg و migration رسمی؛ دلیل ADR-004 و شاهد گزارش اسپرینت ۲                                                                 |
+| فرانت‌اند                     | React/Next.js، TypeScript                                  | Next.js App Router اجراشده در اسپرینت ۳ طبق ADR-005؛ Next.js 16.4.3/React 19.3.1 و Tailwind 4.3.3؛ منبع Make خوانده و تطبیق در سند فیگما ثبت شد |
+| runtime و package manager     | Node 24.22.2 LTS و pnpm 12.16.1، workspace و lockfile واحد | نصب تکرارپذیر؛ ابزار پایه در ADR-003 و مهاجرت مدیر بسته در [ADR-006](ADR-006-pnpm-workspace.md)                                                 |
+| آزمون بک‌اند                  | Vitest 4.1.12 و Supertest با @nestjs/testing               | جایگزین پیشنهاد قبلی Jest؛ boot واقعی و تست‌های HTTP اسپرینت ۱ اجرا شدند؛ جزئیات ADR-003                                                        |
+| CI provider                   | GitHub Actions                                             | اجراشده برای پایه API/PostgreSQL؛ فرانت/browser اسپرینت ۳ به workflow اضافه شده‌اند؛ CI تازه پیش از push اجرا نشده                              |
+| SMS، میزبانی و object storage | TBD                                                        | ارزیابی دسترسی ایران، هزینه، شرایط خدمات و قابلیت مهاجرت                                                                                        |
 
 NestJS یک ساختار برای controller، provider و dependency injection فراهم می‌کند؛ معماری دامنه و صحت رزرو باید جداگانه طراحی شوند. Nest به‌تنهایی صحت، امنیت یا مقیاس‌پذیری را تضمین نمی‌کند.
 

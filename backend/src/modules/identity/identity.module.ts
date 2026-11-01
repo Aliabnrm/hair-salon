@@ -1,3 +1,5 @@
+import { SecurityRateLimiter } from './infrastructure/persistence/security-rate-limiter.js';
+import { CookieMutationGuard } from './presentation/http/cookie-mutation.guard.js';
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../../database/database.module.js';
 import { IdentityStore } from './application/ports/identity-store.port.js';
@@ -20,6 +22,8 @@ import { CredentialsPipe } from './presentation/http/credentials.pipe.js';
   imports: [DatabaseModule],
   controllers: [AuthenticationController, CurrentUserController],
   providers: [
+    SecurityRateLimiter,
+    CookieMutationGuard,
     { provide: IdentityStore, useClass: PostgresIdentityStore },
     { provide: PasswordHasher, useClass: Argon2PasswordHasher },
     { provide: AuthAttemptStore, useClass: PostgresAuthAttemptStore },
@@ -32,5 +36,6 @@ import { CredentialsPipe } from './presentation/http/credentials.pipe.js';
     SessionAuthGuard,
     CredentialsPipe,
   ],
+  exports: [SessionAuthGuard, ResolveSessionService, CookieMutationGuard, SecurityRateLimiter],
 })
 export class IdentityModule {}

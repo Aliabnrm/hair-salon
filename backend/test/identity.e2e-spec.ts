@@ -15,12 +15,7 @@ describe('identity HTTP boundaries without a database', () => {
   afterAll(async () => {
     await fixture?.app.close();
   });
-  it.each([
-    undefined,
-    'null',
-    'https://foreign.example',
-    `${origin}.evil.example`,
-  ])(
+  it.each([undefined, 'null', 'https://foreign.example', `${origin}.evil.example`])(
     'rejects missing/null/foreign Origin before I/O: %s',
     async (untrusted) => {
       for (const route of ['register', 'login', 'logout']) {
@@ -50,18 +45,15 @@ describe('identity HTTP boundaries without a database', () => {
     { ...credentials, password: 'short' },
     { ...credentials, password: 123456789012 },
     { ...credentials, email: 'invalid-email' },
-  ])(
-    'rejects invalid DTO or mass assignment without DB access',
-    async (body) => {
-      const response = await request(fixture.app.getHttpServer())
-        .post('/api/v1/auth/register')
-        .set('Origin', origin)
-        .send(body)
-        .expect(422);
-      expect(response.body.error.code).toBe('VALIDATION_FAILED');
-      expect(JSON.stringify(response.body)).not.toContain('forged-actor');
-    },
-  );
+  ])('rejects invalid DTO or mass assignment without DB access', async (body) => {
+    const response = await request(fixture.app.getHttpServer())
+      .post('/api/v1/auth/register')
+      .set('Origin', origin)
+      .send(body)
+      .expect(422);
+    expect(response.body.error.code).toBe('VALIDATION_FAILED');
+    expect(JSON.stringify(response.body)).not.toContain('forged-actor');
+  });
   it('limits the JSON body before hashing and preserves a safe error envelope', async () => {
     const response = await request(fixture.app.getHttpServer())
       .post('/api/v1/auth/login')
@@ -80,9 +72,7 @@ describe('identity HTTP boundaries without a database', () => {
       .set('Content-Type', 'application/json')
       .send('{')
       .expect(400);
-    const response = await request(fixture.app.getHttpServer())
-      .get('/api/v1/me')
-      .expect(401);
+    const response = await request(fixture.app.getHttpServer()).get('/api/v1/me').expect(401);
     expect(response.headers['cache-control']).toBe('no-store');
   });
   it('returns a safe 503 for an unavailable auth database while liveness remains alive', async () => {
@@ -93,9 +83,7 @@ describe('identity HTTP boundaries without a database', () => {
       .expect(503);
     expect(response.body.error.code).toBe('SERVICE_UNAVAILABLE');
     expect(JSON.stringify(response.body)).not.toContain(credentials.password);
-    await request(fixture.app.getHttpServer())
-      .get('/api/v1/health/liveness')
-      .expect(200);
+    await request(fixture.app.getHttpServer()).get('/api/v1/health/liveness').expect(200);
   });
   it('allows repeated sign-out without a cookie and exposes no session', async () => {
     const response = await request(fixture.app.getHttpServer())
@@ -104,8 +92,6 @@ describe('identity HTTP boundaries without a database', () => {
       .send({})
       .expect(200);
     expect(response.body.data).toEqual({ signed_out: true });
-    expect(JSON.stringify(fixture.logger.entries)).not.toContain(
-      credentials.password,
-    );
+    expect(JSON.stringify(fixture.logger.entries)).not.toContain(credentials.password);
   });
 });

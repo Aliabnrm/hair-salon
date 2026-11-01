@@ -1,6 +1,5 @@
 export type SalonType = 'men' | 'women';
-export type CategoryId =
-  'haircut' | 'beard' | 'color' | 'brushing' | 'keratin' | 'nails' | 'skin';
+export type CategoryId = 'haircut' | 'beard' | 'color' | 'brushing' | 'keratin' | 'nails' | 'skin';
 export interface Category {
   id: CategoryId;
   label: string;

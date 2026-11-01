@@ -11,9 +11,7 @@ for (const width of [320, 360, 390, 430, 768, 1024, 1440])
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
     await expect(page.locator('html')).toHaveAttribute('lang', 'fa');
     expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= window.innerWidth,
-      ),
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
     const visual = await page.locator('[data-app-shell]').evaluate((el) => {
       const style = getComputedStyle(el);
@@ -23,15 +21,11 @@ for (const width of [320, 360, 390, 430, 768, 1024, 1440])
         bg: style.backgroundColor,
       };
     });
-    expect(visual.width).toBe(
-      width >= 1280 ? 832 : width >= 768 ? 704 : Math.min(width, 480),
-    );
+    expect(visual.width).toBe(width >= 1280 ? 832 : width >= 768 ? 704 : Math.min(width, 480));
     expect(visual.font).toContain('Vazirmatn');
     expect(visual.bg).toBe('rgb(248, 250, 252)');
     expect(
-      await page
-        .getByRole('searchbox')
-        .evaluate((el) => el.getBoundingClientRect().height),
+      await page.getByRole('searchbox').evaluate((el) => el.getBoundingClientRect().height),
     ).toBeCloseTo(54, 3);
     const images = page.locator('main img');
     await images.evaluateAll((imgs) =>
@@ -43,17 +37,12 @@ for (const width of [320, 360, 390, 430, 768, 1024, 1440])
       .poll(() =>
         images.evaluateAll((imgs) =>
           imgs.every(
-            (img) =>
-              img instanceof HTMLImageElement &&
-              img.complete &&
-              img.naturalWidth > 0,
+            (img) => img instanceof HTMLImageElement && img.complete && img.naturalWidth > 0,
           ),
         ),
       )
       .toBe(true);
-    await expect(
-      page.getByRole('navigation', { name: 'ناوبری اصلی' }),
-    ).toBeInViewport();
+    await expect(page.getByRole('navigation', { name: 'ناوبری اصلی' })).toBeInViewport();
     await page.screenshot({
       path: testInfo.outputPath(`discovery-${width}.png`),
       animations: 'disabled',
@@ -62,7 +51,5 @@ for (const width of [320, 360, 390, 430, 768, 1024, 1440])
     await page.keyboard.press('Enter');
     await expect(page.getByText('۲ نتیجه', { exact: true })).toBeVisible();
     await page.getByRole('searchbox').fill('ناموجود');
-    await expect(
-      page.getByRole('button', { name: 'پاک کردن فیلترها', exact: true }),
-    ).toBeVisible();
+    await expect(page.getByRole('button', { name: 'پاک کردن فیلترها', exact: true })).toBeVisible();
   });

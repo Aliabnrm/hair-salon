@@ -11,9 +11,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           id="main-content"
           className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
         >
-          <div className="screen-enter flex min-h-full flex-col">
-            {children}
-          </div>
+          <div className="screen-enter flex min-h-full flex-col">{children}</div>
         </main>
         <BottomNavigation />
       </div>

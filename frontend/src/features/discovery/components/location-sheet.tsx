@@ -26,7 +26,10 @@ export function LocationSheet({
       onClose={onClose}
       title="شهر و محله"
       footer={
-        <Button className="w-full" onClick={() => onApply(city, area)}>
+        <Button
+          className="w-full"
+          onClick={() => onApply(city, area)}
+        >
           نمایش سالن‌ها
         </Button>
       }
@@ -49,13 +52,16 @@ export function LocationSheet({
             type="button"
           >
             {c.name}
-            {city === c.id && <Icon name="check" size={18} />}
+            {city === c.id && (
+              <Icon
+                name="check"
+                size={18}
+              />
+            )}
           </button>
         ))}
       </div>
-      <p className="mb-3 mt-6 text-sm font-bold text-ink-soft">
-        محله در {selected?.name}
-      </p>
+      <p className="mb-3 mt-6 text-sm font-bold text-ink-soft">محله در {selected?.name}</p>
       <div
         aria-label="انتخاب محله"
         className="flex flex-wrap gap-2"

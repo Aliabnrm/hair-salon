@@ -1,22 +1,22 @@
 # ADR-003 — ابزار و قرارداد اجرای اسپرینت ۱
 
 > تصمیم تاریخی npm در این ADR با [ADR-006](ADR-006-pnpm-workspace.md) و دستور کارفرما در ۲۰۲۶-۱۰-۳۱ جایگزین شد؛ نسخه‌ها و نتایج اجرای اولیه پایین بدون بازنویسی نگه داشته شده‌اند.
-تاریخ: ۲۰۲۶-۱۰-۲۹. وضعیت: **اجرا و بررسی‌شده در اسپرینت ۱**. نسخه‌های مستقیم exact و وابستگی‌های گذرا در lockfile ریشه قفل شده‌اند. `npm ci` و `npm run check` موفق بودند؛ [گزارش اجرا](../../planning/sprints/sprint-01-report.md) مرجع شواهد است. این بررسی برای API پایه و محیط فعلی است و تضمین سازگاری تمام قابلیت‌های آینده نیست.
+> تاریخ: ۲۰۲۶-۱۰-۲۹. وضعیت: **اجرا و بررسی‌شده در اسپرینت ۱**. نسخه‌های مستقیم exact و وابستگی‌های گذرا در lockfile ریشه قفل شده‌اند. `npm ci` و `npm run check` موفق بودند؛ [گزارش اجرا](../../planning/sprints/sprint-01-report.md) مرجع شواهد است. این بررسی برای API پایه و محیط فعلی است و تضمین سازگاری تمام قابلیت‌های آینده نیست.
 
 ## نسخه‌های واقعی اجرا
 
-| جزء | نسخه انتخاب‌شده |
-|---|---|
-| Node.js / npm | 24.22.2 LTS / 11.19.1 |
-| @nestjs/common،core،platform-express،testing | 12.3.2 |
-| @nestjs/cli | 12.0.11، فقط محلی برای build/watch |
-| @nestjs/config / swagger | 12.0.1 / 12.0.5 |
-| TypeScript | 6.0.2 |
-| Vitest | 4.1.12 |
-| Supertest / @types/supertest | 7.3.1 / 7.2.1 |
-| Oxlint / Prettier | 1.90.0 / 3.9.10 |
-| @types/node / @types/express | 24.19.2 / 5.0.6 |
-| reflect-metadata / rxjs | 0.2.2 / 7.8.2 |
+| جزء                                          | نسخه انتخاب‌شده                    |
+| -------------------------------------------- | ---------------------------------- |
+| Node.js / npm                                | 24.22.2 LTS / 11.19.1              |
+| @nestjs/common،core،platform-express،testing | 12.3.2                             |
+| @nestjs/cli                                  | 12.0.11، فقط محلی برای build/watch |
+| @nestjs/config / swagger                     | 12.0.1 / 12.0.5                    |
+| TypeScript                                   | 6.0.2                              |
+| Vitest                                       | 4.1.12                             |
+| Supertest / @types/supertest                 | 7.3.1 / 7.2.1                      |
+| Oxlint / Prettier                            | 1.90.0 / 3.9.10                    |
+| @types/node / @types/express                 | 24.19.2 / 5.0.6                    |
+| reflect-metadata / rxjs                      | 0.2.2 / 7.8.2                      |
 
 Node قبلی دستگاه 24.5.0 بود؛ نسخه global تغییر نکرد. آرشیو رسمی macOS ARM مربوط به 24.22.2 دریافت، SHA256 آن با SHASUMS256 رسمی مقایسه و در مسیر ignored محلی `work/runtime/` استخراج شد. این runtime پیش‌نیاز عمومی مخزن نیست؛ روی دستگاه دیگر نسخه `.nvmrc` با مدیر نسخه فعال شود. npm همراه runtime منتخب استفاده شد.
 
@@ -31,17 +31,18 @@ CLI generator اجرا نشد؛ ساختار کوچک با فایل‌های ص�
 در Nest 12.3.2، handler پیش‌فرض 404 با global prefix محدود می‌شود. تست واقعی نشان داد مسیر ریشه و آدرس docs غیرفعال، پاسخ Express را می‌گیرند. `app.setup.ts` پس از ثبت routeهای Nest با `app.init()`، یک fallback پایانی برای مسیرهای باقی‌مانده ثبت می‌کند. این fallback همان `createApiError` را مصرف می‌کند؛ prefix، middleware و filter همچنان یک‌بار تعریف می‌شوند. سرور در این پروژه متعلق به همین API است؛ در صورت میزبانی چند app روی Express مشترک، این تصمیم باید بازبینی شود. runtime و تست هر دو setup غیرهم‌زمان را await می‌کنند.
 
 ## انتخاب
-| جزء | مبنا برای اجرا | دلیل/مرز |
-|---|---|---|
-| Node.js | آخرین patch سازگار 24.x LTS، حداقل 24.15 طبق مستند CLI بررسی‌شده | نسخه LTS با سابقه بیشتر نسبت به 26 که تازه LTS شده؛ exact version در .nvmrc و engines سازگار ثبت شود |
-| NestJS | خانواده پایدار 12.x با patch هم‌نسخه core/common/platform-express/testing | منابع فعلی و registry بررسی شدند؛ peerها قبل نصب کنترل شوند؛ pre-release انتخاب نشود |
-| زبان/module | TypeScript 6.x سازگار با Nest/ابزار، ESM و NodeNext، strict | مطابق starter رسمی فعلی؛ importهای runtime با پسوند .js مطابق build واقعی |
-| package manager | npm همراه Node انتخاب‌شده، workspaces و یک lockfile ریشه | زیرساخت کم برای یک API و فرانت آینده؛ npm version دقیق در packageManager ثبت شود |
-| HTTP adapter | Express مطابق starter | تغییر به Fastify بدون نیاز/benchmark این اسپرینت توجیه ندارد |
-| آزمون | Vitest از major سازگار starter، Supertest و @nestjs/testing | پیشنهاد قدیمی Jest جایگزین شد؛ Vitest 4.x در starter بررسی‌شده، وجود 5.x در registry دلیل ارتقای خودکار نیست |
-| lint/format | Oxlint مطابق starter و Prettier | یک linter برای API؛ typecheck با TypeScript جداست؛ ESLint دوم بدون نیاز اضافه نشود |
-| config | @nestjs/config با validate تابع کوچک typed برای PORT/NODE_ENV | وابستگی validation اضافی برای دو متغیر لازم نیست؛ خواندن env متمرکز و شکست قبل listen |
-| OpenAPI | @nestjs/swagger سازگار | مستند endpointهای واقعی، مسیر docs فقط dev/test |
+
+| جزء             | مبنا برای اجرا                                                            | دلیل/مرز                                                                                                     |
+| --------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Node.js         | آخرین patch سازگار 24.x LTS، حداقل 24.15 طبق مستند CLI بررسی‌شده          | نسخه LTS با سابقه بیشتر نسبت به 26 که تازه LTS شده؛ exact version در .nvmrc و engines سازگار ثبت شود         |
+| NestJS          | خانواده پایدار 12.x با patch هم‌نسخه core/common/platform-express/testing | منابع فعلی و registry بررسی شدند؛ peerها قبل نصب کنترل شوند؛ pre-release انتخاب نشود                         |
+| زبان/module     | TypeScript 6.x سازگار با Nest/ابزار، ESM و NodeNext، strict               | مطابق starter رسمی فعلی؛ importهای runtime با پسوند .js مطابق build واقعی                                    |
+| package manager | npm همراه Node انتخاب‌شده، workspaces و یک lockfile ریشه                  | زیرساخت کم برای یک API و فرانت آینده؛ npm version دقیق در packageManager ثبت شود                             |
+| HTTP adapter    | Express مطابق starter                                                     | تغییر به Fastify بدون نیاز/benchmark این اسپرینت توجیه ندارد                                                 |
+| آزمون           | Vitest از major سازگار starter، Supertest و @nestjs/testing               | پیشنهاد قدیمی Jest جایگزین شد؛ Vitest 4.x در starter بررسی‌شده، وجود 5.x در registry دلیل ارتقای خودکار نیست |
+| lint/format     | Oxlint مطابق starter و Prettier                                           | یک linter برای API؛ typecheck با TypeScript جداست؛ ESLint دوم بدون نیاز اضافه نشود                           |
+| config          | @nestjs/config با validate تابع کوچک typed برای PORT/NODE_ENV             | وابستگی validation اضافی برای دو متغیر لازم نیست؛ خواندن env متمرکز و شکست قبل listen                        |
+| OpenAPI         | @nestjs/swagger سازگار                                                    | مستند endpointهای واقعی، مسیر docs فقط dev/test                                                              |
 
 مبنای پژوهش اولیه: @nestjs/core=12.3.2، @nestjs/cli=12.0.11، @nestjs/config=12.0.1، @nestjs/swagger=12.0.5 و TypeScript 6.0.2؛ Vitest 4.1.2 در starter بود و مطابق توضیح بالا به patch اصلاح‌شده ارتقا یافت. جدول ابتدای سند و lockfile، مرجع نسخه اجرا هستند. CLI prerequisites و peerDependencies پکیج دو بررسی جدا هستند.
 

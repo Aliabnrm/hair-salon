@@ -28,29 +28,21 @@ export function updateFilters(
     next.category = null;
   return next;
 }
-export function filterSalons(
-  salons: DemoSalon[],
-  filters: DiscoveryFilters,
-): DemoSalon[] {
+export function filterSalons(salons: DemoSalon[], filters: DiscoveryFilters): DemoSalon[] {
   const query = normalizePersian(filters.query);
   return salons.filter(
     (s) =>
       s.cityId === filters.cityId &&
-      (filters.neighborhood === 'all' ||
-        s.neighborhood === filters.neighborhood) &&
+      (filters.neighborhood === 'all' || s.neighborhood === filters.neighborhood) &&
       (filters.type === 'all' || s.type === filters.type) &&
-      (!filters.category ||
-        s.services.some((v) => v.category === filters.category)) &&
+      (!filters.category || s.services.some((v) => v.category === filters.category)) &&
       (!query ||
         normalizePersian(
           [s.name, s.neighborhood, ...s.services.map((v) => v.name)].join(' '),
         ).includes(query)),
   );
 }
-export function startingPrice(
-  salon: DemoSalon,
-  category: DiscoveryFilters['category'],
-): string {
+export function startingPrice(salon: DemoSalon, category: DiscoveryFilters['category']): string {
   const prices = salon.services
     .filter((s) => !category || s.category === category)
     .map((s) => s.price);

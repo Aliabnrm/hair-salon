@@ -1,11 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { categories, cities, demoSalons } from '../data/demo-salons';
-import {
-  defaultFilters,
-  filterSalons,
-  updateFilters,
-} from '../model/filter-salons';
+import { defaultFilters, filterSalons, updateFilters } from '../model/filter-salons';
 import type { DiscoveryFilters } from '../model/discovery.types';
 
 export function useDiscoveryFilters() {

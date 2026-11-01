@@ -183,16 +183,16 @@ hair-salon/
 
 ## نام‌گذاری
 
-| مورد | قرارداد | نمونه |
-|---|---|---|
-| پوشه/فایل دستی | English kebab-case؛ suffix نقش Nest حفظ شود | sign-in-form.tsx، register-user.service.ts |
-| React component / class | PascalCase | SignInForm، RegisterUserService |
-| تابع/متغیر | camelCase و فعل/نام روشن | normalizeEmail، resolveSession |
-| Port | قرارداد کوچک و مشخص، با token DI واقعی | PasswordHasher، IdentityStore |
-| جدول/ستون PostgreSQL | snake_case؛ جدول جمع | app.users، password_credentials، token_hash |
-| URL | lowercase kebab-case یا resource رایج | /sign-in، /api/v1/auth/login، /api/v1/me |
-| domain capability | نام مفهوم کسب‌وکار، نه نام صفحه یا ابزار | identity، discovery؛ نه services عمومی یا drizzle-domain |
-| asset | نام توصیفی محتوا، بدون نام‌های image1/final2 | salon-card-mahour.<source-extension> |
+| مورد                    | قرارداد                                      | نمونه                                                    |
+| ----------------------- | -------------------------------------------- | -------------------------------------------------------- |
+| پوشه/فایل دستی          | English kebab-case؛ suffix نقش Nest حفظ شود  | sign-in-form.tsx، register-user.service.ts               |
+| React component / class | PascalCase                                   | SignInForm، RegisterUserService                          |
+| تابع/متغیر              | camelCase و فعل/نام روشن                     | normalizeEmail، resolveSession                           |
+| Port                    | قرارداد کوچک و مشخص، با token DI واقعی       | PasswordHasher، IdentityStore                            |
+| جدول/ستون PostgreSQL    | snake_case؛ جدول جمع                         | app.users، password_credentials، token_hash              |
+| URL                     | lowercase kebab-case یا resource رایج        | /sign-in، /api/v1/auth/login، /api/v1/me                 |
+| domain capability       | نام مفهوم کسب‌وکار، نه نام صفحه یا ابزار     | identity، discovery؛ نه services عمومی یا drizzle-domain |
+| asset                   | نام توصیفی محتوا، بدون نام‌های image1/final2 | salon-card-mahour.<source-extension>                     |
 
 نام‌های قراردادی framework مثل `page.tsx`،`layout.tsx`،`next.config.ts` و فایل تولیدشده ابزار استثنای آگاهانه‌اند. React component در فایل kebab-case export PascalCase دارد. «account» route است؛ هویت و نشست در همین دامنه identity می‌مانند و User دوم یا ماژول موازی auth/users/accounts ساخته نمی‌شود.
 

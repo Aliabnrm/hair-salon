@@ -10,16 +10,12 @@ function resolveRequestId(request: Request): string {
   ).length;
   const value = request.headers['x-request-id'];
 
-  return occurrences === 1 &&
-    typeof value === 'string' &&
-    /^[A-Za-z0-9_-]{1,64}$/.test(value)
+  return occurrences === 1 && typeof value === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(value)
     ? value
     : randomUUID();
 }
 
-export function requestIdMiddleware(
-  logger: Pick<ConsoleLogger, 'log'>,
-): RequestHandler {
+export function requestIdMiddleware(logger: Pick<ConsoleLogger, 'log'>): RequestHandler {
   return (request, response: Response, next: NextFunction) => {
     const context = Object.assign(request, {
       requestId: resolveRequestId(request),

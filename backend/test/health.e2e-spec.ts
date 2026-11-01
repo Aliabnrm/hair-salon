@@ -1,16 +1,11 @@
-import {
-  request as httpRequest,
-  type IncomingMessage,
-  type Server,
-} from 'node:http';
+import { request as httpRequest, type IncomingMessage, type Server } from 'node:http';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestApplication } from './helpers/create-test-application.js';
 
 const HEALTH = '/api/v1/health/liveness';
-const UUID =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 describe('liveness HTTP contract and request context', () => {
   let app: INestApplication<Server>;
@@ -53,16 +48,13 @@ describe('liveness HTTP contract and request context', () => {
         .set('X-Request-Id', id)
         .expect(200);
       expect(response.headers['x-request-id']).toMatch(UUID);
-      expect(response.body.meta.request_id).toBe(
-        response.headers['x-request-id'],
-      );
+      expect(response.body.meta.request_id).toBe(response.headers['x-request-id']);
     },
   );
 
   it('rejects duplicated request-id headers even if each value is valid', async () => {
     const address = app.getHttpServer().address();
-    if (!address || typeof address === 'string')
-      throw new Error('Expected a TCP test server.');
+    if (!address || typeof address === 'string') throw new Error('Expected a TCP test server.');
     const response = await new Promise<IncomingMessage>((resolve, reject) => {
       const outgoing = httpRequest(
         {
@@ -85,15 +77,11 @@ describe('liveness HTTP contract and request context', () => {
 
   it('gives concurrent requests independent contexts', async () => {
     const responses = await Promise.all(
-      Array.from({ length: 8 }, () =>
-        request(app.getHttpServer()).get(HEALTH).expect(200),
-      ),
+      Array.from({ length: 8 }, () => request(app.getHttpServer()).get(HEALTH).expect(200)),
     );
     const ids = responses.map((response) => response.headers['x-request-id']);
     expect(new Set(ids).size).toBe(8);
     for (const response of responses)
-      expect(response.body.meta.request_id).toBe(
-        response.headers['x-request-id'],
-      );
+      expect(response.body.meta.request_id).toBe(response.headers['x-request-id']);
   });
 });

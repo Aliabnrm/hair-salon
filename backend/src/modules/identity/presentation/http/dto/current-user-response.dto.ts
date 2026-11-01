@@ -15,10 +15,7 @@ export class CurrentUserResponseDto {
   @ApiProperty({ type: CurrentUserDataDto }) data!: CurrentUserDataDto;
   @ApiProperty({ type: IdentityMetaDto }) meta!: IdentityMetaDto;
 }
-export function currentUserResponse(
-  user: IdentityUser,
-  requestId: string,
-): CurrentUserResponseDto {
+export function currentUserResponse(user: IdentityUser, requestId: string): CurrentUserResponseDto {
   return {
     data: {
       user: {

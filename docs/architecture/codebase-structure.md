@@ -38,6 +38,7 @@ components/ui و lib به features وابسته نمی‌شوند؛ app ترکی
 HealthModule فقط DatabaseHealthCheck را از DatabaseModule مصرف می‌کند. DatabaseProvider مالک Pool واحد است؛ schema دامنه کنار persistence آن قرار دارد و `database/schema.ts` aggregate است. `app-schema.ts` leaf مشترک است تا import cycle ایجاد نشود. namespace `app` معادل tenant نیست.
 
 ## رشد یک قابلیت پیچیده بک‌اند — مثال آینده، فعلاً نسازید
+
 ```text
 modules/bookings/
   bookings.module.ts
@@ -60,3 +61,9 @@ modules/bookings/
 جهت import: Controller→Application؛ Application→Domain و Port؛ adapter→Port/Domain؛ Module پیاده‌سازی Port را به token وصل می‌کند. adapter نباید قانون تازه رزرو تعریف کند. TypeScript interface در runtime وجود ندارد؛ در مرز واقعی از token صریح DI استفاده شود. circular dependency با forwardRef به‌عنوان راهکار پیش‌فرض پنهان نشود؛ مرز مسئولیت بازبینی شود.
 
 ماژول دیگر فقط providerهای exportشده را مصرف کند؛ deep import به repository یا DTO داخلی آن ممنوع است. mapping DTO↔domain در مرز HTTP و mapping DB↔domain در adapter انجام شود. common به modules وابسته نباشد و به انبار helperهای بی‌نام تبدیل نشود. یک shared package برای «شاید بعداً» ساخته نشود.
+
+## افزوده اجرایی اسپرینت ۴
+
+ساختار واقعی مدیریت و نشست در [درخت اسپرینت۴](sprint-04-structure.md) و تصمیم در [ADR-007](adr/ADR-007-private-salon-management.md) ثبت شده‌اند. `salon-management` یک feature با چهار سناریوی Business/Catalog/Team/Scheduling و چهار Store است. validation/error مشترک در `common/domain`، بدون import Nest/ORM؛ نشست متعلق به identity و فقط `public.ts` برای مصرف قابلیت مدیریت است؛ حذف MFA در ADR-008 ثبت شده است. schema identity تنها از leaf مجاز persistence-schema برای FK مصرف می‌شود؛ private adapter به دامنه مدیریت import نشده است.
+
+فرانت feature salon-management از transport/session/tokens جاری استفاده می‌کند؛ route، UI، hook، API و تبدیل خالص جدا هستند. AccountGate و business layout مرز عمر state خصوصی را تعیین می‌کنند. scaffolding فرضی، package مشترک تازه یا لایه Health اضافی ایجاد نشده است.

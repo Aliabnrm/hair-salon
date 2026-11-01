@@ -2,29 +2,20 @@ import { createServer, connect, type Socket } from 'node:net';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  DatabaseProvider,
-  DATABASE_LIMITS,
-} from '../src/database/database.provider.js';
+import { DatabaseProvider, DATABASE_LIMITS } from '../src/database/database.provider.js';
 import { createTestApplication } from './helpers/create-test-application.js';
 import { createTestDatabase } from './helpers/test-database.js';
 
 const READY = '/api/v1/health/readiness';
 const LIVE = '/api/v1/health/liveness';
 
-function expectSuccess(response: {
-  body: unknown;
-  headers: Record<string, string>;
-}) {
+function expectSuccess(response: { body: unknown; headers: Record<string, string> }) {
   expect(response.body).toEqual({
     data: { status: 'ok' },
     meta: { request_id: response.headers['x-request-id'] },
   });
 }
-function expectUnavailable(response: {
-  body: unknown;
-  headers: Record<string, string>;
-}) {
+function expectUnavailable(response: { body: unknown; headers: Record<string, string> }) {
   expect(response.body).toEqual({
     error: {
       code: 'SERVICE_UNAVAILABLE',
@@ -64,9 +55,7 @@ describe('readiness with an isolated real PostgreSQL database', () => {
   it('loses its database, keeps liveness and recovers in the same application', async () => {
     try {
       // Only the UUID database created by this suite becomes unavailable.
-      await target.admin.query(
-        `ALTER DATABASE "${target.name}" ALLOW_CONNECTIONS false`,
-      );
+      await target.admin.query(`ALTER DATABASE "${target.name}" ALLOW_CONNECTIONS false`);
       await target.admin.query(
         'SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = $1',
         [target.name],
@@ -74,10 +63,7 @@ describe('readiness with an isolated real PostgreSQL database', () => {
       // Allow pg to deliver the asynchronous error on idle sockets.
       await new Promise((resolve) => setTimeout(resolve, 100));
       expectUnavailable(
-        await request(app.getHttpServer())
-          .get(READY)
-          .set('X-Request-Id', 'db-outage')
-          .expect(503),
+        await request(app.getHttpServer()).get(READY).set('X-Request-Id', 'db-outage').expect(503),
       );
       expectSuccess(await request(app.getHttpServer()).get(LIVE).expect(200));
       expect(entries).toContainEqual({ event: 'database_idle_error' });
@@ -86,9 +72,7 @@ describe('readiness with an isolated real PostgreSQL database', () => {
         phase: 'acquire',
       });
     } finally {
-      await target.admin.query(
-        `ALTER DATABASE "${target.name}" ALLOW_CONNECTIONS true`,
-      );
+      await target.admin.query(`ALTER DATABASE "${target.name}" ALLOW_CONNECTIONS true`);
     }
     expectSuccess(await request(app.getHttpServer()).get(READY).expect(200));
   });
@@ -100,9 +84,7 @@ describe('readiness with an isolated real PostgreSQL database', () => {
     );
     try {
       const started = performance.now();
-      expectUnavailable(
-        await request(app.getHttpServer()).get(READY).expect(503),
-      );
+      expectUnavailable(await request(app.getHttpServer()).get(READY).expect(503));
       expect(performance.now() - started).toBeLessThan(3_000);
       expect(pool.waitingCount).toBe(0);
       expectSuccess(await request(app.getHttpServer()).get(LIVE).expect(200));
@@ -114,12 +96,7 @@ describe('readiness with an isolated real PostgreSQL database', () => {
 
   it('keeps database identity and raw failures out of public logs', () => {
     const logs = JSON.stringify(entries);
-    for (const sensitive of [
-      target.url,
-      target.name,
-      'SELECT 1',
-      new URL(target.url).hostname,
-    ]) {
+    for (const sensitive of [target.url, target.name, 'SELECT 1', new URL(target.url).hostname]) {
       expect(logs).not.toContain(sensitive);
     }
     expect(entries).toContainEqual(
@@ -138,10 +115,7 @@ async function createRelay(databaseUrl: string) {
   const sockets = new Set<Socket>();
   let stall = false;
   const server = createServer((incoming) => {
-    const upstream = connect(
-      Number(destination.port || 5432),
-      destination.hostname,
-    );
+    const upstream = connect(Number(destination.port || 5432), destination.hostname);
     for (const socket of [incoming, upstream]) {
       sockets.add(socket);
       socket.on('error', () => {
@@ -163,8 +137,7 @@ async function createRelay(databaseUrl: string) {
   });
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();
-  if (!address || typeof address === 'string')
-    throw new Error('Expected TCP relay.');
+  if (!address || typeof address === 'string') throw new Error('Expected TCP relay.');
   const url = new URL(databaseUrl);
   url.hostname = '127.0.0.1';
   url.port = String(address.port);
@@ -196,9 +169,7 @@ describe('bounded network failure and recovery', () => {
       expectSuccess(await request(app.getHttpServer()).get(READY).expect(200));
       relay.setStall(true);
       const started = performance.now();
-      expectUnavailable(
-        await request(app.getHttpServer()).get(READY).expect(503),
-      );
+      expectUnavailable(await request(app.getHttpServer()).get(READY).expect(503));
       expect(performance.now() - started).toBeLessThan(3_000);
       expect(app.get(DatabaseProvider).pool.totalCount).toBe(0);
       await expect.poll(() => relay.sockets.size).toBe(0);
@@ -224,9 +195,7 @@ describe('bounded network failure and recovery', () => {
     const { app } = await createTestApplication('test', [], relay.url);
     try {
       const started = performance.now();
-      expectUnavailable(
-        await request(app.getHttpServer()).get(READY).expect(503),
-      );
+      expectUnavailable(await request(app.getHttpServer()).get(READY).expect(503));
       expect(performance.now() - started).toBeLessThan(3_000);
       expect(app.get(DatabaseProvider).pool.totalCount).toBe(0);
       expect(app.get(DatabaseProvider).pool.waitingCount).toBe(0);
@@ -248,12 +217,8 @@ describe('bounded network failure and recovery', () => {
     );
     try {
       expectSuccess(await request(app.getHttpServer()).get(LIVE).expect(200));
-      expectUnavailable(
-        await request(app.getHttpServer()).get(READY).expect(503),
-      );
-      expect(JSON.stringify(logger.entries)).not.toContain(
-        'db-sensitive-sentinel',
-      );
+      expectUnavailable(await request(app.getHttpServer()).get(READY).expect(503));
+      expect(JSON.stringify(logger.entries)).not.toContain('db-sensitive-sentinel');
     } finally {
       await app.close();
     }

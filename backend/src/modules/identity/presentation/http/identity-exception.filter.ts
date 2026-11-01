@@ -1,8 +1,4 @@
-import {
-  Catch,
-  type ArgumentsHost,
-  type ExceptionFilter,
-} from '@nestjs/common';
+import { Catch, type ArgumentsHost, type ExceptionFilter } from '@nestjs/common';
 import type { Response } from 'express';
 import { createApiError } from '../../../../common/http/api-error.js';
 import type { RequestContext } from '../../../../common/http/request-context.js';

@@ -1,21 +1,6 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  Post,
-  Req,
-  Res,
-  UseFilters,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Req, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  ApiAcceptedResponse,
-  ApiBody,
-  ApiOkResponse,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiAcceptedResponse, ApiBody, ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import type { RequestContext } from '../../../../common/http/request-context.js';
 import { ApiErrorDto } from '../../../../common/http/api-error.js';
@@ -28,14 +13,8 @@ import { AuthMutationGuard } from './auth-mutation.guard.js';
 import { CredentialsPipe } from './credentials.pipe.js';
 import { RegisterRequestDto } from './dto/register-request.dto.js';
 import { SignInRequestDto } from './dto/sign-in-request.dto.js';
-import {
-  currentUserResponse,
-  CurrentUserResponseDto,
-} from './dto/current-user-response.dto.js';
-import {
-  RegistrationResponseDto,
-  SignOutResponseDto,
-} from './dto/registration-response.dto.js';
+import { currentUserResponse, CurrentUserResponseDto } from './dto/current-user-response.dto.js';
+import { RegistrationResponseDto, SignOutResponseDto } from './dto/registration-response.dto.js';
 import { IdentityExceptionFilter } from './identity-exception.filter.js';
 import {
   authenticationPeer,
@@ -74,11 +53,7 @@ export class AuthenticationController {
     @Body(CredentialsPipe) body: RegisterRequestDto,
     @Req() request: RequestContext,
   ): Promise<RegistrationResponseDto> {
-    await this.limiter.check(
-      'register',
-      authenticationPeer(request),
-      body.email,
-    );
+    await this.limiter.check('register', authenticationPeer(request), body.email);
     await this.registerUser.execute(body.email, body.password);
     return {
       data: { registration: 'received' },

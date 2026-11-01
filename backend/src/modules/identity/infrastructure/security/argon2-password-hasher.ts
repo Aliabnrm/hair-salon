@@ -9,10 +9,7 @@ export const ARGON2_OPTIONS = {
   parallelism: 1,
 } as const;
 @Injectable()
-export class Argon2PasswordHasher
-  extends PasswordHasher
-  implements OnModuleInit
-{
+export class Argon2PasswordHasher extends PasswordHasher implements OnModuleInit {
   private readonly dummyHash = hash(randomBytes(32), ARGON2_OPTIONS);
   async onModuleInit(): Promise<void> {
     await this.dummyHash;

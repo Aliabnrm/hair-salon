@@ -13,6 +13,9 @@ export class AuthMutationGuard implements CanActivate {
   constructor(private readonly config: ConfigService<Environment, true>) {}
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
+    return this.validate(request);
+  }
+  protected validate(request: Request, requireJson = true): boolean {
     const origin = request.headers.origin;
     if (
       typeof origin !== 'string' ||
@@ -20,8 +23,8 @@ export class AuthMutationGuard implements CanActivate {
     )
       throw new ForbiddenException();
     if (
-      request.headers['content-type']?.split(';')[0]?.trim().toLowerCase() !==
-      'application/json'
+      requireJson &&
+      request.headers['content-type']?.split(';')[0]?.trim().toLowerCase() !== 'application/json'
     )
       throw new UnsupportedMediaTypeException();
     return true;

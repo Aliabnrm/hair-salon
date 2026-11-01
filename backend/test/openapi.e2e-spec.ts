@@ -9,9 +9,7 @@ describe('OpenAPI availability and schema', () => {
       const { app } = await createTestApplication(environment);
       try {
         await request(app.getHttpServer()).get('/api/docs').expect(200);
-        const response = await request(app.getHttpServer())
-          .get('/api/openapi.json')
-          .expect(200);
+        const response = await request(app.getHttpServer()).get('/api/openapi.json').expect(200);
         expect(Object.keys(response.body.paths)).toEqual([
           '/api/v1/health/readiness',
           '/api/v1/health/liveness',
@@ -19,16 +17,30 @@ describe('OpenAPI availability and schema', () => {
           '/api/v1/auth/login',
           '/api/v1/auth/logout',
           '/api/v1/me',
+          '/api/v1/me/businesses',
+          '/api/v1/businesses',
+          '/api/v1/businesses/{businessId}/settings',
+          '/api/v1/businesses/{businessId}/catalog/services',
+          '/api/v1/businesses/{businessId}/catalog/services/{id}',
+          '/api/v1/businesses/{businessId}/services',
+          '/api/v1/businesses/{businessId}/services/{id}',
+          '/api/v1/businesses/{businessId}/staff',
+          '/api/v1/businesses/{businessId}/staff/{id}',
+          '/api/v1/businesses/{businessId}/hours',
+          '/api/v1/businesses/{businessId}/staff/{staffId}/hours',
+          '/api/v1/businesses/{businessId}/schedule-exceptions',
+          '/api/v1/businesses/{businessId}/schedule-exceptions/{id}',
         ]);
         expect(
-          response.body.paths['/api/v1/health/liveness'].get.responses['200']
-            .content['application/json'].schema,
+          response.body.paths['/api/v1/health/liveness'].get.responses['200'].content[
+            'application/json'
+          ].schema,
         ).toEqual({ $ref: '#/components/schemas/HealthResponseDto' });
         for (const status of ['200', '503']) {
           expect(
-            response.body.paths['/api/v1/health/readiness'].get.responses[
-              status
-            ].content['application/json'].schema,
+            response.body.paths['/api/v1/health/readiness'].get.responses[status].content[
+              'application/json'
+            ].schema,
           ).toEqual({
             $ref:
               status === '200'
@@ -36,18 +48,23 @@ describe('OpenAPI availability and schema', () => {
                 : '#/components/schemas/ApiErrorDto',
           });
         }
+        expect(response.body.components.schemas.HealthResponseDto.required).toEqual([
+          'data',
+          'meta',
+        ]);
+        expect(response.body.components.schemas.HealthDataDto.properties.status.enum).toEqual([
+          'ok',
+        ]);
+        expect(response.body.components.schemas.ApiErrorDetailsDto.required).toEqual([
+          'code',
+          'message',
+          'request_id',
+          'retryable',
+        ]);
         expect(
-          response.body.components.schemas.HealthResponseDto.required,
-        ).toEqual(['data', 'meta']);
-        expect(
-          response.body.components.schemas.HealthDataDto.properties.status.enum,
-        ).toEqual(['ok']);
-        expect(
-          response.body.components.schemas.ApiErrorDetailsDto.required,
-        ).toEqual(['code', 'message', 'request_id', 'retryable']);
-        expect(
-          response.body.paths['/api/v1/health/liveness'].get.responses['500']
-            .content['application/json'].schema,
+          response.body.paths['/api/v1/health/liveness'].get.responses['500'].content[
+            'application/json'
+          ].schema,
         ).toEqual({ $ref: '#/components/schemas/ApiErrorDto' });
       } finally {
         await app.close();
@@ -66,14 +83,10 @@ describe('OpenAPI availability and schema', () => {
         '/api/openapi.yaml',
         '/api/v1/_test/failure',
       ]) {
-        const response = await request(app.getHttpServer())
-          .get(path)
-          .expect(404);
+        const response = await request(app.getHttpServer()).get(path).expect(404);
         expect(response.body.error.code).toBe('NOT_FOUND');
       }
-      await request(app.getHttpServer())
-        .get('/api/v1/health/liveness')
-        .expect(200);
+      await request(app.getHttpServer()).get('/api/v1/health/liveness').expect(200);
     } finally {
       await app.close();
     }

@@ -22,10 +22,10 @@ token نشست ۳۲ بایت تصادفی است؛ فقط SHA256 در PG می‌
 
 migration قدیمی byte-identical است:
 
-| فایل | SHA256 |
-|---|---|
+| فایل                         | SHA256                                                             |
+| ---------------------------- | ------------------------------------------------------------------ |
 | 0000_database_foundation.sql | `2b1c8ea5b29b189685962ca26fb6bb06e2a4d6621e1b116721114b34aeedf78c` |
-| 0000_snapshot.json | `57d7151aeee6a5f486bbbc80f7e3f61fe9d0da7fd6fa5556f8b99b66d06d01c4` |
+| 0000_snapshot.json           | `57d7151aeee6a5f486bbbc80f7e3f61fe9d0da7fd6fa5556f8b99b66d06d01c4` |
 
 entry قبلی journal و timestamp/hash قبلی حفظ شدند و فقط entry جدید append شد؛ fixture تاریخی journal اسپرینت ۲ برای تست upgrade عمدی است.
 
@@ -43,16 +43,16 @@ PLAYWRIGHT_CHANNEL=chrome npm run check
 
 URL بالا فقط credential ساختگی محلی است؛ runner تست از `.env` توسعه fallback نمی‌گیرد. npm ci از lockfile نهایی موفق بود. دانلود اولیه بسته بزرگ Next/SWC با قطعی مواجه شد؛ tarballهای رسمی پس از کنترل SHA512 رسمی وارد cache npm شدند و نصب استاندارد، بدون force یا registry جایگزین کامل شد.
 
-| بررسی در check نهایی | نتیجه واقعی |
-|---|---|
-| build هر دو workspace | موفق؛ خروجی Nest و پنج route Next شامل not-found |
-| typecheck هر دو workspace | موفق؛ strict و noUncheckedIndexedAccess برقرار |
-| lint و format:check | موفق، بدون mutation؛ next-env.d.ts تولیدی از Prettier مستثناست |
-| unit backend | ۷۳ موفق |
-| unit frontend | ۲۰ موفق |
-| HTTP مستقل Nest | ۴۸ موفق |
-| integration PostgreSQL واقعی | ۲۳ موفق |
-| Playwright با Next production + Nest + PG | ۱۷ موفق |
+| بررسی در check نهایی                      | نتیجه واقعی                                                    |
+| ----------------------------------------- | -------------------------------------------------------------- |
+| build هر دو workspace                     | موفق؛ خروجی Nest و پنج route Next شامل not-found               |
+| typecheck هر دو workspace                 | موفق؛ strict و noUncheckedIndexedAccess برقرار                 |
+| lint و format:check                       | موفق، بدون mutation؛ next-env.d.ts تولیدی از Prettier مستثناست |
+| unit backend                              | ۷۳ موفق                                                        |
+| unit frontend                             | ۲۰ موفق                                                        |
+| HTTP مستقل Nest                           | ۴۸ موفق                                                        |
+| integration PostgreSQL واقعی              | ۲۳ موفق                                                        |
+| Playwright با Next production + Nest + PG | ۱۷ موفق                                                        |
 
 مجموع **۱۸۱ تست** در check نهایی عبور کردند. خروجی محلی `work/sprint-03-check.log` است؛ نتایج فایل‌های backend-check و browser-transport مربوط به مرحله‌های قبل‌اند و دوباره به مجموع اضافه نشدند.
 
@@ -70,16 +70,16 @@ runner مرورگر برای هر worker فقط DB UUID و پورت آزاد خ�
 
 ## معیارهای پذیرش
 
-| معیار | نتیجه / شاهد |
-|---|---|
-| S3-AC-01 | backend/frontend و lockfile واحد؛ hash قدیمی محفوظ و regression/upgrade واقعی موفق |
-| S3-AC-02 | source کامل رابط، inventory stateها، asset/token و کنترل prototype در سند فیگما |
-| S3-AC-03 | fixture مشخص، فیلتر/جستجو/empty/reset و محدودیت رزرو با تست مرورگر |
-| S3-AC-04 | فرم تا PG، reload، دو حساب و logout با مرورگر واقعی |
-| S3-AC-05 | transaction/unique/hash/session/rate چندنمونه‌ای با PG واقعی |
-| S3-AC-06 | cookie/proxy/CSRF/IP و خطا/داده حساس با HTTP و مرورگر |
-| S3-AC-07 | تصویر منبع و اجرا هم‌شرایط، overlay/diff و ledger؛ تغییرهای مجاز demo/email آشکارند |
-| S3-AC-08 | check کامل محلی و اجرای زنده موفق؛ remote CI جدید اجرا نشده |
+| معیار    | نتیجه / شاهد                                                                         |
+| -------- | ------------------------------------------------------------------------------------ |
+| S3-AC-01 | backend/frontend و lockfile واحد؛ hash قدیمی محفوظ و regression/upgrade واقعی موفق   |
+| S3-AC-02 | source کامل رابط، inventory stateها، asset/token و کنترل prototype در سند فیگما      |
+| S3-AC-03 | fixture مشخص، فیلتر/جستجو/empty/reset و محدودیت رزرو با تست مرورگر                   |
+| S3-AC-04 | فرم تا PG، reload، دو حساب و logout با مرورگر واقعی                                  |
+| S3-AC-05 | transaction/unique/hash/session/rate چندنمونه‌ای با PG واقعی                         |
+| S3-AC-06 | cookie/proxy/CSRF/IP و خطا/داده حساس با HTTP و مرورگر                                |
+| S3-AC-07 | تصویر منبع و اجرا هم‌شرایط، overlay/diff و ledger؛ تغییرهای مجاز demo/email آشکارند  |
+| S3-AC-08 | check کامل محلی و اجرای زنده موفق؛ remote CI جدید اجرا نشده                          |
 | S3-AC-09 | README، معماری، API/data/security، گزارش و درس فارسی؛ تغییر محلی و پیام commit آماده |
 
 ## Git و حد تحویل

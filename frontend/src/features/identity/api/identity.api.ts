@@ -1,8 +1,4 @@
-import {
-  apiRequest,
-  HttpFailure,
-  isRecord,
-} from '../../../lib/api/http-client';
+import { apiRequest, HttpFailure, isRecord } from '../../../lib/api/http-client';
 import type { Credentials, SessionUser } from '../model/identity.types';
 
 function parseUser(data: unknown): SessionUser {
@@ -32,9 +28,7 @@ export async function signIn(credentials: Credentials): Promise<SessionUser> {
     }),
   );
 }
-export async function currentUser(
-  signal?: AbortSignal,
-): Promise<SessionUser | null> {
+export async function currentUser(signal?: AbortSignal): Promise<SessionUser | null> {
   try {
     return parseUser(await apiRequest('/api/v1/me', signal ? { signal } : {}));
   } catch (error) {
@@ -47,6 +41,5 @@ export async function signOut(): Promise<void> {
     method: 'POST',
     body: {},
   });
-  if (!isRecord(data) || data.signed_out !== true)
-    throw new HttpFailure(502, 'INVALID_RESPONSE');
+  if (!isRecord(data) || data.signed_out !== true) throw new HttpFailure(502, 'INVALID_RESPONSE');
 }

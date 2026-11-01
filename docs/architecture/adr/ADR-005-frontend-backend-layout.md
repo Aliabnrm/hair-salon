@@ -32,16 +32,16 @@ HTTP → application service → domain و Port؛ adapter → Port و domain؛ M
 
 ابتدا انتقال ساختاری با ثابت نگه‌داشتن رفتار انجام و تمام تست‌های موجود واقعاً اجرا شود؛ سپس identity و frontend افزوده شوند. مسیرهای زیر باید کنترل شوند:
 
-| مورد | مبدأ/خطر | نتیجه لازم |
-|---|---|---|
-| workspace/lockfile | apps/api و linkهای lock | backend و frontend در همان lockfile، بدون ارتقای بی‌دلیل نسخه‌های موجود |
-| Compose در backend/package.json | ../../compose.yml | ../compose.yml |
-| README و commandهای CI | مسیرهای قبلی، build و cache | فرمان‌های ریشه همچنان delegate، مسیرهای جاری اصلاح، cache lockfile ریشه |
-| env runtime و CLI | URLهای module-relative | از backend/src/config یا dist/config، ../../.env همچنان صحیح است؛ replace کورکورانه نکن |
-| migration runner | از dist/database به ../../drizzle | این نسبت بعد انتقال هم صحیح است؛ SQL/journal/snapshot قبلی فقط جابه‌جا و byte-identical بمانند |
-| تست startup/migration | cwd و dist/main.js | اجرای child process از backend؛ نه ارجاع به apps/api یا خروجی build قدیمی |
-| داده ignored | env،dist و فایل شخصی احتمالی | بدون افشا یا حذف؛ env خصوصی هرگز stage/ثبت نشود؛ build تازه اجرا شود |
-| اسناد | مسیرهای تاریخی گزارش ۱/۲ | مسیر جاری در README/ساختار اصلاح؛ گزارش تاریخی با یادداشت انتقال، نه جعل نتیجه تست گذشته |
+| مورد                            | مبدأ/خطر                          | نتیجه لازم                                                                                     |
+| ------------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------- |
+| workspace/lockfile              | apps/api و linkهای lock           | backend و frontend در همان lockfile، بدون ارتقای بی‌دلیل نسخه‌های موجود                        |
+| Compose در backend/package.json | ../../compose.yml                 | ../compose.yml                                                                                 |
+| README و commandهای CI          | مسیرهای قبلی، build و cache       | فرمان‌های ریشه همچنان delegate، مسیرهای جاری اصلاح، cache lockfile ریشه                        |
+| env runtime و CLI               | URLهای module-relative            | از backend/src/config یا dist/config، ../../.env همچنان صحیح است؛ replace کورکورانه نکن        |
+| migration runner                | از dist/database به ../../drizzle | این نسبت بعد انتقال هم صحیح است؛ SQL/journal/snapshot قبلی فقط جابه‌جا و byte-identical بمانند |
+| تست startup/migration           | cwd و dist/main.js                | اجرای child process از backend؛ نه ارجاع به apps/api یا خروجی build قدیمی                      |
+| داده ignored                    | env،dist و فایل شخصی احتمالی      | بدون افشا یا حذف؛ env خصوصی هرگز stage/ثبت نشود؛ build تازه اجرا شود                           |
+| اسناد                           | مسیرهای تاریخی گزارش ۱/۲          | مسیر جاری در README/ساختار اصلاح؛ گزارش تاریخی با یادداشت انتقال، نه جعل نتیجه تست گذشته       |
 
 ## مرز اتصال مرورگر و API
 

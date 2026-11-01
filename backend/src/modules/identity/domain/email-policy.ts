@@ -17,9 +17,7 @@ export function normalizeEmail(input: string): string | undefined {
   const labels = domain.split('.');
   if (
     labels.length < 2 ||
-    labels.some(
-      (label) => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label),
-    )
+    labels.some((label) => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))
   )
     return undefined;
   return email;

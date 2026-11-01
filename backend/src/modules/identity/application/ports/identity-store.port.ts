@@ -9,9 +9,7 @@ export interface PasswordIdentity {
 }
 export abstract class IdentityStore {
   abstract register(email: string, passwordHash: string): Promise<void>;
-  abstract findPasswordIdentity(
-    email: string,
-  ): Promise<PasswordIdentity | undefined>;
+  abstract findPasswordIdentity(email: string): Promise<PasswordIdentity | undefined>;
   abstract createSession(
     userId: string,
     tokenHash: string,

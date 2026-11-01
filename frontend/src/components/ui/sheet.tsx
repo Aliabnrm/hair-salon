@@ -63,7 +63,10 @@ export function Sheet({
       <div className="pointer-events-none flex h-full items-end">
         <div className="sheet-panel pointer-events-auto relative flex max-h-[88%] w-full flex-col rounded-t-[1.75rem] bg-canvas shadow-2xl">
           <div className="flex items-center justify-between gap-3 px-5 pb-2 pt-3">
-            <h2 className="text-lg font-extrabold text-ink" id={titleId}>
+            <h2
+              className="text-lg font-extrabold text-ink"
+              id={titleId}
+            >
               {title}
             </h2>
             <button
@@ -76,11 +79,7 @@ export function Sheet({
             </button>
           </div>
           <div className="overflow-y-auto px-5 pb-5">{children}</div>
-          {footer && (
-            <div className="border-t border-line bg-surface px-5 py-4">
-              {footer}
-            </div>
-          )}
+          {footer && <div className="border-t border-line bg-surface px-5 py-4">{footer}</div>}
         </div>
       </div>
     </dialog>

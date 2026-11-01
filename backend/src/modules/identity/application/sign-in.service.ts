@@ -2,11 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InvalidCredentialsError } from '../domain/identity-errors.js';
 import { IdentityStore } from './ports/identity-store.port.js';
 import { PasswordHasher } from './ports/password-hasher.port.js';
-import {
-  createSessionToken,
-  hashSessionToken,
-  SESSION_LIFETIME_MS,
-} from './session-token.js';
+import { createSessionToken, hashSessionToken, SESSION_LIFETIME_MS } from './session-token.js';
 @Injectable()
 export class SignInService {
   constructor(

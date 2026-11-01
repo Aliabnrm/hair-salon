@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Get,
-  Req,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { Controller, Get, Req, ServiceUnavailableException } from '@nestjs/common';
 import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
@@ -26,11 +21,8 @@ export class HealthController {
     description: 'Database accepts a bounded SELECT 1.',
   })
   @ApiServiceUnavailableResponse({ type: ApiErrorDto })
-  async getReadiness(
-    @Req() request: RequestContext,
-  ): Promise<HealthResponseDto> {
-    if (!(await this.healthService.isReady()))
-      throw new ServiceUnavailableException();
+  async getReadiness(@Req() request: RequestContext): Promise<HealthResponseDto> {
+    if (!(await this.healthService.isReady())) throw new ServiceUnavailableException();
     return { data: { status: 'ok' }, meta: { request_id: request.requestId } };
   }
 

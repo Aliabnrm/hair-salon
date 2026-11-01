@@ -14,18 +14,18 @@
 
 Make route واقعی چندصفحه‌ای نداشت؛ stateهای App بین tab و screen جابه‌جا می‌شدند. routeهای محصول به شکل زیر تفکیک شدند:
 
-| route/بخش | منبع و state | نتیجه این اسپرینت |
-|---|---|---|
-| `/` | home/explore؛ هدر، hero، search؛ all/men/women؛ خدمت؛ ready/empty؛ شهر و محله | پیاده‌شده با همان ساختار، متن اصلی عنوان و داده‌های fixture؛ فیلتر ترکیبی واقعی محلی |
-| کارت‌ها | ۱۲ سالن در تهران/شیراز/اصفهان/مشهد؛ تصویر، نوع، محله، ساعت، قیمت شروع و زمان فرضی | همان سالن/تصویر/قیمت/ساعت؛ زمان فرضی با «داده نمایشی» جایگزین شد |
-| انتخاب مکان | sheet شهر/محله، draft و Apply، بستن/Escape و focus trap | پیاده‌شده؛ dialog بومی برای inert و گردش/بازگرداندن فوکوس |
-| loading/error کشف | request نمایشی با تأخیر ۶۵۰ms و خطای کنترل‌شده پنل | fixture محلی نیاز به شبکه ندارد؛ تأخیر/خطای ساختگی وارد محصول نشد؛ empty واقعی حفظ شد |
-| `/sign-in` و `/sign-up` | verify موبایل/کد با DEMO_CODE؛ صفحه ایمیل/رمز وجود نداشت | فرم ایمیل/رمز واقعی با tokenها و سبک همان فرم‌ها؛ تغییر مصوب روش ورود |
-| `/account` | حساب ناشناس یا شماره ظاهراً تأییدشده؛ ابزار نمونه و ورودی مدیریت سالن | کاربر واقعی /me، reload، خطا/retry، خروج؛ شماره/عضویت/سالن فرضی ندارد |
-| نوبت‌های من | ۳ رزرو اولیه، گذشته/آینده، لغو و جابه‌جایی | فقط توضیح روشن «رزرو هنوز فعال نیست»؛ badge و ticket ساختگی حذف شدند |
-| salon/schedule/review/success | خدمات/متخصص/درباره؛ روز/ساعت، تداخل، قیمت، نتیجه نامشخص، موفقیت | خارج محدوده؛ کلیک کارت توضیح نمونه‌بودن می‌دهد و رزرو جعلی نمی‌سازد |
-| BusinessApp | امروز، هفته، خدمات و بیشتر؛ وقت دستی/مسدودی و مدیریت نمایشی | خارج محدوده؛ ماژول یا route خالی ایجاد نشد |
-| aside و ابزار حساب | تم‌های پیشنهادی، simulation شبکه/تداخل/کندی/SMS و reset نمونه | کنترل بازبینی prototype؛ وارد UI عمومی نشد |
+| route/بخش                     | منبع و state                                                                      | نتیجه این اسپرینت                                                                     |
+| ----------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `/`                           | home/explore؛ هدر، hero، search؛ all/men/women؛ خدمت؛ ready/empty؛ شهر و محله     | پیاده‌شده با همان ساختار، متن اصلی عنوان و داده‌های fixture؛ فیلتر ترکیبی واقعی محلی  |
+| کارت‌ها                       | ۱۲ سالن در تهران/شیراز/اصفهان/مشهد؛ تصویر، نوع، محله، ساعت، قیمت شروع و زمان فرضی | همان سالن/تصویر/قیمت/ساعت؛ زمان فرضی با «داده نمایشی» جایگزین شد                      |
+| انتخاب مکان                   | sheet شهر/محله، draft و Apply، بستن/Escape و focus trap                           | پیاده‌شده؛ dialog بومی برای inert و گردش/بازگرداندن فوکوس                             |
+| loading/error کشف             | request نمایشی با تأخیر ۶۵۰ms و خطای کنترل‌شده پنل                                | fixture محلی نیاز به شبکه ندارد؛ تأخیر/خطای ساختگی وارد محصول نشد؛ empty واقعی حفظ شد |
+| `/sign-in` و `/sign-up`       | verify موبایل/کد با DEMO_CODE؛ صفحه ایمیل/رمز وجود نداشت                          | فرم ایمیل/رمز واقعی با tokenها و سبک همان فرم‌ها؛ تغییر مصوب روش ورود                 |
+| `/account`                    | حساب ناشناس یا شماره ظاهراً تأییدشده؛ ابزار نمونه و ورودی مدیریت سالن             | کاربر واقعی /me، reload، خطا/retry، خروج؛ شماره/عضویت/سالن فرضی ندارد                 |
+| نوبت‌های من                   | ۳ رزرو اولیه، گذشته/آینده، لغو و جابه‌جایی                                        | فقط توضیح روشن «رزرو هنوز فعال نیست»؛ badge و ticket ساختگی حذف شدند                  |
+| salon/schedule/review/success | خدمات/متخصص/درباره؛ روز/ساعت، تداخل، قیمت، نتیجه نامشخص، موفقیت                   | خارج محدوده؛ کلیک کارت توضیح نمونه‌بودن می‌دهد و رزرو جعلی نمی‌سازد                   |
+| BusinessApp                   | امروز، هفته، خدمات و بیشتر؛ وقت دستی/مسدودی و مدیریت نمایشی                       | خارج محدوده؛ ماژول یا route خالی ایجاد نشد                                            |
+| aside و ابزار حساب            | تم‌های پیشنهادی، simulation شبکه/تداخل/کندی/SMS و reset نمونه                     | کنترل بازبینی prototype؛ وارد UI عمومی نشد                                            |
 
 ## token و دارایی
 
@@ -39,28 +39,28 @@ Make route واقعی چندصفحه‌ای نداشت؛ stateهای App بین 
 
 کد دریافت‌شده Make در محیط محلی مستقل اجرا شد؛ منطق و classهای آن حفظ شدند. فقط bootstrap اجرای محلی، registration صریح sourceهای Tailwind و انتقال URL فونت/عکس به همان bytes محلی انجام شد. فایل خام و hash پیش از adaptation نگه داشته شده‌اند. این تصاویر baseline خود پیاده‌سازی نیستند؛ از App اصلی Make گرفته شده‌اند. ابزار رندر همان Chrome 156.0.8078.48، scale=1، ارتفاع ۹۰۰، فونت/داده/تم/state یکسان و reduced-motion بود.
 
-| viewport/state | مرجع از source Make | پیاده‌سازی |
-|---|---|---|
-| ۳۶۰×۹۰۰، ready/all | [reference](assets/sprint-03/reference-360.png) | [implementation](assets/sprint-03/implementation-360.png) |
-| ۳۹۰×۹۰۰، ready/all | [reference](assets/sprint-03/reference-390.png) | [implementation](assets/sprint-03/implementation-390.png) |
-| ۴۳۰×۹۰۰، ready/all | [reference](assets/sprint-03/reference-430.png) | [implementation](assets/sprint-03/implementation-430.png) |
-| ۱۴۴۰×۹۰۰، product crop ۸۳۲×۸۳۶ | [reference](assets/sprint-03/reference-1440.png) | [implementation](assets/sprint-03/implementation-1440.png) |
-| ۳۹۰، بانوان+رنگ مو، ۲ نتیجه | [reference](assets/sprint-03/reference-filtered-390.png) | [implementation](assets/sprint-03/implementation-filtered-390.png) |
-| ۳۹۰، query ناموجود | [reference](assets/sprint-03/reference-empty-390.png) | [implementation](assets/sprint-03/implementation-empty-390.png) |
-| ۳۹۰، انتخاب شهر/محله | [reference](assets/sprint-03/reference-location-390.png) | [implementation](assets/sprint-03/implementation-location-390.png) |
+| viewport/state                 | مرجع از source Make                                      | پیاده‌سازی                                                         |
+| ------------------------------ | -------------------------------------------------------- | ------------------------------------------------------------------ |
+| ۳۶۰×۹۰۰، ready/all             | [reference](assets/sprint-03/reference-360.png)          | [implementation](assets/sprint-03/implementation-360.png)          |
+| ۳۹۰×۹۰۰، ready/all             | [reference](assets/sprint-03/reference-390.png)          | [implementation](assets/sprint-03/implementation-390.png)          |
+| ۴۳۰×۹۰۰، ready/all             | [reference](assets/sprint-03/reference-430.png)          | [implementation](assets/sprint-03/implementation-430.png)          |
+| ۱۴۴۰×۹۰۰، product crop ۸۳۲×۸۳۶ | [reference](assets/sprint-03/reference-1440.png)         | [implementation](assets/sprint-03/implementation-1440.png)         |
+| ۳۹۰، بانوان+رنگ مو، ۲ نتیجه    | [reference](assets/sprint-03/reference-filtered-390.png) | [implementation](assets/sprint-03/implementation-filtered-390.png) |
+| ۳۹۰، query ناموجود             | [reference](assets/sprint-03/reference-empty-390.png)    | [implementation](assets/sprint-03/implementation-empty-390.png)    |
+| ۳۹۰، انتخاب شهر/محله           | [reference](assets/sprint-03/reference-location-390.png) | [implementation](assets/sprint-03/implementation-location-390.png) |
 
 [overlay با نسبت ۵۰٪](assets/sprint-03/overlay-390.png)، [diff بدون حذف پیکسل متفاوت](assets/sprint-03/diff-390.png) و [اندازه/مقایسه ناحیه‌ها](assets/sprint-03/visual-measurements.json) نگه داشته شدند. default/filtered/empty/location به‌ترتیب ۷۸۹۵/۷۷۵۲/۴۸۷۲/۳۹۴۶ پیکسل متفاوت دارند؛ متن مجاز، badge و برچسب نمونه بخش اصلی تفاوت‌اند. این عددها به‌عنوان gate پنهان یا threshold پذیرش استفاده نشدند. عنوان hero و نتیجه در تمام عرض‌های مقایسه‌شده صفر پیکسل اختلاف داشتند؛ جای عمودی ناحیه‌های هدر، جستجو، tabs، فیلتر، عنوان و nav برابر بود. متن demo در عرض ۳۶۰ نیز همان تعداد خط منبع دارد.
 
 ## ledger اختلاف و تصمیم
 
-| بخش | انتظار منبع / مشاهده | اصلاح یا علت مجاز |
-|---|---|---|
-| description قهرمان | ادعای «زمان‌های آزاد واقعی» | با دستور fixture: سالن/قیمت/ساعت نمایشی و رزرو غیرفعال؛ شکست خط و ارتفاع منبع حفظ شد |
-| footer کارت | زمان آزاد امروز/فردای شبیه‌سازی‌شده | با «داده نمایشی» عوض شد؛ بقیه layout/قیمت/crop همان منبع است |
-| nav | badge سه نوبت | حذف داده شخصی ساختگی؛ نوبت‌ها توضیح قابلیت غیرفعال دارند |
-| desktop | aside بازبینی کنار محصول | حذف کنترل prototype و وسط‌چین‌کردن همان ناحیه محصول؛ crop مقایسه اندازه یکسان دارد |
-| sheet | dialog سفارشی فقط با aria-modal | dialog بومی، Tab loop، Escape و بازگرداندن فوکوس؛ ظاهر sheet حفظ شد و inert واقعی اضافه شد |
-| آیکن/shadow | SVG inline در Make و SVG exportشده به mask در محصول | glyph/اندازه/رنگ یکسان؛ تفاوت ریز raster/rounding دیده شد. مثلاً دکمه فعال «همه» فقط ۳۸ پیکسل با حداکثر اختلاف ۱ از ۲۵۵ داشت؛ سبک computed یکسان بود |
-| ورود/ثبت‌نام/حساب | OTP و نشست درون state نمونه | ایمیل/رمز و نشست واقعی، مطابق دستور کارفرما؛ [ورود](assets/sprint-03/sign-in-390.png) و [ثبت‌نام](assets/sprint-03/sign-up-390.png) برای مرور، نه ادعای pixel parity صفحه ناموجود |
+| بخش                | انتظار منبع / مشاهده                                | اصلاح یا علت مجاز                                                                                                                                                                 |
+| ------------------ | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| description قهرمان | ادعای «زمان‌های آزاد واقعی»                         | با دستور fixture: سالن/قیمت/ساعت نمایشی و رزرو غیرفعال؛ شکست خط و ارتفاع منبع حفظ شد                                                                                              |
+| footer کارت        | زمان آزاد امروز/فردای شبیه‌سازی‌شده                 | با «داده نمایشی» عوض شد؛ بقیه layout/قیمت/crop همان منبع است                                                                                                                      |
+| nav                | badge سه نوبت                                       | حذف داده شخصی ساختگی؛ نوبت‌ها توضیح قابلیت غیرفعال دارند                                                                                                                          |
+| desktop            | aside بازبینی کنار محصول                            | حذف کنترل prototype و وسط‌چین‌کردن همان ناحیه محصول؛ crop مقایسه اندازه یکسان دارد                                                                                                |
+| sheet              | dialog سفارشی فقط با aria-modal                     | dialog بومی، Tab loop، Escape و بازگرداندن فوکوس؛ ظاهر sheet حفظ شد و inert واقعی اضافه شد                                                                                        |
+| آیکن/shadow        | SVG inline در Make و SVG exportشده به mask در محصول | glyph/اندازه/رنگ یکسان؛ تفاوت ریز raster/rounding دیده شد. مثلاً دکمه فعال «همه» فقط ۳۸ پیکسل با حداکثر اختلاف ۱ از ۲۵۵ داشت؛ سبک computed یکسان بود                              |
+| ورود/ثبت‌نام/حساب  | OTP و نشست درون state نمونه                         | ایمیل/رمز و نشست واقعی، مطابق دستور کارفرما؛ [ورود](assets/sprint-03/sign-in-390.png) و [ثبت‌نام](assets/sprint-03/sign-up-390.png) برای مرور، نه ادعای pixel parity صفحه ناموجود |
 
 داخل محدوده کشف، اختلاف شناخته‌شده حل‌نشده در layout/asset/token باقی نماند؛ تفاوت‌های بالا آگاهانه و مستندند. browser test عرض‌های ۳۲۰/۳۶۰/۳۹۰/۴۳۰/۷۶۸/۱۰۲۴/۱۴۴۰، RTL، نبود overflow، بارگیری تصویر و دسترسی عمل اصلی با صفحه‌کلید را بررسی می‌کند. کیفیت روی موبایل فیزیکی، Safari/Firefox یا شرایط اینترنت ایران هنوز آزموده نشده است.

@@ -11,15 +11,12 @@ import { test as base, expect } from '@playwright/test';
 import { createTestDatabase } from '../../../backend/test/helpers/test-database';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
-const backendDirectory = fileURLToPath(
-  new URL('../../../backend/', import.meta.url),
-);
+const backendDirectory = fileURLToPath(new URL('../../../backend/', import.meta.url));
 const frontendDirectory = fileURLToPath(new URL('../../', import.meta.url));
-const nextExecutable = createRequire(
-  new URL('../../package.json', import.meta.url),
-).resolve('next/dist/bin/next');
-const pause = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
+const nextExecutable = createRequire(new URL('../../package.json', import.meta.url)).resolve(
+  'next/dist/bin/next',
+);
+const pause = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 interface OwnedProcess {
   child: ChildProcess;
   output(): string;
@@ -37,19 +34,14 @@ async function unusedPort(): Promise<number> {
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
   const address = server.address();
-  if (!address || typeof address === 'string')
-    throw new Error('Test port allocation failed.');
+  if (!address || typeof address === 'string') throw new Error('Test port allocation failed.');
   const port = address.port;
   await new Promise<void>((resolve, reject) =>
     server.close((error) => (error ? reject(error) : resolve())),
   );
   return port;
 }
-function start(
-  args: string[],
-  cwd: string,
-  env: NodeJS.ProcessEnv,
-): OwnedProcess {
+function start(args: string[], cwd: string, env: NodeJS.ProcessEnv): OwnedProcess {
   const child = spawn(process.execPath, args, {
     cwd,
     env,
@@ -70,8 +62,7 @@ function start(
 }
 async function stop(owned: OwnedProcess | undefined): Promise<void> {
   const child = owned?.child;
-  if (!child?.pid || child.exitCode !== null || child.signalCode !== null)
-    return;
+  if (!child?.pid || child.exitCode !== null || child.signalCode !== null) return;
   const pid = child.pid;
   const exited = once(child, 'close').catch(() => undefined);
   const signal = (value: NodeJS.Signals) => {
@@ -79,19 +70,11 @@ async function stop(owned: OwnedProcess | undefined): Promise<void> {
       if (process.platform === 'win32') child.kill(value);
       else globalThis.process.kill(-pid, value);
     } catch (error) {
-      if (!(
-        error instanceof Error &&
-        'code' in error &&
-        error.code === 'ESRCH'
-      ))
-        throw error;
+      if (!(error instanceof Error && 'code' in error && error.code === 'ESRCH')) throw error;
     }
   };
   signal('SIGTERM');
-  const graceful = await Promise.race([
-    exited.then(() => true),
-    pause(3000).then(() => false),
-  ]);
+  const graceful = await Promise.race([exited.then(() => true), pause(3000).then(() => false)]);
   if (!graceful) {
     signal('SIGKILL');
     await exited;
@@ -103,8 +86,7 @@ async function finished(owned: OwnedProcess, timeout: number): Promise<void> {
   }, timeout);
   try {
     const [code] = await once(owned.child, 'close');
-    if (code !== 0)
-      throw new Error(`Owned build/migration failed:\n${owned.output()}`);
+    if (code !== 0) throw new Error(`Owned build/migration failed:\n${owned.output()}`);
   } finally {
     clearTimeout(timer);
   }
@@ -125,8 +107,7 @@ async function ready(owned: OwnedProcess, url: string): Promise<void> {
 export const test = base.extend<object, { stack: TestStack }>({
   stack: [
     async ({ browserName }, use) => {
-      if (browserName !== 'chromium')
-        throw new Error('This transport fixture requires Chromium.');
+      if (browserName !== 'chromium') throw new Error('This transport fixture requires Chromium.');
       const database = await createTestDatabase();
       let backend: OwnedProcess | undefined;
       let frontend: OwnedProcess | undefined;
@@ -155,11 +136,7 @@ export const test = base.extend<object, { stack: TestStack }>({
           AUTH_ALLOWED_ORIGINS: origin,
           AUTH_RATE_LIMIT_SECRET: rateLimitSecret,
         };
-        migration = start(
-          ['dist/database/migrate.js'],
-          backendDirectory,
-          backendEnvironment,
-        );
+        migration = start(['dist/database/migrate.js'], backendDirectory, backendEnvironment);
         await finished(migration, 15_000);
         backend = start(['dist/main.js'], backendDirectory, backendEnvironment);
         await ready(backend, `${backendOrigin}/api/v1/health/readiness`);
@@ -187,27 +164,12 @@ export const test = base.extend<object, { stack: TestStack }>({
           });
         }
         // Resolve only this workspace's declared dependencies without copying private env or build output.
-        await symlink(
-          `${frontendDirectory}node_modules`,
-          `${ownedFrontend}/node_modules`,
-          'dir',
-        );
+        await symlink(`${frontendDirectory}node_modules`, `${ownedFrontend}/node_modules`, 'dir');
         // Rewrites bind the destination at build time. This owned build targets this test's fresh API port.
-        build = start(
-          [nextExecutable, 'build', '--webpack'],
-          ownedFrontend,
-          frontendEnvironment,
-        );
+        build = start([nextExecutable, 'build', '--webpack'], ownedFrontend, frontendEnvironment);
         await finished(build, 90_000);
         frontend = start(
-          [
-            nextExecutable,
-            'start',
-            '--hostname',
-            '127.0.0.1',
-            '--port',
-            String(frontendPort),
-          ],
+          [nextExecutable, 'start', '--hostname', '127.0.0.1', '--port', String(frontendPort)],
           ownedFrontend,
           frontendEnvironment,
         );
@@ -249,8 +211,7 @@ export const test = base.extend<object, { stack: TestStack }>({
           }
         }
       }
-      if (failures.length)
-        throw new AggregateError(failures, 'The owned test stack failed.');
+      if (failures.length) throw new AggregateError(failures, 'The owned test stack failed.');
     },
     { scope: 'worker', timeout: 150_000 },
   ],

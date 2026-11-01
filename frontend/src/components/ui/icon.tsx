@@ -36,6 +36,10 @@ export function Icon({
     '--icon-url': `url('/assets/icons/${name}.svg')`,
   };
   return (
-    <span aria-hidden="true" className={`icon ${className}`} style={style} />
+    <span
+      aria-hidden="true"
+      className={`icon ${className}`}
+      style={style}
+    />
   );
 }

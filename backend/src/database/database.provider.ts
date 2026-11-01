@@ -1,8 +1,4 @@
-import {
-  ConsoleLogger,
-  Injectable,
-  type OnApplicationShutdown,
-} from '@nestjs/common';
+import { ConsoleLogger, Injectable, type OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';

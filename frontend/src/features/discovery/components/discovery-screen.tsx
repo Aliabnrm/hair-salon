@@ -29,9 +29,17 @@ export function DiscoveryScreen() {
             onClick={() => setLocationOpen(true)}
             type="button"
           >
-            <Icon className="text-petrol" name="pin" size={18} />
+            <Icon
+              className="text-petrol"
+              name="pin"
+              size={18}
+            />
             <span className="truncate">{locationLabel}</span>
-            <Icon className="text-muted" name="chevron-down" size={16} />
+            <Icon
+              className="text-muted"
+              name="chevron-down"
+              size={16}
+            />
           </button>
         </div>
         <h1 className="mt-7 text-[1.75rem] font-extrabold leading-[1.5] text-ink">

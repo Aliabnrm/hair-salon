@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Pool } from 'pg';
 import request from 'supertest';
-import { beforeAll, beforeEach, afterAll, describe, it, expect } from 'vitest';
+import { beforeAll, beforeEach, afterAll, describe, it, expect, vi } from 'vitest';
 import { createTestDatabase } from './helpers/test-database.js';
 import { createTestApplication } from './helpers/create-test-application.js';
 import { runMigration } from './helpers/run-migration.js';
@@ -36,6 +36,20 @@ describe('salon management with password sessions against PostgreSQL', () => {
   afterAll(async () => {
     await fixture?.app.close();
     await pool?.end();
+    // pg-pool can finish end() before PostgreSQL observes every socket closing.
+    // Do not force-drop this owned DB while those clients still receive events.
+    if (target) {
+      await vi.waitFor(
+        async () => {
+          const result = await target.admin.query<{ count: number }>(
+            'SELECT count(*)::int AS count FROM pg_stat_activity WHERE datname=$1',
+            [target.name],
+          );
+          expect(result.rows[0]?.count).toBe(0);
+        },
+        { timeout: 5_000, interval: 50 },
+      );
+    }
     await target?.close();
   });
   function get(path: string, session: string) {

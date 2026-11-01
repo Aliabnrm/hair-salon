@@ -69,7 +69,7 @@ export function BusinessFormFields({
                   aria-invalid={fields.audience ? true : undefined}
                   className="peer absolute inset-0 size-full cursor-pointer opacity-0"
                 />
-                <span className="flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-muted bg-surface px-3 text-base text-ink-soft transition-colors peer-checked:border-petrol peer-checked:bg-petrol-soft peer-checked:font-bold peer-checked:text-petrol-deep peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-info peer-disabled:opacity-70">
+                <span className="flex min-h-14 flex-wrap items-center justify-center gap-2 rounded-2xl border border-muted bg-surface px-3 text-base text-ink-soft transition-colors peer-checked:border-petrol peer-checked:bg-petrol-soft peer-checked:font-bold peer-checked:text-petrol-deep peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-info peer-disabled:opacity-70">
                   {form.audience === audience && (
                     <Icon
                       name="check"

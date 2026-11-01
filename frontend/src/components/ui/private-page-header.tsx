@@ -15,7 +15,7 @@ export function PrivatePageHeader({
 }) {
   return (
     <header className="bg-petrol-deep px-5 pb-6 pt-[calc(1.25rem+env(safe-area-inset-top))] text-white sm:px-6">
-      <div className="mb-5 flex min-h-11 items-center justify-between gap-3">
+      <div className="mb-5 flex min-h-11 flex-wrap items-center justify-between gap-3">
         <span className="inline-flex items-center gap-2.5 font-bold">
           <span className="grid size-9 place-items-center rounded-xl bg-surface">
             <img

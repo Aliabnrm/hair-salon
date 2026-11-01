@@ -96,13 +96,26 @@ test('real private account and four management routes at mobile and desktop widt
     await page.setViewportSize({ width: 320, height: 900 });
     await page.evaluate(async () => {
       document.documentElement.style.fontSize = '200%';
+      document.querySelector<HTMLElement>('main')!.style.scrollbarGutter = 'stable';
       await document.fonts.ready;
       await new Promise(requestAnimationFrame);
       await new Promise(requestAnimationFrame);
     });
-    expect(
-      await page.locator('main').evaluate((main) => main.scrollWidth <= main.clientWidth),
-    ).toBe(true);
+    const reflow = await page.locator('main').evaluate((main) => {
+      const bounds = main.getBoundingClientRect();
+      return {
+        fits: main.scrollWidth <= main.clientWidth,
+        overflow: [...main.querySelectorAll<HTMLElement>('*')]
+          .filter((element) => {
+            // The management tabs intentionally scroll inside their own navigation.
+            if (element.closest('nav')) return false;
+            const box = element.getBoundingClientRect();
+            return box.width > 0 && (box.left < bounds.left || box.right > bounds.right);
+          })
+          .map((element) => ({ tag: element.tagName, classes: element.className })),
+      };
+    });
+    expect(reflow.fits, JSON.stringify(reflow.overflow)).toBe(true);
     const phone = page.getByLabel('موبایل عمومی سالن (اختیاری)');
     await phone.focus();
     const refresh = page.getByRole('button', { name: 'بارگذاری نسخه تازه', exact: true });

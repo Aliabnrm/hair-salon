@@ -5,7 +5,13 @@ import { PostgresPublicationStore } from './infrastructure/persistence/postgres-
 import { PostgresPublicCatalogStore } from './infrastructure/persistence/postgres-public-catalog-store.js';
 import { PublicationController } from './presentation/http/publication.controller.js';
 import { PublicCatalogController } from './presentation/http/public-catalog.controller.js';
-import { Module } from '@nestjs/common';
+import { ConsoleLogger, Module } from '@nestjs/common';
+import { AvailabilityService } from './application/availability/availability.service.js';
+import { AvailabilityReader } from './application/ports/availability-reader.js';
+import { Clock } from './application/ports/clock.js';
+import { SystemClock } from './infrastructure/time/system-clock.js';
+import { PostgresAvailabilityReader } from './infrastructure/persistence/postgres-availability-reader.js';
+import { AvailabilityController } from './presentation/http/availability.controller.js';
 import { DatabaseModule } from '../../database/database.module.js';
 import { IdentityModule } from '../identity/public.js';
 import {
@@ -32,6 +38,7 @@ import { ScheduleExceptionsController } from './presentation/http/schedule-excep
 @Module({
   imports: [DatabaseModule, IdentityModule],
   controllers: [
+    AvailabilityController,
     PublicationController,
     PublicCatalogController,
     BusinessesController,
@@ -41,6 +48,13 @@ import { ScheduleExceptionsController } from './presentation/http/schedule-excep
     ScheduleExceptionsController,
   ],
   providers: [
+    {
+      provide: ConsoleLogger,
+      useFactory: () => new ConsoleLogger('SalonManagement', { json: true }),
+    },
+    AvailabilityService,
+    { provide: AvailabilityReader, useClass: PostgresAvailabilityReader },
+    { provide: Clock, useClass: SystemClock },
     PublicCatalogService,
     PublicationService,
     { provide: PublicationStore, useClass: PostgresPublicationStore },

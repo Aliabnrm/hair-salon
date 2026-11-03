@@ -24,6 +24,7 @@ describe('OpenAPI availability and schema', () => {
             '/api/v1/catalog/locations',
             '/api/v1/catalog/salons',
             '/api/v1/catalog/salons/{businessId}',
+            '/api/v1/catalog/salons/{businessId}/availability',
             '/api/v1/health/readiness',
             '/api/v1/health/liveness',
             '/api/v1/auth/register',

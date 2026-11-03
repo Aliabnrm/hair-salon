@@ -104,9 +104,10 @@ async function ready(owned: OwnedProcess, url: string): Promise<void> {
   }
   throw new Error(`Owned test server was not ready:\n${owned.output()}`);
 }
-export const test = base.extend<object, { stack: TestStack }>({
+export const test = base.extend<object, { stack: TestStack; availabilityNow: string | undefined }>({
+  availabilityNow: [undefined, { scope: 'worker', option: true }],
   stack: [
-    async ({ browserName }, use) => {
+    async ({ browserName, availabilityNow }, use) => {
       if (browserName !== 'chromium') throw new Error('This transport fixture requires Chromium.');
       const database = await createTestDatabase();
       let backend: OwnedProcess | undefined;
@@ -135,10 +136,15 @@ export const test = base.extend<object, { stack: TestStack }>({
           PORT: String(backendPort),
           AUTH_ALLOWED_ORIGINS: origin,
           AUTH_RATE_LIMIT_SECRET: rateLimitSecret,
+          ...(availabilityNow ? { AVAILABILITY_TEST_NOW: availabilityNow } : {}),
         };
         migration = start(['dist/database/migrate.js'], backendDirectory, backendEnvironment);
         await finished(migration, 15_000);
-        backend = start(['dist/main.js'], backendDirectory, backendEnvironment);
+        backend = start(
+          [availabilityNow ? 'test/fixtures/availability-browser-api.mjs' : 'dist/main.js'],
+          backendDirectory,
+          backendEnvironment,
+        );
         await ready(backend, `${backendOrigin}/api/v1/health/readiness`);
         const frontendEnvironment: NodeJS.ProcessEnv = {
           ...system,

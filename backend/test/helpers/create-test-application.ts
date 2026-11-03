@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module.js';
 import { configureApplication } from '../../src/app.setup.js';
+import { Clock } from '../../src/modules/salon-management/application/ports/clock.js';
 import type { Environment, NodeEnvironment } from '../../src/config/environment.js';
 
 class RecordingLogger extends ConsoleLogger {
@@ -23,6 +24,7 @@ export async function createTestApplication(
   environment: NodeEnvironment = 'test',
   controllers: Type<unknown>[] = [],
   databaseUrl = 'postgresql://unused:unused@127.0.0.1:1/unused_test',
+  clock?: Clock,
 ): Promise<{ app: INestApplication; logger: RecordingLogger }> {
   const logger = new RecordingLogger();
   const config = new ConfigService<Environment, true>({
@@ -33,15 +35,16 @@ export async function createTestApplication(
     AUTH_ALLOWED_ORIGINS: ['http://localhost:3000'],
     AUTH_RATE_LIMIT_SECRET: 'test_only_auth_secret_never_use_in_production',
   });
-  const module = await Test.createTestingModule({
+  const builder = Test.createTestingModule({
     imports: [AppModule],
     controllers,
   })
     .overrideProvider(ConsoleLogger)
     .useValue(logger)
     .overrideProvider(ConfigService)
-    .useValue(config)
-    .compile();
+    .useValue(config);
+  if (clock) builder.overrideProvider(Clock).useValue(clock);
+  const module = await builder.compile();
   const app = module.createNestApplication<NestExpressApplication>({
     logger: false,
   });

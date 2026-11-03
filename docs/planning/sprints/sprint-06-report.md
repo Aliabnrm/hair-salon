@@ -1,6 +1,6 @@
 # گزارش اجرای اسپرینت۶ — انتخاب خدمت و زمان‌های پیشنهادی
 
-وضعیت: اجرا و بررسی محلی کامل؛ ۳۰۵ تست موفق.
+وضعیت: اجرا و بررسی محلی کامل؛ ۳۰۶ تست موفق.
 
 تاریخ اجرا: ۲۰۲۶-۱۱-۰۳؛ محل: `/Users/a.abnar/Desktop/hair-salon`. مبنای کد `308bf67` پس از ادغام PR #6 در dev؛ شاخه اجرای محلی `feat/sprint-06-availability`.
 
@@ -25,7 +25,7 @@
 
 محیط واقعی: macOS/Node24.22.2، pnpm12.16.1، PostgreSQL17.11 میزبان و Chrome نصب‌شده از طریق `PLAYWRIGHT_CHANNEL=chrome`. URL اختصاصی تست از env خصوصی خوانده شد و در خروجی/سند منتشر نشده است. fixtureها DB UUID مستقل، API واقعی و کپی مستقل build فرانت با مقصد API همان fixture دارند.
 
-`pnpm install --frozen-lockfile` موفق بود؛ lockfile همسان ماند. فرمان نهایی `pnpm run check` با PostgreSQL و Chrome اجرا شد؛ خروجی آخر در `work/sprint-06-run-check.log` است. فرمان با exit code صفر تمام شد؛ مجموع۳۰۵تست موفق و هیچ skipped/failed در اجرای نهایی نبود. پس از آن فقط اسناد نتیجه/وضعیت تکمیل و format:check دوباره اجرا شد.
+`pnpm install --frozen-lockfile` موفق بود؛ lockfile همسان ماند. فرمان نهایی `pnpm run check` با PostgreSQL و Chrome اجرا شد؛ خروجی آخر در `work/sprint-06-run-check.log` است. فرمان با exit code صفر تمام شد؛ مجموع۳۰۶تست موفق و هیچ skipped/failed در اجرای نهایی نبود. پس از آن فقط اسناد نتیجه/وضعیت تکمیل و format:check دوباره اجرا شد.
 
 | بررسی                                                | نتیجه ثبت‌شده                         |
 | ---------------------------------------------------- | ------------------------------------- |
@@ -34,7 +34,7 @@
 | unit backend                                         | ۱۱۱ موفق                              |
 | unit frontend                                        | ۴۰ موفق                               |
 | HTTP/Nest/OpenAPI                                    | ۵۵ موفق                               |
-| integration PostgreSQL واقعی                         | ۶۴ موفق                               |
+| integration PostgreSQL واقعی                         | ۶۵ موفق                               |
 | مرورگر واقعی                                         | ۳۵ موفق با Next/Nest/PostgreSQL واقعی |
 
 تست‌های اضافه‌شده۶، مرز بافر/استراحت/مجاورت/نیمه‌باز، exact۶۰دقیقه، افق،۲۴:۰۰، any/count و ترتیب ورودی، busy و DST تاریخی، query تزریقی/تکراری، tenant/متخصص مخفی، تعطیلی/override/deleted، عدم write محصول، quota و خرابی واقعی DB را پوشش می‌دهند. تست race با قفل جدول تست، Reader را هنگام commit تغییر مدت و توقف انتشار نگه می‌دارد؛ پاسخ قدیمی منسجم یا404 مجاز و درخواست بعد commit404 الزامی است.
@@ -49,6 +49,12 @@
 
 اجرای اول مرورگر به labelهای wrapشده و انتخاب role=alert عمومیِ شامل announcer خود Next برخورد کرد؛ label صریح و locator مخصوص alert محصول اصلاح شدند. assertion تاریخ نهایی باید منتظر پاسخ همان تاریخ باشد؛ assertion فوری، slot روز قبلی را قبل از اتمام انتقال می‌دید. آزمون اکنون تاریخ UTC slot تازه را صریح انتظار می‌کشد. full check یک وابستگی ConsoleLogger ثبت‌نشده را هم پیدا کرد؛ provider محلی feature اضافه و boot واقعی دوباره بررسی شد. نتیجه نهایی فقط از اجرای کامل پس از این اصلاح‌ها گرفته می‌شود.
 
+## اصلاح CI هنگام انتقال به GitHub
+
+اجرای اول [PR #8](https://github.com/Aliabnrm/hair-salon/pull/8) در job کیفیت پس از موفقیت۶۴تست PostgreSQL، با خطای خارج از assertion به کد `57P01` شکست خورد؛ Docker smoke همان اجرا موفق بود. پاک‌سازی DB موقت با `DROP DATABASE ... WITH (FORCE)` می‌توانست قبل از مشاهده بسته‌شدن socket در PostgreSQL، اتصال در حال پایان را قطع کند؛ موفقیت محلی قبلی این race را رد نمی‌کرد.
+
+helper مشترک `backend/test/helpers/test-database.ts` اکنون با deadline پنج‌ثانیه، نبود اتصال به همان DB تولیدشده را از `pg_stat_activity` بررسی می‌کند و سپس بدون FORCE حذف می‌کند. اتصال باقی‌مانده باعث شکست صریح cleanup می‌شود؛ خطا نادیده گرفته نمی‌شود و guard مقصد محلی تست حفظ شده است. تست واقعی جدید در `backend/test/test-database.integration-spec.ts` ثابت می‌کند client موجود هنگام آغاز cleanup هنوز query موفق دارد و پس از disconnect، DB واقعاً حذف شده است. بررسی متمرکز migration و cleanup،۷تست موفق داشت. پس از اصلاح، `pnpm run check` کامل دوباره با exit code صفر و۳۰۶تست موفق شامل۶۵تست PostgreSQL و۳۵تست مرورگر تمام شد؛ جدول این گزارش نتیجه همین اجرای تازه است. پس از ثبت نتیجه فقط format:check و diff check تکرار شدند.
+
 ## دیتابیس و عملکرد
 
 migration جدید، تغییر schema/SQL migrationهای0000..0004، reset/seed توسعه و write داده محصول انجام نشد. تست‌های تازه migration از صفر و rerun را اجرا کردند؛ تست‌های موجود upgrade داده‌دار/قیود هم در check حفظ شدند. چهارچوب موجود test DB، teardown processها/Pool و حذف کپی موقت frontend را انجام می‌دهد؛ processهای توسعه قبلی روی۳۰۰۰/۳۰۰۱ مالک این تست نبودند و متوقف نشدند.
@@ -61,7 +67,7 @@ migration جدید، تغییر schema/SQL migrationهای0000..0004، reset/see
 
 جهت import، تکرار قواعد، ورودی/خروجی allowlist، خطای بلعیده‌شده، راز/PII، timeout، نیمه‌شب/DST و state کهنه مرور شدند. Domain وابستگی Nest/ORM/UI ندارد؛ Port برای مرز واقعی است. I/O شکست‌خورده، موفقیت یا empty تلقی نمی‌شود. رزرو اتمیک، اشغال واقعی، SMS/auth تازه و اسپرینت۷ بیرون تحویل‌اند.
 
-منابع واقعاً خوانده‌شده و محدودیت دریافت منابع در [منابع۶](../../references/sprint-06-engineering-sources.md) آمده‌اند. CI remote و rebuild Docker نسخه۶ انجام نشده‌اند؛ ادعای Linux، مرورگر دیگر، آزمون بار production یا اجرای Compose تازه نداریم.
+منابع واقعاً خوانده‌شده و محدودیت دریافت منابع در [منابع۶](../../references/sprint-06-engineering-sources.md) آمده‌اند. در تحویل محلی اولیه، CI remote و rebuild Docker نسخه۶ انجام نشده بودند؛ هنگام انتقال، Docker smoke در اجرای اول PR #8 موفق شد و شکست quality و اصلاح آن در بخش CI ثبت شد. نتیجه CI آخرین commit در همان PR مرجع انتقال است؛ آزمون بار production یا اجرای محلی Compose تازه ادعا نشده است.
 
 وضعیت Git هنگام تحویل پیاده‌سازی: dev با pull --ff-only به‌روز و سپس شاخه مستقل از درخت پاک ساخته شد. در آن نقطه، تغییرها local و unstaged بودند و commit/push/PR/merge/deploy انجام نشده بود. در درخواست بعدی، کارفرما صریحاً ثبت، push و ادغام همین اسپرینت را ابتدا در dev و سپس main خواست؛ این انتقال از مسیر دو PR و پس از CI انجام می‌شود. وضعیت نهایی انتقال در PRهای GitHub مرجع است. `git diff --check` بدون خطا بود. متن‌های پیشنهادی commit بر اساس دسته‌بندی واقعی:
 

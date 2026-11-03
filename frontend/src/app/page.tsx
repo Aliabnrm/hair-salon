@@ -1,6 +1,18 @@
-// Design implementation is gated on the full source of the confirmed Figma Make.
-// This nonvisual route only allows the independent Next/API proxy to be built and tested.
+import { Suspense } from 'react';
 import { DiscoveryScreen } from '../features/discovery';
 export default function HomePage() {
-  return <DiscoveryScreen />;
+  return (
+    <Suspense
+      fallback={
+        <p
+          className="p-5"
+          role="status"
+        >
+          در حال بارگذاری…
+        </p>
+      }
+    >
+      <DiscoveryScreen />
+    </Suspense>
+  );
 }

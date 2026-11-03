@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 export type NodeEnvironment = 'development' | 'test' | 'production';
 
 export interface Environment {
+  HOST: '127.0.0.1' | '0.0.0.0';
   PORT: number;
   NODE_ENV: NodeEnvironment;
   DATABASE_URL: string;
@@ -63,6 +64,10 @@ export function validateAuthSecret(value: unknown, environment: NodeEnvironment)
 }
 
 export function validateEnvironment(input: Record<string, unknown>): Environment {
+  const host = input.HOST === undefined ? '127.0.0.1' : input.HOST;
+  if (host !== '127.0.0.1' && host !== '0.0.0.0') {
+    throw new Error('HOST must be 127.0.0.1 or 0.0.0.0.');
+  }
   const port = input.PORT === undefined ? '3001' : input.PORT;
   const nodeEnvironment = input.NODE_ENV === undefined ? 'development' : input.NODE_ENV;
   if (
@@ -82,6 +87,7 @@ export function validateEnvironment(input: Record<string, unknown>): Environment
     throw new Error('NODE_ENV must be development, test, or production.');
   }
   return {
+    HOST: host,
     PORT: Number(port),
     NODE_ENV: nodeEnvironment,
     DATABASE_URL: validateDatabaseUrl(input.DATABASE_URL),

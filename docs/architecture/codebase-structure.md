@@ -33,7 +33,7 @@ hair-salon/
   work/                      # فایل واسط و شاهد محلی ignored
 ```
 
-components/ui و lib به features وابسته نمی‌شوند؛ app ترکیب‌کننده است. frontend به entity/secret بک‌اند import ندارد. runner تست مرورگر فقط helper مالکیت DB تست را reuse می‌کند؛ کد backend وارد bundle نمی‌شود. query رزرو، کاتالوگ واقعی یا لایه فرضی برای آینده ساخته نشده است.
+components/ui و lib به features وابسته نمی‌شوند؛ app ترکیب‌کننده است. frontend به entity/secret بک‌اند import ندارد. runner تست مرورگر فقط helper مالکیت DB تست را reuse می‌کند؛ کد backend وارد bundle نمی‌شود. query رزرو یا لایه فرضی برای آینده ساخته نشده است؛ کاتالوگ واقعی در افزوده اسپرینت۵ شرح داده شده است.
 
 HealthModule فقط DatabaseHealthCheck را از DatabaseModule مصرف می‌کند. DatabaseProvider مالک Pool واحد است؛ schema دامنه کنار persistence آن قرار دارد و `database/schema.ts` aggregate است. `app-schema.ts` leaf مشترک است تا import cycle ایجاد نشود. namespace `app` معادل tenant نیست.
 
@@ -67,3 +67,11 @@ modules/bookings/
 ساختار واقعی مدیریت و نشست در [درخت اسپرینت۴](sprint-04-structure.md) و تصمیم در [ADR-007](adr/ADR-007-private-salon-management.md) ثبت شده‌اند. `salon-management` یک feature با چهار سناریوی Business/Catalog/Team/Scheduling و چهار Store است. validation/error مشترک در `common/domain`، بدون import Nest/ORM؛ نشست متعلق به identity و فقط `public.ts` برای مصرف قابلیت مدیریت است؛ حذف MFA در ADR-008 ثبت شده است. schema identity تنها از leaf مجاز persistence-schema برای FK مصرف می‌شود؛ private adapter به دامنه مدیریت import نشده است.
 
 فرانت feature salon-management از transport/session/tokens جاری استفاده می‌کند؛ route، UI، hook، API و تبدیل خالص جدا هستند. AccountGate و business layout مرز عمر state خصوصی را تعیین می‌کنند. scaffolding فرضی، package مشترک تازه یا لایه Health اضافی ایجاد نشده است.
+
+## افزوده اجرایی اسپرینت۵
+
+انتشار و کاتالوگ عمومی در feature موجود salon-management اضافه شده‌اند؛ [ساختار](sprint-05-structure.md) و [ADR-009](adr/ADR-009-reviewed-public-catalog.md) مرجع مرز عمومی/خصوصی، revision، reviewer و transaction هستند. schema و DB دوم نداریم. discovery از API واقعی می‌خواند؛ fixtureها فقط در تست/شواهد تاریخی باقی‌اند.
+
+## اجرای کانتینری محلی
+
+`Dockerfile` ریشه targetهای API و فرانت و `compose.yml` profile کامل `app` دارد؛ PostgreSQL بدون profile برای توسعه میزبان باقی است. migration سرویس یک‌بارمصرف پیش از API است. جزئیات packaging، standalone فرانت و تنظیمات شبکه در [ADR-010](adr/ADR-010-local-docker-runtime.md) و دستورهای استفاده در [README](../../README.md) هستند.

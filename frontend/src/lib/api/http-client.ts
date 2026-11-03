@@ -25,7 +25,7 @@ function allowedPath(path: string): boolean {
   const url = new URL(path, 'http://internal.invalid'),
     id = '[a-fA-F0-9-]{36}';
   const pattern = new RegExp(
-    `^/api/v1/(?:auth/(?:register|login|logout)|me(?:/businesses)?|businesses(?:/${id}/(?:settings|catalog/services(?:/${id})?|services(?:/${id})?|staff(?:/${id}(?:/hours)?)?|hours|schedule-exceptions(?:/${id})?))?)$`,
+    `^/api/v1/(?:catalog/(?:categories|locations|salons(?:/${id})?)|review/(?:access|businesses(?:/${id}(?:/decisions)?)?)|auth/(?:register|login|logout)|me(?:/businesses)?|businesses(?:/${id}/(?:settings|publication(?:/(?:requests|withdrawals))?|preview|catalog/services(?:/${id})?|services(?:/${id})?|staff(?:/${id}(?:/hours)?)?|hours|schedule-exceptions(?:/${id})?))?)$`,
   );
   return url.origin === 'http://internal.invalid' && pattern.test(url.pathname);
 }

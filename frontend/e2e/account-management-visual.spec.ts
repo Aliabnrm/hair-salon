@@ -3,7 +3,8 @@ import type { Page } from '@playwright/test';
 import { test, expect } from './fixtures/test-stack';
 import { registerAndLogin } from './fixtures/account-flow';
 
-const directory = '../docs/references/assets/account-management-redesign';
+// Current runs must not replace the historical Sprint 4 design evidence.
+const directory = '../work/account-management-redesign/current';
 async function capture(page: Page, name: string) {
   const phase = process.env.REDESIGN_CAPTURE_PHASE ?? 'after';
   for (const width of [320, 360, 390, 430, 1440]) {

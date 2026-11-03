@@ -2,6 +2,7 @@ import { digits } from '../../../lib/format/digits';
 import type { BusinessInput } from './management.types';
 
 export interface BusinessFormValues {
+  description: string;
   name: string;
   audience: 'women' | 'men';
   city: string;
@@ -11,6 +12,7 @@ export interface BusinessFormValues {
 }
 export function businessFormValues(business?: BusinessInput): BusinessFormValues {
   return {
+    description: business?.description ?? '',
     name: business?.name ?? '',
     audience: business?.audience ?? 'men',
     city: business?.city ?? '',

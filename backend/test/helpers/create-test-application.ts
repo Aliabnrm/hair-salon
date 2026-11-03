@@ -26,6 +26,7 @@ export async function createTestApplication(
 ): Promise<{ app: INestApplication; logger: RecordingLogger }> {
   const logger = new RecordingLogger();
   const config = new ConfigService<Environment, true>({
+    HOST: '127.0.0.1',
     PORT: 3001,
     DATABASE_URL: databaseUrl,
     NODE_ENV: environment,

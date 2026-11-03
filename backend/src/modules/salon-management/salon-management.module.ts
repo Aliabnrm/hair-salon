@@ -1,3 +1,10 @@
+import { PublicCatalogService } from './application/public-catalog.service.js';
+import { PublicationService } from './application/publication.service.js';
+import { PublicationStore, PublicCatalogStore } from './application/ports/publication-store.js';
+import { PostgresPublicationStore } from './infrastructure/persistence/postgres-publication-store.js';
+import { PostgresPublicCatalogStore } from './infrastructure/persistence/postgres-public-catalog-store.js';
+import { PublicationController } from './presentation/http/publication.controller.js';
+import { PublicCatalogController } from './presentation/http/public-catalog.controller.js';
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../../database/database.module.js';
 import { IdentityModule } from '../identity/public.js';
@@ -25,6 +32,8 @@ import { ScheduleExceptionsController } from './presentation/http/schedule-excep
 @Module({
   imports: [DatabaseModule, IdentityModule],
   controllers: [
+    PublicationController,
+    PublicCatalogController,
     BusinessesController,
     CatalogController,
     StaffController,
@@ -32,6 +41,10 @@ import { ScheduleExceptionsController } from './presentation/http/schedule-excep
     ScheduleExceptionsController,
   ],
   providers: [
+    PublicCatalogService,
+    PublicationService,
+    { provide: PublicationStore, useClass: PostgresPublicationStore },
+    { provide: PublicCatalogStore, useClass: PostgresPublicCatalogStore },
     { provide: BusinessStore, useClass: PostgresBusinessStore },
     { provide: CatalogStore, useClass: PostgresCatalogStore },
     { provide: TeamStore, useClass: PostgresTeamStore },

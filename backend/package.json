@@ -16,7 +16,7 @@
     "format:check": "prettier --check --ignore-path ../.prettierignore .",
     "test": "vitest run --config vitest.config.ts",
     "test:e2e": "pnpm run build && vitest run --config vitest.config.e2e.ts",
-    "db:up": "docker compose -f ../compose.yml up -d --wait",
+    "db:up": "docker compose -f ../compose.yml up -d --wait postgres",
     "db:down": "docker compose -f ../compose.yml down",
     "db:migrate": "pnpm run build && node dist/database/migrate.js",
     "test:integration": "pnpm run build && vitest run --config vitest.config.integration.ts"

@@ -1,6 +1,8 @@
 # راهنمای مستندات پلتفرم رزرو آرایشگاه و سالن
 
-نسخه ۰٫۳ — ۲۰۲۶-۱۰-۲۹ — مستندات منتقل‌شده به hair-salon؛ NestJS برای بک‌اند انتخاب شده؛ اجرای هر اسپرینت تابع تأیید طرح همان اسپرینت است.
+راهنمای جاری clone و اجرای محلی/کامل Docker در [README ریشه](../README.md) است؛ [ADR-010](architecture/adr/ADR-010-local-docker-runtime.md)، [گزارش بررسی](engineering/local-setup-report.md) و [درس Docker](learning/local-docker.md) تصمیم و شواهد مربوط را ثبت می‌کنند.
+
+نسخه ۰٫۴ — ۲۰۲۶-۱۱-۰۱ — مستندات منتقل‌شده به hair-salon؛ NestJS برای بک‌اند انتخاب شده؛ اجرای هر اسپرینت تابع تأیید طرح همان اسپرینت است.
 
 ## وضعیت مخزن جاری
 
@@ -49,7 +51,7 @@
 
 ## نتیجه اجرای اسپرینت ۳
 
-[طرح](planning/sprints/sprint-03-plan.md) و [پرامپت](prompts/sprint-03.md) با دستور کارفرما اجرا شدند: کد backend/frontend، کشف نمونه آراسته و حساب واقعی ایمیل/رمز. [گزارش](planning/sprints/sprint-03-report.md)، [درس](learning/sprint-03.md)، [ساختار](architecture/sprint-03-structure.md)، [ADR-005](architecture/adr/ADR-005-frontend-backend-layout.md) و [شواهد فیگما](references/sprint-03-figma.md) نقطه شروع مرورند. اسپرینت۳ در PR #4 به dev منتظر اصلاح CI است؛ وضعیت فعلی اسپرینت۴ در بخش بعد آمده است.
+[طرح](planning/sprints/sprint-03-plan.md) و [پرامپت](prompts/sprint-03.md) با دستور کارفرما اجرا شدند: کد backend/frontend، کشف نمونه آراسته و حساب واقعی ایمیل/رمز. [گزارش](planning/sprints/sprint-03-report.md)، [درس](learning/sprint-03.md)، [ساختار](architecture/sprint-03-structure.md)، [ADR-005](architecture/adr/ADR-005-frontend-backend-layout.md) و [شواهد فیگما](references/sprint-03-figma.md) نقطه شروع مرورند. پایه اسپرینت۳ همراه PR #5 وارد dev شد؛ وضعیت ادغام نهایی در برنامه اسپرینت‌ها ثبت شده است.
 
 ## مدیر بسته جاری
 
@@ -57,8 +59,18 @@
 
 ## نتیجه اجرای اسپرینت ۴
 
-مدیریت خصوصی سالن/خدمات/متخصص/برنامه در محدوده مصوب اجرا شد. MFA اولیه طبق درخواست بعدی کارفرما حذف شده؛ [ADR-008](architecture/adr/ADR-008-remove-owner-mfa.md) مرجع احراز فعلی با ایمیل/رمز است. [گزارش](planning/sprints/sprint-04-report.md)، [درس فارسی](learning/sprint-04.md)، [ساختار](architecture/sprint-04-structure.md)، [ADR-007](architecture/adr/ADR-007-private-salon-management.md) و [منابع](references/sprint-04-engineering-sources.md) مرجع مرورند. اسپرینت۵ و رزرو/انتشار شروع نشده‌اند؛ commit/push تغییر تازه با کارفرماست.
+مدیریت خصوصی سالن/خدمات/متخصص/برنامه در محدوده مصوب اجرا شد. MFA اولیه طبق درخواست بعدی کارفرما حذف شده؛ [ADR-008](architecture/adr/ADR-008-remove-owner-mfa.md) مرجع احراز فعلی با ایمیل/رمز است. [گزارش](planning/sprints/sprint-04-report.md)، [درس فارسی](learning/sprint-04.md)، [ساختار](architecture/sprint-04-structure.md)، [ADR-007](architecture/adr/ADR-007-private-salon-management.md) و [منابع](references/sprint-04-engineering-sources.md) مرجع مرورند. با درخواست صریح کارفرما، بسته اسپرینت۴ و ریدیزاین همراه پایه اسپرینت۳ از [PR #5](https://github.com/Aliabnrm/hair-salon/pull/5) با [CI موفق](https://github.com/Aliabnrm/hair-salon/actions/runs/41335060859) وارد dev شد. در نتیجه تاریخی اسپرینت۴، انتشار وجود نداشت؛ وضعیت جاری اسپرینت۵ در ادامه آمده است. قاعده commit/push دستی برای تغییرهای بعدی برقرار است.
 
 ## ریدیزاین حساب و مدیریت سالن
 
 [تصمیم طراحی، تصاویر قبل/بعد و نتیجه بررسی](design/account-management-redesign.md) و [درس فارسی جداسازی UI، hook و API](learning/account-management-redesign.md) مربوط به درخواست مستقل ریدیزاین چهار مسیر موجودند؛ قابلیت یا اسپرینت بعدی اضافه نشده است.
+
+## نتیجه اجرای اسپرینت ۵
+
+[طرح](planning/sprints/sprint-05-plan.md) و [پرامپت اجرایی](prompts/sprint-05.md) با حفظ ورود فعلی و حذف تأیید ایمیل/reset از محدوده مصوب‌اند. [ADR-009](architecture/adr/ADR-009-reviewed-public-catalog.md)، [ساختار](architecture/sprint-05-structure.md)، [درس](learning/sprint-05.md) و [گزارش](planning/sprints/sprint-05-report.md) مرجع این برش‌اند. commit/push با کارفرماست؛ حساب واقعی reviewer خودکار انتخاب نمی‌شود.
+
+کاتالوگ و انتشار بررسی‌شده در شاخه محلی اجرا شدند؛ check کامل۲۶۱تست موفق داشت. migration توسعه با حفظ داده‌های قبلی اعمال شد؛ وضعیت تفصیلی در گزارش است. تغییرها هنوز commit/push نشده‌اند.
+
+## اسپرینت ۶ — طرح مصوب و پرامپت آماده
+
+[طرح۶](planning/sprints/sprint-06-plan.md) و [پرامپت۶](prompts/sprint-06.md) با دامنه خدمت پیوسته تک‌متخصص برای هر دو گروه و گام۱۵/فاصله۶۰/افق۳۰ آماده شدند. فعلاً فقط مستندات تغییر کرده‌اند؛ اجرای اسپرینت۶ آغاز نشده است.

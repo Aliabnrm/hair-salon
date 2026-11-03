@@ -1,4 +1,5 @@
 import { AccountScreen } from '../../../features/identity';
-export default function AccountPage() {
-  return <AccountScreen />;
+import { ReviewEntry } from '../../../features/review/components/review-entry';
+export default function Page() {
+  return <AccountScreen workspaceTools={<ReviewEntry />} />;
 }

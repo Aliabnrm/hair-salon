@@ -5,7 +5,7 @@ import { SessionProvider } from '../features/identity';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'آراسته | کشف سالن',
+  title: 'آراسته',
   description: 'کشف سالن‌های نمونه و حساب کاربری آراسته',
   icons: { icon: '/assets/brand-mark.svg' },
 };

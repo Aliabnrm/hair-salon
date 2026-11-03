@@ -92,6 +92,16 @@ export function BusinessFormFields({
         </fieldset>
         <TextField
           comfortable
+          label="معرفی کوتاه سالن (اختیاری)"
+          name="description"
+          value={form.description}
+          onChange={(e) => change('description', e.target.value)}
+          maxLength={600}
+          error={fields.description}
+          hint="تا ۶۰۰ نویسه؛ این متن پس از تأیید انتشار عمومی خواهد شد."
+        />
+        <TextField
+          comfortable
           label="شهر"
           name="city"
           value={form.city}

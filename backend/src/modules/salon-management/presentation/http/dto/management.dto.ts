@@ -1,5 +1,7 @@
-import { ApiProperty, ApiPropertyOptional, PartialType, PickType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType, PickType, OmitType } from '@nestjs/swagger';
 export class BusinessCreateDto {
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 600 }) description?:
+    string | null;
   @ApiProperty({ minLength: 2, maxLength: 120 }) name!: string;
   @ApiProperty({ enum: ['men', 'women'] }) audience!: 'men' | 'women';
   @ApiProperty({ minLength: 2, maxLength: 80 }) city!: string;
@@ -17,12 +19,17 @@ export class BusinessCreateDto {
 export class BusinessPatchDto extends PartialType(BusinessCreateDto) {}
 export class BusinessResponseDto extends BusinessCreateDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
-  @ApiProperty({ enum: ['draft'] }) state!: string;
+  @ApiProperty({ enum: ['draft', 'pending_review', 'published', 'suspended'] }) state!: string;
   @ApiProperty({ enum: ['Asia/Tehran'] }) timezone!: string;
   @ApiProperty({ minimum: 1 }) version!: number;
   @ApiProperty({ format: 'date-time' }) created_at!: string;
 }
 export class ServiceCreateDto {
+  @ApiProperty({
+    type: String,
+    description: 'Required for new services; nullable only for legacy responses.',
+  })
+  category_id!: string;
   @ApiProperty({ minLength: 2, maxLength: 120 }) name!: string;
   @ApiProperty({
     type: 'integer',
@@ -41,13 +48,15 @@ export class ServiceCreateDto {
 export class ServicePatchDto extends PartialType(ServiceCreateDto) {
   @ApiPropertyOptional() active?: boolean;
 }
-export class ServiceResponseDto extends ServiceCreateDto {
+export class ServiceResponseDto extends OmitType(ServiceCreateDto, ['category_id'] as const) {
+  @ApiProperty({ type: String, nullable: true }) category_id!: string | null;
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty() active!: boolean;
   @ApiProperty({ minimum: 1 }) version!: number;
   @ApiProperty({ enum: ['IRR'] }) currency!: string;
 }
 export class StaffCreateDto {
+  @ApiPropertyOptional({ default: false }) public_visible?: boolean;
   @ApiProperty({ minLength: 2, maxLength: 80 }) display_name!: string;
   @ApiProperty({ type: [String], maxItems: 100, uniqueItems: true })
   service_ids!: string[];

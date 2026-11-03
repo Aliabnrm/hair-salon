@@ -18,6 +18,7 @@ export function StaffEditor({
   onCancel: () => void;
 }) {
   const services = useRemote(businessId, (signal) => api.allServices(businessId, signal));
+  const [visible, setVisible] = useState(staff?.public_visible ?? false);
   const [name, setName] = useState(staff?.display_name ?? ''),
     [selected, setSelected] = useState(staff?.service_ids ?? []),
     mutation = useManagedMutation();
@@ -25,7 +26,7 @@ export function StaffEditor({
     setSelected((old) => (old.includes(id) ? old.filter((x) => x !== id) : [...old, id]));
   async function submit(event: FormEvent) {
     event.preventDefault();
-    const body = { display_name: name, service_ids: selected };
+    const body = { display_name: name, service_ids: selected, public_visible: visible };
     await mutation.execute(
       JSON.stringify([staff?.id, staff?.version, body]),
       (key, signal) =>
@@ -54,6 +55,15 @@ export function StaffEditor({
           required
           error={mutation.fields.display_name}
         />
+        <label className="flex min-h-11 items-center gap-3">
+          <input
+            type="checkbox"
+            className="size-5 accent-petrol"
+            checked={visible}
+            onChange={(e) => setVisible(e.target.checked)}
+          />
+          نمایش نام متخصص در پروفایل عمومی سالن
+        </label>
         <p className="text-sm text-muted">این پروفایل، حساب ورود ایجاد نمی‌کند.</p>
         <fieldset className="space-y-2">
           <legend className="font-bold">خدمات قابل انجام</legend>

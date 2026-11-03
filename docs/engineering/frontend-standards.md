@@ -1,6 +1,6 @@
 # استاندارد فرانت‌اند و Design System
 
-فرانت در `frontend/` با Next.js App Router/React/TypeScript strict ساخته شده است. [ADR-005](../architecture/adr/ADR-005-frontend-backend-layout.md)، [ساختار واقعی](../architecture/sprint-03-structure.md) و [شاهد طراحی](../references/sprint-03-figma.md) مرجع‌اند. CSS با Tailwind 4 و tokenهای منبع Make، نشست با SessionProvider و داده کشف با fixture مشخص مدیریت می‌شود.
+فرانت در `frontend/` با Next.js App Router/React/TypeScript strict ساخته شده است. [ADR-005](../architecture/adr/ADR-005-frontend-backend-layout.md)، [ساختار واقعی](../architecture/sprint-03-structure.md) و [شاهد طراحی](../references/sprint-03-figma.md) مرجع‌اند. CSS با Tailwind 4 و tokenهای منبع Make، نشست با SessionProvider و داده کشف از API عمومی واقعی می‌آید؛ fixture فقط در تست/شاهد تاریخی است.
 
 ## جداسازی UI و منطق
 

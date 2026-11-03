@@ -17,3 +17,5 @@
 [پرامپت اسپرینت ۲](sprint-02.md) طبق محدوده تأییدشده، [طرح دقیق](../planning/sprints/sprint-02-plan.md) و ADR-004 آماده است؛ اجرای DB و تست واقعی انجام شده و [گزارش](../planning/sprints/sprint-02-report.md)/[درس](../learning/sprint-02.md) مرجع نتیجه‌اند. تأیید محدوده معتبر است و برای تصمیم‌های عادی همان طرح تأیید دوباره لازم نیست.
 
 [پرامپت اسپرینت ۳](sprint-03.md) و [طرح](../planning/sprints/sprint-03-plan.md) با پیوست اجرایی کارفرما اجرا شدند: backend/frontend ریشه، کشف آراسته و ورود ایمیل/رمز. [گزارش](../planning/sprints/sprint-03-report.md) نتیجه را ثبت می‌کند؛ commit/push با کارفرماست. [ساختار هدف](../architecture/sprint-03-structure.md) و [حد شواهد طراحی](../references/sprint-03-figma.md) بخشی از context اجرایی‌اند.
+
+[پرامپت اسپرینت۶](sprint-06.md) و [طرح مصوب](../planning/sprints/sprint-06-plan.md) برای انتخاب خدمت/متخصص/روز و زمان‌های مبتنی بر برنامه واقعی آماده‌اند؛ اجرا آغاز نشده است. Q-15 و اعداد اولیه با کارفرما تثبیت شدند. تهیه پرامپت، دستور اجرای آن نیست.

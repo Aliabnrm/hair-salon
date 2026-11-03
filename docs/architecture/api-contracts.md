@@ -147,3 +147,25 @@ Endpoint Review،Payment،Refund،campaign و نقشه در P0 عمداً قرا
 فهرست limit پیش‌فرض۲۰/حداکثر۵۰ و cursor opaque وابسته به tenant/filter است؛ ترتیب `(created_at,id)` با دقت اصلی PostgreSQL. active فقط برای خدمات/متخصص، from/to/staff_id برای استثناها؛ cursor ناسازگار422. lookup UI صفحات را تا سقف resource می‌خواند، fetch بی‌کران ندارد.
 
 Origin دقیق allowlist و JSON برای mutation دارای بدنه؛ DELETE بدون بدنه همچنان Origin می‌خواهد. بدنه حداکثر۱۶KiB و no-store؛ خطای validation می‌تواند `error.fields` شامل پیام فیلد داشته باشد. 429 دارای Retry-After؛ UI انتظار را رعایت می‌کند. سهمیه‌ها: مدیریت۶۰write/دقیقه/actor و ساخت سالن۵/ساعت/actor. سقف داده۳سالن/مالک،۱۰۰خدمت و۵۰متخصص/سالن. peer پشت Next فعلی مشترک است و trusted proxy انتشار هنوز طراحی نشده است.
+
+## قرارداد اجرایی اسپرینت ۵
+
+طبق ADR-009، تمام مسیرهای catalog/review/publication نیز no-store هستند. schema دقیق از OpenAPI واقعی `dto/publication.dto.ts` تولید می‌شود؛ این بخش محدوده فعلی را از APIهای آینده رزرو جدا می‌کند.
+
+| مسیر پس از /api/v1                                    | رفتار                                                                                                                             |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| GET /catalog/categories و /catalog/locations          | page با items/next_cursor=null؛ دسته مرجع فعال به ترتیب و مکان سالن‌های published                                                 |
+| GET /catalog/salons                                   | page عمومی؛ q≤100، audience=men/women، category معتبر، city≤80، district≤120 وابسته به city، limit پیش‌فرض20/سقف50 و cursor       |
+| GET /catalog/salons/{businessId}                      | PublicProfile allowlist، فقط published؛ منابع دیگر404                                                                             |
+| GET /businesses/{businessId}/publication              | مالک؛ state/version/content_revision/request_id/issues/history حداکثر50رویداد آخر                                                 |
+| GET /businesses/{businessId}/preview                  | projection مشترک با مجوز مالک                                                                                                     |
+| POST /businesses/{businessId}/publication/requests    | مالک، consent=true؛ If-Match نسخه انتشار و Idempotency-Key                                                                        |
+| POST /businesses/{businessId}/publication/withdrawals | مالک، body={}؛ انصراف pending یا توقف published؛ همان هدرها                                                                       |
+| GET /review/access                                    | حساب واردشده؛ can_review از DB                                                                                                    |
+| GET /review/businesses                                | reviewer مستقل؛ صف صفحه‌بندی‌شده pending/published/suspended، بدون سالن خود و draft هرگز ارسال‌نشده                               |
+| GET /review/businesses/{businessId}                   | reviewer مستقل؛ publication/profile و ETag نسخه انتشار؛ فقط سالن سابقاً ارسال‌شده                                                 |
+| POST /review/businesses/{businessId}/decisions        | decision=approve/reject/suspend، request_id جاری، content_revision دیده‌شده، reason برای رد/تعلیق۲..۶۰۰؛ If-Match/Idempotency-Key |
+
+ناشناس در خصوصی401، نقش بررسی نامعتبر403، سالن متعلق به دیگری در API مالک404، validation422، state/request/version کهنه409 و If-Match غایب428 است. mutationها Origin دقیق/JSON/بدنه محدود فعلی را حفظ می‌کنند. نرخ catalog تا180درخواست/IP در دقیقه و mutation انتشار داخل سقف مدیریت60درخواست/حساب در دقیقه است؛ حساب پشت NAT در پایلوت اندازه‌گیری شود. ورودی ناشناخته و query تکراری رد می‌شوند. هیچ PATCH عمومی state یا endpoint اعطای reviewer وجود ندارد.
+
+min_price_irr کمینه خدمات منطبق بر فیلتر در سرور، integer IRR است؛ تومان در UI دقیق نمایش داده می‌شود. cursor به فیلتر و ترتیب ایجاد/UUID بسته است و timestamp کامل PostgreSQL را دارد. q از strpos پارامتری استفاده می‌کند؛ `%` و `_` wildcard نمی‌شوند. profile روزهای خاص آینده تا۹۳روز را با متخصص عمومی مرتبط نمایش می‌دهد؛ ساعات، availability نیستند. دلیل تصمیم فقط در مسیر خصوصی مالک/reviewer دیده می‌شود.

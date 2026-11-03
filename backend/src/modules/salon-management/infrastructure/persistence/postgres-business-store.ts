@@ -10,7 +10,7 @@ import type {
 } from '../../domain/management.types.js';
 import { BusinessWriteTransaction } from './business-write-transaction.js';
 import { cursor, page, scope } from './management-pagination.js';
-const projection = `b.id,b.name,b.audience,b.city,b.district,b.public_address,b.public_phone,b.state,b.timezone,b.version,b.created_at::text AS created_at`;
+const projection = `b.description,b.id,b.name,b.audience,b.city,b.district,b.public_address,b.public_phone,b.state,b.timezone,b.version,b.created_at::text AS created_at`;
 @Injectable()
 export class PostgresBusinessStore extends BusinessStore {
   constructor(private readonly write: BusinessWriteTransaction) {
@@ -42,7 +42,7 @@ export class PostgresBusinessStore extends BusinessStore {
       if ((count.rows[0]?.count ?? 0) >= managementLimits.businessesPerOwner)
         conflict('BUSINESS_LIMIT', 'حداکثر سه سالن می‌توانید ایجاد کنید.');
       const r = await tx.query<Business>(
-        `INSERT INTO app.businesses AS b(name,audience,city,district,public_address,public_phone) VALUES($1,$2,$3,$4,$5,$6) RETURNING ${projection}`,
+        `INSERT INTO app.businesses AS b(name,audience,city,district,public_address,public_phone,description) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING ${projection}`,
         [
           input.name,
           input.audience,
@@ -50,6 +50,7 @@ export class PostgresBusinessStore extends BusinessStore {
           input.district,
           input.public_address,
           input.public_phone,
+          input.description ?? null,
         ],
       );
       const row = r.rows[0];
@@ -69,7 +70,7 @@ export class PostgresBusinessStore extends BusinessStore {
       );
       this.write.version(r.rows[0]?.version ?? 0, command.version);
       const result = await tx.query<Business>(
-        `UPDATE app.businesses AS b SET name=$2,audience=$3,city=$4,district=$5,public_address=$6,public_phone=$7,version=version+1,updated_at=now() WHERE id=$1 RETURNING ${projection}`,
+        `UPDATE app.businesses AS b SET name=$2,audience=$3,city=$4,district=$5,public_address=$6,public_phone=$7,description=$8,version=version+1,updated_at=now() WHERE id=$1 RETURNING ${projection}`,
         [
           command.businessId,
           input.name,
@@ -78,6 +79,7 @@ export class PostgresBusinessStore extends BusinessStore {
           input.district,
           input.public_address,
           input.public_phone,
+          input.description ?? null,
         ],
       );
       return result.rows[0] ?? notFound();

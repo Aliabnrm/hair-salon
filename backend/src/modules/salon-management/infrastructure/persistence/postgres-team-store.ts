@@ -6,7 +6,7 @@ import { TeamStore } from '../../application/ports/management-stores.js';
 import type { Staff, StaffInput, PageQuery, WriteCommand } from '../../domain/management.types.js';
 import { BusinessWriteTransaction } from './business-write-transaction.js';
 import { cursor, page, scope } from './management-pagination.js';
-const projection = `s.id,s.display_name,s.active,s.version,COALESCE((SELECT jsonb_agg(ss.service_id ORDER BY ss.service_id) FROM app.staff_services ss WHERE ss.business_id=s.business_id AND ss.staff_id=s.id),'[]'::jsonb) AS service_ids`;
+const projection = `s.public_visible,s.id,s.display_name,s.active,s.version,COALESCE((SELECT jsonb_agg(ss.service_id ORDER BY ss.service_id) FROM app.staff_services ss WHERE ss.business_id=s.business_id AND ss.staff_id=s.id),'[]'::jsonb) AS service_ids`;
 @Injectable()
 export class PostgresTeamStore extends TeamStore {
   constructor(private readonly write: BusinessWriteTransaction) {
@@ -62,8 +62,8 @@ export class PostgresTeamStore extends TeamStore {
       if ((c.rows[0]?.count ?? 0) >= managementLimits.staffPerBusiness)
         conflict('STAFF_LIMIT', 'حداکثر پنجاه متخصص مجاز است.');
       const r = await tx.query<{ id: string }>(
-        'INSERT INTO app.staff_profiles(business_id,display_name) VALUES($1,$2) RETURNING id',
-        [business, input.display_name],
+        'INSERT INTO app.staff_profiles(business_id,display_name,public_visible) VALUES($1,$2,$3) RETURNING id',
+        [business, input.display_name, input.public_visible ?? false],
       );
       const row = r.rows[0] ?? notFound();
       await this.assign(tx, business, row.id, input.service_ids);
@@ -82,8 +82,8 @@ export class PostgresTeamStore extends TeamStore {
       this.write.version(row.version, command.version);
       await this.assign(tx, business, id, input.service_ids);
       const r = await tx.query<Staff>(
-        `UPDATE app.staff_profiles AS s SET display_name=$3,active=$4,version=version+1,updated_at=now() WHERE business_id=$1 AND id=$2 RETURNING ${projection}`,
-        [business, id, input.display_name, active],
+        `UPDATE app.staff_profiles AS s SET display_name=$3,active=$4,public_visible=$5,version=version+1,updated_at=now() WHERE business_id=$1 AND id=$2 RETURNING ${projection}`,
+        [business, id, input.display_name, active, input.public_visible ?? false],
       );
       return r.rows[0] ?? notFound();
     });

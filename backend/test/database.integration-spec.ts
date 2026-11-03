@@ -43,7 +43,11 @@ describe('real PostgreSQL migrations', () => {
           'management_audit',
           'management_writes',
           'password_credentials',
+          'publication_events',
+          'reviewer_permission_history',
+          'reviewer_permissions',
           'schedule_exceptions',
+          'service_categories',
           'services',
           'sessions',
           'staff_hours',
@@ -55,7 +59,7 @@ describe('real PostgreSQL migrations', () => {
       const first = await pool.query(
         'SELECT id, hash, created_at FROM drizzle.__drizzle_migrations ORDER BY id',
       );
-      expect(first.rows).toHaveLength(4);
+      expect(first.rows).toHaveLength(5);
       const sql = await readFile(
         new URL('../drizzle/0000_database_foundation.sql', import.meta.url),
         'utf8',
@@ -108,7 +112,7 @@ describe('real PostgreSQL migrations', () => {
           'SELECT id, hash, created_at FROM drizzle.__drizzle_migrations ORDER BY id',
         )
       ).rows;
-      expect(upgraded).toHaveLength(4);
+      expect(upgraded).toHaveLength(5);
       expect(upgraded[0]).toEqual(oldJournal[0]);
       expect((await runMigration(target.url)).status).toBe(0);
       expect(
@@ -195,7 +199,7 @@ describe('real PostgreSQL migrations', () => {
         await pool.query('SELECT id,hash,created_at FROM drizzle.__drizzle_migrations ORDER BY id')
       ).rows;
       expect(after.slice(0, 2)).toEqual(before);
-      expect(after).toHaveLength(4);
+      expect(after).toHaveLength(5);
       expect((await runMigration(target.url)).status).toBe(0);
       expect(
         (
@@ -288,6 +292,113 @@ describe('real PostgreSQL migrations', () => {
           3,
         ),
       ).toEqual(oldHistory);
+      expect((await runMigration(target.url)).status).toBe(0);
+    } finally {
+      await pool.end();
+      await target.close();
+      await rm(folder, { recursive: true, force: true });
+    }
+  });
+
+  it('upgrades a populated Sprint 4 salon without publishing, guessing categories or losing constraints', async () => {
+    const target = await createTestDatabase();
+    const folder = await mkdtemp(join(tmpdir(), 'hair-salon-s4-upgrade-'));
+    const pool = new Pool({ connectionString: target.url });
+    try {
+      await mkdir(join(folder, 'meta'));
+      const journal = JSON.parse(
+        await readFile(new URL('../drizzle/meta/_journal.json', import.meta.url), 'utf8'),
+      );
+      journal.entries = journal.entries.slice(0, 4);
+      await writeFile(join(folder, 'meta/_journal.json'), JSON.stringify(journal));
+      for (const name of [
+        '0000_database_foundation',
+        '0001_identity',
+        '0002_salon_management',
+        '0003_remove_mfa',
+      ])
+        await copyFile(
+          fileURLToPath(new URL('../drizzle/' + name + '.sql', import.meta.url)),
+          join(folder, name + '.sql'),
+        );
+      await migrate(drizzle(pool), { migrationsFolder: folder });
+      const user = (
+        await pool.query(
+          "INSERT INTO app.users(email) VALUES('legacy-s4@example.com') RETURNING id",
+        )
+      ).rows[0].id;
+      const business = (
+        await pool.query(
+          "INSERT INTO app.businesses(name,audience,city) VALUES('سالن قدیمی','men','تهران') RETURNING id",
+        )
+      ).rows[0].id;
+      await pool.query('INSERT INTO app.business_memberships(business_id,user_id) VALUES($1,$2)', [
+        business,
+        user,
+      ]);
+      const service = (
+        await pool.query(
+          "INSERT INTO app.services(business_id,name,price_irr,duration_minutes,buffer_before_minutes,buffer_after_minutes) VALUES($1,'خدمت قدیمی',0,30,0,0) RETURNING id",
+          [business],
+        )
+      ).rows[0].id;
+      const staff = (
+        await pool.query(
+          "INSERT INTO app.staff_profiles(business_id,display_name) VALUES($1,'متخصص قدیمی') RETURNING id",
+          [business],
+        )
+      ).rows[0].id;
+      await pool.query(
+        'INSERT INTO app.staff_services(business_id,staff_id,service_id) VALUES($1,$2,$3)',
+        [business, staff, service],
+      );
+      await pool.query(
+        'INSERT INTO app.business_hours(business_id,weekday,start_minute,end_minute) VALUES($1,0,540,1080)',
+        [business],
+      );
+      const constraints = (
+        await pool.query(
+          "SELECT conname,pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE connamespace='app'::regnamespace AND conname<>'business_state' ORDER BY conname",
+        )
+      ).rows;
+      const before = (await pool.query('SELECT * FROM drizzle.__drizzle_migrations ORDER BY id'))
+        .rows;
+      expect((await runMigration(target.url)).status).toBe(0);
+      expect(
+        (
+          await pool.query(
+            'SELECT state,content_revision,publication_version,current_request_id FROM app.businesses WHERE id=$1',
+            [business],
+          )
+        ).rows[0],
+      ).toEqual({
+        state: 'draft',
+        content_revision: 1,
+        publication_version: 1,
+        current_request_id: null,
+      });
+      expect(
+        (await pool.query('SELECT category_id,price_irr FROM app.services WHERE id=$1', [service]))
+          .rows[0],
+      ).toEqual({ category_id: null, price_irr: '0' });
+      expect(
+        (await pool.query('SELECT public_visible FROM app.staff_profiles WHERE id=$1', [staff]))
+          .rows[0].public_visible,
+      ).toBe(false);
+      expect((await pool.query('SELECT * FROM app.staff_services')).rows).toHaveLength(1);
+      expect((await pool.query('SELECT * FROM app.business_hours')).rows).toHaveLength(1);
+      const after = (
+        await pool.query(
+          "SELECT conname,pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE connamespace='app'::regnamespace ORDER BY conname",
+        )
+      ).rows;
+      for (const constraint of constraints) expect(after).toContainEqual(constraint);
+      expect(
+        (await pool.query('SELECT * FROM drizzle.__drizzle_migrations ORDER BY id')).rows.slice(
+          0,
+          4,
+        ),
+      ).toEqual(before);
       expect((await runMigration(target.url)).status).toBe(0);
     } finally {
       await pool.end();

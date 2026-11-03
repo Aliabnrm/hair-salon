@@ -1,4 +1,4 @@
-import type { Category, CategoryId } from '../model/discovery.types';
+import type { Category } from '../../public-catalog';
 export const chipClass = (active: boolean) =>
   `inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold transition-colors ${active ? 'border-petrol bg-petrol text-white' : 'border-line bg-surface text-ink-soft hover:border-line-strong'}`;
 export function ServiceFilters({
@@ -7,8 +7,8 @@ export function ServiceFilters({
   onChange,
 }: {
   categories: Category[];
-  value: CategoryId | null;
-  onChange: (value: CategoryId | null) => void;
+  value: string | null;
+  onChange: (value: string | null) => void;
 }) {
   return (
     <div

@@ -1,4 +1,8 @@
 import { test, expect } from './fixtures/test-stack';
+import { seedPublicSalons } from './fixtures/public-salons';
+test.beforeEach(async ({ stack }) => {
+  await seedPublicSalons(stack.pool);
+});
 // Values come from the extracted Make source; source-to-implementation images are recorded in the design ledger.
 for (const width of [320, 360, 390, 430, 768, 1024, 1440])
   test(`Figma layout contract and RTL remain usable at ${width}px`, async ({
@@ -27,21 +31,8 @@ for (const width of [320, 360, 390, 430, 768, 1024, 1440])
     expect(
       await page.getByRole('searchbox').evaluate((el) => el.getBoundingClientRect().height),
     ).toBeCloseTo(54, 3);
-    const images = page.locator('main img');
-    await images.evaluateAll((imgs) =>
-      imgs.forEach((img) => {
-        if (img instanceof HTMLImageElement) img.loading = 'eager';
-      }),
-    );
-    await expect
-      .poll(() =>
-        images.evaluateAll((imgs) =>
-          imgs.every(
-            (img) => img instanceof HTMLImageElement && img.complete && img.naturalWidth > 0,
-          ),
-        ),
-      )
-      .toBe(true);
+    await expect(page.getByRole('region').locator('img')).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /آزمون کشف نیلوفر/ })).toBeVisible();
     await expect(page.getByRole('navigation', { name: 'ناوبری اصلی' })).toBeInViewport();
     await page.screenshot({
       path: testInfo.outputPath(`discovery-${width}.png`),
@@ -49,7 +40,7 @@ for (const width of [320, 360, 390, 430, 768, 1024, 1440])
     });
     await page.getByRole('button', { name: 'ناخن', exact: true }).focus();
     await page.keyboard.press('Enter');
-    await expect(page.getByText('۲ نتیجه', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'سالنی پیدا نشد' })).toBeVisible();
     await page.getByRole('searchbox').fill('ناموجود');
     await expect(page.getByRole('button', { name: 'پاک کردن فیلترها', exact: true })).toBeVisible();
   });

@@ -13,9 +13,44 @@ export class BusinessWriteTransaction {
     );
     if (!r.rowCount) notFound();
   }
-  async run<T extends object>(
+  async reviewer(actor: string, business?: string, tx?: PoolClient): Promise<void> {
+    const db = tx ?? this.database.pool;
+    const permission = await db.query(
+      'SELECT user_id FROM app.reviewer_permissions WHERE user_id=$1 AND active' +
+        (tx ? ' FOR SHARE' : ''),
+      [actor],
+    );
+    if (!permission.rowCount)
+      throw new CapabilityError(403, 'REVIEW_FORBIDDEN', 'دسترسی بررسی انتشار ندارید.');
+    if (business) {
+      const own = await db.query(
+        'SELECT 1 FROM app.business_memberships WHERE user_id=$1 AND business_id=$2 AND active',
+        [actor, business],
+      );
+      if (own.rowCount)
+        throw new CapabilityError(403, 'SELF_REVIEW_FORBIDDEN', 'بررسی سالن خودتان مجاز نیست.');
+    }
+  }
+  run<T extends object>(command: WriteCommand, action: (tx: PoolClient) => Promise<T>): Promise<T> {
+    return this.execute(command, action, 'owner', true);
+  }
+  runPublication<T extends object>(
     command: WriteCommand,
     action: (tx: PoolClient) => Promise<T>,
+  ): Promise<T> {
+    return this.execute(command, action, 'owner', false);
+  }
+  runReview<T extends object>(
+    command: WriteCommand,
+    action: (tx: PoolClient) => Promise<T>,
+  ): Promise<T> {
+    return this.execute(command, action, 'reviewer', false);
+  }
+  private async execute<T extends object>(
+    command: WriteCommand,
+    action: (tx: PoolClient) => Promise<T>,
+    authority: 'owner' | 'reviewer',
+    contentMutation: boolean,
   ): Promise<T> {
     const tx = await this.database.pool.connect();
     try {
@@ -25,11 +60,15 @@ export class BusinessWriteTransaction {
       ]);
       if (command.businessId) {
         // Only an authorized tenant can be locked, even on replay.
-        await this.owner(command.actorId, command.businessId, tx);
+        await (authority === 'owner'
+          ? this.owner(command.actorId, command.businessId, tx)
+          : this.reviewer(command.actorId, command.businessId, tx));
         await tx.query('SELECT id FROM app.businesses WHERE id=$1 FOR UPDATE', [
           command.businessId,
         ]);
-        await this.owner(command.actorId, command.businessId, tx);
+        await (authority === 'owner'
+          ? this.owner(command.actorId, command.businessId, tx)
+          : this.reviewer(command.actorId, command.businessId, tx));
       } else await tx.query('SELECT id FROM app.users WHERE id=$1 FOR UPDATE', [command.actorId]);
       const old = await tx.query<{
         fingerprint: string;
@@ -50,6 +89,19 @@ export class BusinessWriteTransaction {
           );
         await tx.query('COMMIT');
         return record.response;
+      }
+      if (contentMutation && command.businessId) {
+        await tx.query(
+          `INSERT INTO app.publication_events(business_id,actor_id,action,revision,publication_version,request_id)
+          SELECT id,$2,'content_changed',content_revision,publication_version+1,current_request_id FROM app.businesses WHERE id=$1 AND state IN ('published','pending_review')`,
+          [command.businessId, command.actorId],
+        );
+        await tx.query(
+          `UPDATE app.businesses SET content_revision=content_revision+1,publication_version=publication_version+1,
+          version=version+CASE WHEN state IN ('published','pending_review') AND $2<>'business.update' THEN 1 ELSE 0 END,
+          state=CASE WHEN state IN ('published','pending_review') THEN 'draft' ELSE state END,current_request_id=NULL WHERE id=$1`,
+          [command.businessId, command.operation],
+        );
       }
       const result = await action(tx);
       const target =

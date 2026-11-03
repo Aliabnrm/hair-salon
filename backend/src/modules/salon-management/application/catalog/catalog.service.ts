@@ -14,6 +14,8 @@ export class CatalogService {
     return this.store.get(actor, business, id);
   }
   create(command: WriteCommand, input: unknown) {
+    if (!object(input, serviceFields).category_id)
+      invalid('category_id', 'دسته خدمت را انتخاب کنید.');
     return this.store.create(command, serviceInput(input));
   }
   async update(command: WriteCommand, id: string, input: unknown) {

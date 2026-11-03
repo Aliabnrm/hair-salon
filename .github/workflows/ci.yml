@@ -67,3 +67,37 @@ jobs:
 
       - name: Build, typecheck, lint, format and test
         run: pnpm run check
+
+  docker:
+    name: Docker smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      COMPOSE_PROJECT_NAME: hair-salon-ci
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build and start the complete stack from a clean checkout
+        run: docker compose --profile app up --build -d --wait --wait-timeout 180
+
+      - name: Check pages, static assets, proxy and repeat migration
+        run: |
+          curl --fail --silent --show-error http://127.0.0.1:3000/ --output /dev/null
+          curl --fail --silent --show-error http://127.0.0.1:3000/sign-in --output /dev/null
+          curl --fail --silent --show-error http://127.0.0.1:3000/assets/brand-mark.svg --output /dev/null
+          curl --fail --silent --show-error http://127.0.0.1:3000/api/v1/health/readiness
+          curl --fail --silent --show-error http://127.0.0.1:3001/api/v1/health/readiness
+          docker compose --profile app run --rm migrate
+
+      - name: Show stack status and logs
+        if: always()
+        run: |
+          docker compose --profile app ps -a
+          docker compose --profile app logs --no-color --tail 100
+
+      - name: Remove this disposable CI stack and its data
+        if: always()
+        run: docker compose --profile app down --volumes

@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: local_only_password
       POSTGRES_DB: hair_salon
     ports:
-      - '127.0.0.1:54329:5432'
+      - '127.0.0.1:${POSTGRES_PORT:-54329}:5432'
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U hair_salon_local -d hair_salon']
       interval: 2s
@@ -14,5 +14,78 @@ services:
       retries: 15
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  migrate:
+    profiles: [app]
+    build:
+      context: .
+      target: api
+    image: hair-salon-api:local
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://hair_salon_local:local_only_password@postgres:5432/hair_salon
+    command: ['node', 'dist/database/migrate.js']
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+
+  api:
+    profiles: [app]
+    build:
+      context: .
+      target: api
+    image: hair-salon-api:local
+    environment:
+      HOST: 0.0.0.0
+      PORT: '3001'
+      # Local HTTP cookies and reviewer tooling require development mode.
+      NODE_ENV: development
+      DATABASE_URL: postgresql://hair_salon_local:local_only_password@postgres:5432/hair_salon
+      AUTH_ALLOWED_ORIGINS: http://127.0.0.1:${FRONTEND_PORT:-3000},http://localhost:${FRONTEND_PORT:-3000}
+      AUTH_RATE_LIMIT_SECRET: local_only_change_before_shared_use_32_bytes
+    ports:
+      - '127.0.0.1:${API_PORT:-3001}:3001'
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3001/api/v1/health/readiness').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    init: true
+
+  frontend:
+    profiles: [app]
+    build:
+      context: .
+      target: frontend
+      args:
+        BACKEND_ORIGIN: http://api:3001
+    environment:
+      BACKEND_ORIGIN: http://api:3001
+    ports:
+      - '127.0.0.1:${FRONTEND_PORT:-3000}:3000'
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/v1/health/readiness').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    init: true
+
 volumes:
   postgres_data:

@@ -104,3 +104,22 @@ Business و Staff در همه جداول فرزند با کلید ترکیبی �
 ایجاد سالن روی User و child writeها روی Business سپس در صورت نیاز Staff قفل می‌شوند. اثر+عضویت/تخصیص+audit+نتیجه intent یک commit دارند. مجوز actor در adapter اعمال می‌شود؛ FK فقط صحت ارتباط tenantهاست. RLS یا جدول رزرو/مشتری/outbox در این migration وجود ندارد.
 
 deferred trigger سازگاری closed/intervalها را در commit enforce می‌کند. exclusion و triggerها custom SQL همین migration‌اند و در snapshot Drizzle مدل مستقل ندارند؛ با migrationهای بعدی آن‌ها را حفظ و SQL را مرور کنید. تست واقعی fresh، upgrade هویت seedشده اسپرینت۳، rerun، rollback و race در گزارش آمده است؛ مهاجرت startup یا reset دیتابیس توسعه نداریم.
+
+## schema اجرایی اسپرینت ۵
+
+`0004_reviewed_public_catalog.sql` و snapshot جدید، 0000..0003 را بازنویسی نمی‌کنند.
+
+| جدول/ستون                            | معنا                                                                                                                                    |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| service_categories                   | id ثابت، label فارسی، sort_order و active؛ هفت دسته مرجع نسخه‌بندی‌شده                                                                  |
+| services.category_id                 | FK دسته؛ null فقط برای سازگاری داده قدیمی؛ دسته تازه باید معتبر/فعال باشد                                                               |
+| staff_profiles.public_visible        | boolean پیش‌فرض false برای همه متخصصان قدیم و جدید                                                                                      |
+| businesses.description/search_text   | متن ساده حداکثر600؛ کلید نرمال‌شده جست‌وجو با trigger؛ نمایش اصلی محفوظ                                                                 |
+| businesses.state                     | تنها منبع draft/pending_review/published/suspended                                                                                      |
+| content_revision/publication_version | عدد مثبت مستقل از version مشخصات و hours_version؛ تغییر محتوا و درخواست/تصمیم را تفکیک می‌کنند                                          |
+| current_request_id                   | FK رویداد درخواست؛ فقط pending/published غیرnull؛ CHECK سازگاری state/request                                                           |
+| publication_events                   | actor/business/action/revision/publication_version/request_id/reason/consent/time؛ نسخه انتشار در هر سالن یکتا و مرجع ترتیب تاریخچه است |
+| reviewer_permissions                 | یک سطر اختیار صریح فعال/غیرفعال برای User موجود                                                                                         |
+| reviewer_permission_history          | سابقه محدود grant/revoke با دلیل و زمان                                                                                                 |
+
+index جزئی public_businesses_order_idx روی created_at/id فقط برای published و index تاریخچه برای خواندن محدود اضافه شده‌اند. FKهای tenant، exclusion و triggerهای پیشین محفوظ‌اند. normalize_search، business_search، service_category_valid و FK چرخه‌ای current_request_id در SQL صریح‌اند؛ Drizzle جای SQL لازم را نگرفته است. رضایت به revision رویداد درخواست و request_id همان رویداد بسته می‌شود. برای تعلیق و رد، reason خصوصی است. API تاریخچه را حذف/ویرایش نمی‌کند؛ سیاست retention نهایی قبل بهره‌برداری عمومی تعیین شود.

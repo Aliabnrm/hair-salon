@@ -5,15 +5,17 @@ export interface BusinessInput {
   district: string | null;
   public_address: string | null;
   public_phone: string | null;
+  description?: string | null;
 }
 export interface Business extends BusinessInput {
   id: string;
   version: number;
-  state: 'draft';
+  state: 'draft' | 'pending_review' | 'published' | 'suspended';
   timezone: string;
   created_at: string;
 }
 export interface ServiceInput {
+  category_id?: string | null;
   name: string;
   price_irr: number;
   duration_minutes: number;
@@ -27,6 +29,7 @@ export interface SalonService extends ServiceInput {
   currency: 'IRR';
 }
 export interface StaffInput {
+  public_visible?: boolean;
   display_name: string;
   service_ids: string[];
 }

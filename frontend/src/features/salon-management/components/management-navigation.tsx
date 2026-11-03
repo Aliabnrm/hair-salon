@@ -15,13 +15,19 @@ export function ManagementNavigation({
   const root = `/manage/${businessId}`;
   useEffect(() => {
     const nav = navRef.current;
-    const active = nav?.querySelector<HTMLElement>('[aria-current="page"]');
-    if (nav && active) {
+    if (!nav) return;
+    const revealActive = () => {
+      const active = nav.querySelector<HTMLElement>('[aria-current="page"]');
+      if (!active) return;
       const box = nav.getBoundingClientRect();
       const item = active.getBoundingClientRect();
       if (item.left < box.left || item.right > box.right)
         nav.scrollLeft += item.left - box.left - 12;
-    }
+    };
+    revealActive();
+    const resize = new ResizeObserver(revealActive);
+    resize.observe(nav);
+    return () => resize.disconnect();
   }, [pathname]);
   // The settings screen places the same navigation after its real salon header.
   if (!embedded && pathname === root) return null;
@@ -40,7 +46,7 @@ export function ManagementNavigation({
             سالن‌های من
           </Link>
           <p className="pb-2 text-sm leading-7 text-muted">
-            پیش‌نویس خصوصی؛ هنوز منتشر نشده و قابل رزرو نیست.
+            ویرایش تازه نیاز به بررسی انتشار مجدد دارد؛ رزرو هنوز فعال نیست.
           </p>
         </div>
       )}
@@ -55,6 +61,7 @@ export function ManagementNavigation({
           ['staff', 'متخصصان'],
           ['hours', 'ساعات کاری'],
           ['exceptions', 'تعطیلی‌ها'],
+          ['publication', 'انتشار'],
         ].map(([path, label]) => {
           const href = `${root}${path ? '/' + path : ''}`;
           const active = pathname === href;

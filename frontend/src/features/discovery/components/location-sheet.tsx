@@ -1,25 +1,25 @@
 'use client';
 import { useState } from 'react';
-import { Button } from '../../../components/ui/button';
-import { Icon } from '../../../components/ui/icon';
 import { Sheet } from '../../../components/ui/sheet';
-import { cities } from '../data/demo-salons';
+import { Button } from '../../../components/ui/button';
+import type { Location } from '../../public-catalog';
 import { chipClass } from './service-filters';
-
 export function LocationSheet({
-  cityId,
-  neighborhood,
+  city,
+  district,
+  locations,
   onClose,
   onApply,
 }: {
-  cityId: string;
-  neighborhood: string;
+  city: string;
+  district: string;
+  locations: Location[];
   onClose: () => void;
-  onApply: (cityId: string, neighborhood: string) => void;
+  onApply: (city: string, district: string) => void;
 }) {
-  const [city, setCity] = useState(cityId);
-  const [area, setArea] = useState(neighborhood);
-  const selected = cities.find((c) => c.id === city);
+  const [selected, setSelected] = useState(city),
+    [area, setArea] = useState(district);
+  const current = locations.find((c) => c.city === selected);
   return (
     <Sheet
       open
@@ -28,57 +28,60 @@ export function LocationSheet({
       footer={
         <Button
           className="w-full"
-          onClick={() => onApply(city, area)}
+          onClick={() => onApply(selected, area)}
         >
           نمایش سالن‌ها
         </Button>
       }
     >
-      <p className="mb-3 text-sm font-bold text-ink-soft">شهر</p>
-      <div
-        aria-label="انتخاب شهر"
-        className="grid grid-cols-2 gap-2"
-        role="group"
-      >
-        {cities.map((c) => (
+      <p className="mb-3 font-bold">شهر</p>
+      <div className="flex flex-wrap gap-2">
+        <button
+          className={chipClass(!selected)}
+          aria-pressed={!selected}
+          onClick={() => {
+            setSelected('');
+            setArea('');
+          }}
+        >
+          همه شهرها
+        </button>
+        {locations.map((c) => (
           <button
-            aria-pressed={city === c.id}
-            className={`flex h-14 items-center justify-between rounded-2xl border px-4 text-base font-bold transition-colors ${city === c.id ? 'border-petrol bg-petrol-soft text-petrol-deep' : 'border-line bg-surface text-ink hover:border-line-strong'}`}
-            key={c.id}
+            key={c.city}
+            className={chipClass(selected === c.city)}
+            aria-pressed={selected === c.city}
             onClick={() => {
-              setCity(c.id);
-              setArea('all');
+              setSelected(c.city);
+              setArea('');
             }}
-            type="button"
           >
-            {c.name}
-            {city === c.id && (
-              <Icon
-                name="check"
-                size={18}
-              />
-            )}
+            {c.city}
           </button>
         ))}
       </div>
-      <p className="mb-3 mt-6 text-sm font-bold text-ink-soft">محله در {selected?.name}</p>
-      <div
-        aria-label="انتخاب محله"
-        className="flex flex-wrap gap-2"
-        role="group"
-      >
-        {['all', ...(selected?.neighborhoods ?? [])].map((n) => (
-          <button
-            aria-pressed={area === n}
-            className={chipClass(area === n)}
-            key={n}
-            onClick={() => setArea(n)}
-            type="button"
-          >
-            {n === 'all' ? 'همه محله‌ها' : n}
-          </button>
-        ))}
-      </div>
+      {!locations.length && (
+        <p className="my-4 leading-8 text-muted">
+          هنوز سالنی منتشر نشده است؛ پس از انتشار، شهرهای واقعی اینجا نمایش داده می‌شوند.
+        </p>
+      )}
+      {current && (
+        <>
+          <p className="mb-3 mt-6 font-bold">محله در {current.city}</p>
+          <div className="flex flex-wrap gap-2">
+            {['', ...current.districts].map((d) => (
+              <button
+                key={d}
+                className={chipClass(area === d)}
+                aria-pressed={area === d}
+                onClick={() => setArea(d)}
+              >
+                {d || 'همه محله‌ها'}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </Sheet>
   );
 }

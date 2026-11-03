@@ -43,6 +43,7 @@ test('owner configures a private salon, service, staff, weekly hours and a dated
   await navigation(page, 'خدمات');
   await page.getByRole('button', { name: 'خدمت جدید', exact: true }).click();
   await page.getByLabel('نام خدمت', { exact: true }).fill('کوتاهی مو');
+  await page.getByLabel('دسته خدمت', { exact: true }).selectOption('haircut');
   await page.getByLabel('قیمت (تومان)', { exact: true }).fill('۲۵۰٬۰۰۰');
   await page.getByLabel('مدت خدمت (دقیقه)', { exact: true }).fill('۴۵');
   await page.getByRole('button', { name: 'ذخیره خدمت' }).click();
@@ -131,6 +132,7 @@ test('validation, version conflict and uncertain network retry preserve intent a
   await navigation(page, 'خدمات');
   await page.getByRole('button', { name: 'خدمت جدید', exact: true }).click();
   await page.getByLabel('نام خدمت').fill('رنگ مو');
+  await page.getByLabel('دسته خدمت', { exact: true }).selectOption('color');
   await page.getByLabel('قیمت (تومان)').fill('1e3');
   await page.getByRole('button', { name: 'ذخیره خدمت' }).click();
   await expect(page.getByRole('alert').first()).toContainText('صحیح');

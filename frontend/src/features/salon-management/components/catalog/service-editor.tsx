@@ -1,11 +1,13 @@
-import { useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { TextField } from '../../../../components/ui/text-field';
 import { Button } from '../../../../components/ui/button';
 import * as api from '../../api/management.api';
 import type { SalonService } from '../../model/management.types';
 import { tomanToRial, whole } from '../../model/form-values';
 import { useManagedMutation } from '../../hooks/use-managed-mutation';
-import { RequestFeedback } from '../request-feedback';
+import { useRemote } from '../../../../lib/hooks/use-remote';
+import { categories as loadCategories } from '../../../public-catalog';
+import { LoadState, RequestFeedback } from '../request-feedback';
 export function ServiceEditor({
   businessId,
   service,
@@ -17,7 +19,10 @@ export function ServiceEditor({
   onSaved: () => void | Promise<void>;
   onCancel: () => void;
 }) {
+  const categoryFieldId = useId();
+  const categories = useRemote('service-categories', loadCategories);
   const [form, setForm] = useState({
+    category_id: service?.category_id ?? '',
     name: service?.name ?? '',
     price: String((service?.price_irr ?? 0) / 10),
     duration: String(service?.duration_minutes ?? 30),
@@ -31,6 +36,7 @@ export function ServiceEditor({
     event.preventDefault();
     try {
       const body = {
+        category_id: form.category_id,
         name: form.name,
         price_irr: tomanToRial(form.price),
         duration_minutes: whole(form.duration, 'duration_minutes', 1, 720),
@@ -59,6 +65,44 @@ export function ServiceEditor({
         className="space-y-4"
         disabled={mutation.pending || mutation.uncertain}
       >
+        <LoadState
+          loading={categories.loading}
+          error={categories.error}
+          retry={() => void categories.reload()}
+        />
+        <div className="space-y-2">
+          <label
+            htmlFor={categoryFieldId}
+            className="block font-bold"
+          >
+            دسته خدمت
+          </label>
+          <select
+            id={categoryFieldId}
+            required
+            className="block min-h-11 w-full rounded-xl border border-line bg-surface p-3 text-base"
+            value={form.category_id}
+            onChange={(e) => change('category_id', e.target.value)}
+          >
+            <option value="">انتخاب دسته</option>
+            {categories.data?.map((c) => (
+              <option
+                key={c.id}
+                value={c.id}
+              >
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        {mutation.fields.category_id && (
+          <p
+            role="alert"
+            className="text-danger"
+          >
+            {mutation.fields.category_id}
+          </p>
+        )}
         <TextField
           label="نام خدمت"
           value={form.name}

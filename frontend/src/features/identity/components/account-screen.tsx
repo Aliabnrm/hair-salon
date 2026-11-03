@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { useRef, useState } from 'react';
 import { Button, buttonStyles } from '../../../components/ui/button';
 import { Icon } from '../../../components/ui/icon';
@@ -8,7 +9,7 @@ import { StatePanel } from '../../../components/ui/state-panel';
 import { useSession } from '../hooks/use-session';
 import { authFormError } from '../model/auth-form-errors';
 
-export function AccountScreen() {
+export function AccountScreen({ workspaceTools }: { workspaceTools?: ReactNode }) {
   const { user, status, refresh, signOut } = useSession();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -120,6 +121,7 @@ export function AccountScreen() {
                 />
               </Link>
             </section>
+            {workspaceTools}
             <div className="border-t border-line pt-4">
               <Button
                 variant="ghost"
@@ -169,7 +171,7 @@ export function AccountScreen() {
           </StatePanel>
         )}
         <p className="text-sm leading-7 text-muted">
-          سالن‌ها فعلاً خصوصی‌اند؛ رزرو و بازیابی رمز هنوز فعال نیستند.
+          انتشار سالن پس از بررسی انجام می‌شود؛ رزرو و بازیابی رمز هنوز فعال نیستند.
         </p>
       </div>
     </div>

@@ -1,23 +1,68 @@
-'use client';
-import { useState } from 'react';
-import { categories, cities, demoSalons } from '../data/demo-salons';
-import { defaultFilters, filterSalons, updateFilters } from '../model/filter-salons';
-import type { DiscoveryFilters } from '../model/discovery.types';
-
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useRemote } from '../../../lib/hooks/use-remote';
+import * as api from '../../public-catalog/api/catalog.api';
 export function useDiscoveryFilters() {
-  const [filters, setFilters] = useState(defaultFilters);
-  const update = (patch: Partial<DiscoveryFilters>) =>
-    setFilters((current) => updateFilters(current, patch));
-  const city = cities.find((c) => c.id === filters.cityId) ?? cities[0];
-  if (!city) throw new Error('At least one supported demo city is required.');
+  const router = useRouter(),
+    params = useSearchParams(),
+    query = params.toString();
+  const urlQuery = params.get('q') ?? '';
+  const [search, setSearch] = useState(urlQuery);
+  const [edit, setEdit] = useState(false);
+  useEffect(() => {
+    setSearch(urlQuery);
+    setEdit(false);
+  }, [urlQuery]);
+  function update(patch: Record<string, string | null>) {
+    const next = new URLSearchParams(query);
+    next.delete('cursor');
+    for (const [key, value] of Object.entries(patch)) {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    }
+    const value = next.toString();
+    router.push(value ? '/?' + value : '/', { scroll: false });
+  }
+  useEffect(() => {
+    if (!edit) return;
+    const timer = setTimeout(() => {
+      const next = new URLSearchParams(query);
+      next.delete('cursor');
+      if (search.trim()) next.set('q', search.trim());
+      else next.delete('q');
+      const value = next.toString();
+      if (value !== query) router.push(value ? '/?' + value : '/', { scroll: false });
+      setEdit(false);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [search, edit, query, router]);
+  const results = useRemote(query, (s) => api.salons(query, s));
+  const categories = useRemote('categories', api.categories);
+  const locations = useRemote('locations', api.locations);
   return {
-    filters,
+    params,
+    query,
+    search,
+    setSearch: (value: string) => {
+      setSearch(value);
+      setEdit(true);
+    },
     update,
-    city,
-    locationLabel: `${city.name}، ${filters.neighborhood === 'all' ? 'همه محله‌ها' : filters.neighborhood}`,
-    visibleCategories: categories.filter(
-      (c) => filters.type === 'all' || c.types.includes(filters.type),
-    ),
-    results: filterSalons(demoSalons, filters),
+    results,
+    categories,
+    locations,
+    next: () => {
+      const c = results.data?.next_cursor;
+      if (c) {
+        const p = new URLSearchParams(query);
+        p.set('cursor', c);
+        router.push('/?' + p.toString(), { scroll: false });
+      }
+    },
+    reset: () => {
+      setSearch('');
+      setEdit(false);
+      router.push('/', { scroll: false });
+    },
   };
 }

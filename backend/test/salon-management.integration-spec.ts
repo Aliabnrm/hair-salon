@@ -9,6 +9,7 @@ const origin = 'http://localhost:3000',
   password = 'test-only-strong-password';
 const businessBody = { name: 'سالن خصوصی', audience: 'women', city: 'تهران' };
 const serviceBody = {
+  category_id: 'haircut',
   name: 'کوتاهی مو',
   price_irr: 2500000,
   duration_minutes: 45,

@@ -15,7 +15,11 @@ export async function configureApplication(app: NestExpressApplication): Promise
   app.setGlobalPrefix('api/v1');
   app.use(requestIdMiddleware(app.get(ConsoleLogger)));
   app.use((request: Request, response: Response, next: NextFunction) => {
-    if (/^\/api\/v1\/(?:auth(?:\/|$)|me(?:\/|$)|businesses(?:\/|$))/.test(request.path))
+    if (
+      /^\/api\/v1\/(?:auth(?:\/|$)|me(?:\/|$)|businesses(?:\/|$)|catalog(?:\/|$)|review(?:\/|$))/.test(
+        request.path,
+      )
+    )
       response.setHeader('Cache-Control', 'no-store');
     next();
   });

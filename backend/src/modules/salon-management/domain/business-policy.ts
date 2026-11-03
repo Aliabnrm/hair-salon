@@ -2,6 +2,7 @@ import { invalid } from '../../../common/domain/capability-error.js';
 import { object, text } from './validation.js';
 import type { BusinessInput } from './management.types.js';
 export const businessFields = [
+  'description',
   'name',
   'audience',
   'city',
@@ -27,5 +28,6 @@ export function businessInput(value: unknown): BusinessInput {
     public_address:
       p.public_address == null ? null : text(p.public_address, 'public_address', 1, 500),
     public_phone: phone,
+    description: p.description == null ? null : text(p.description, 'description', 0, 600) || null,
   };
 }

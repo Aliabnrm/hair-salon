@@ -1,82 +1,51 @@
+import Link from 'next/link';
 import { Icon } from '../../../components/ui/icon';
-import type { DemoSalon, CategoryId } from '../model/discovery.types';
-import { startingPrice } from '../model/filter-salons';
-
-export function SalonCard({
-  salon,
-  category,
-  onSelect,
-}: {
-  salon: DemoSalon;
-  category: CategoryId | null;
-  onSelect: () => void;
-}) {
+import type { SalonSummary } from '../../public-catalog';
+import { formatPrice } from '../../public-catalog';
+export function SalonCard({ salon }: { salon: SalonSummary }) {
   return (
     <li>
-      <button
-        className="group block w-full overflow-hidden rounded-3xl border border-line bg-surface text-start shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-lift"
-        onClick={onSelect}
-        type="button"
-        aria-label={`نمایش سالن نمونه ${salon.name}`}
+      <Link
+        href={`/salons/${salon.id}`}
+        prefetch={false}
+        className="group block overflow-hidden rounded-3xl border border-line bg-surface shadow-card transition-colors hover:border-petrol"
       >
-        <span className="relative block h-40 overflow-hidden bg-sand">
-          <img
-            alt={salon.imageAlt}
-            className="size-full object-cover transition duration-500 group-hover:scale-[1.03]"
-            loading="lazy"
-            width={900}
-            height={640}
-            src={salon.image}
-          />
-          <span className="absolute start-3 top-3">
-            <span
-              className={`inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-xs font-bold ${salon.type === 'men' ? 'bg-petrol-soft text-petrol-deep' : 'bg-clay-soft text-clay'}`}
-            >
-              <Icon
-                name={salon.type === 'men' ? 'scissors' : 'sparkle'}
-                size={14}
-              />
-              {salon.type === 'men' ? 'آرایشگاه مردانه' : 'سالن زیبایی بانوان'}
-            </span>
+        <div
+          className={`flex min-h-28 items-center gap-4 p-5 ${salon.audience === 'women' ? 'bg-clay-soft' : 'bg-petrol-soft'}`}
+        >
+          <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-surface text-petrol">
+            <Icon
+              name="scissors"
+              size={32}
+            />
           </span>
-        </span>
-        <span className="block p-4">
-          <span className="flex items-start justify-between gap-3">
-            <span className="min-w-0">
-              <span className="block truncate text-lg font-extrabold text-ink">{salon.name}</span>
-              <span className="mt-1 flex items-center gap-1 text-sm text-ink-soft">
-                <Icon
-                  name="pin"
-                  size={15}
-                />
-                {salon.neighborhood}
-              </span>
+          <div className="min-w-0">
+            <p className="text-sm text-ink-soft">
+              {salon.audience === 'women' ? 'سالن زیبایی بانوان' : 'آرایشگاه مردانه'}
+            </p>
+            <h3 className="mt-2 break-words text-xl font-extrabold leading-8">{salon.name}</h3>
+          </div>
+        </div>
+        <div className="p-4">
+          <p className="flex items-start gap-2 leading-7 text-ink-soft">
+            <Icon
+              name="pin"
+              size={18}
+            />
+            <span className="break-words">
+              {salon.city}
+              {salon.district ? `، ${salon.district}` : ''}
             </span>
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-petrol-soft px-2.5 py-1 text-sm font-bold text-petrol-deep">
-              <Icon
-                name="clock"
-                size={14}
-              />
-              {salon.hours}
-            </span>
-          </span>
-          <span className="mt-4 flex items-center justify-between gap-2 border-t border-line pt-3">
-            <span className="text-sm text-ink-soft">
-              از{' '}
-              <strong className="text-base font-extrabold text-ink">
-                {startingPrice(salon, category)}
-              </strong>
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-muted">
-              <Icon
-                name="info"
-                size={14}
-              />
-              داده نمایشی
-            </span>
-          </span>
-        </span>
-      </button>
+          </p>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
+            <p className="text-sm text-ink-soft">
+              خدمات از{' '}
+              <strong className="text-base text-ink">{formatPrice(salon.min_price_irr)}</strong>
+            </p>
+            <span className="text-sm font-bold text-petrol">مشاهده سالن ←</span>
+          </div>
+        </div>
+      </Link>
     </li>
   );
 }

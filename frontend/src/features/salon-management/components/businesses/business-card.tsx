@@ -38,7 +38,7 @@ export function BusinessCard({ business }: { business: Business }) {
           <span className="text-sm text-ink-soft">
             {business.audience === 'women' ? 'سالن زنانه' : 'سالن مردانه'}
           </span>
-          <DraftBadge />
+          <DraftBadge state={business.state} />
           <span className="ms-auto inline-flex items-center gap-1 text-sm font-bold text-petrol">
             مدیریت
             <Icon

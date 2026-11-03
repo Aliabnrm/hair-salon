@@ -6,7 +6,8 @@ export function validateBackendOrigin(value: unknown): string {
     if (
       url.origin !== value ||
       !['http:', 'https:'].includes(url.protocol) ||
-      (url.protocol === 'http:' && !['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname))
+      (url.protocol === 'http:' &&
+        !['127.0.0.1', 'localhost', '[::1]', 'api'].includes(url.hostname))
     )
       throw invalid();
     return value;

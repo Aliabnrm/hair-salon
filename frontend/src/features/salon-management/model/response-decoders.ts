@@ -12,7 +12,10 @@ import { record, string, number, boolean, array } from '../../../lib/api/respons
 const nullable = (v: unknown) => (v === null ? null : string(v));
 export function business(v: unknown): Business {
   const p = record(v);
-  if ((p.audience !== 'men' && p.audience !== 'women') || p.state !== 'draft')
+  if (
+    (p.audience !== 'men' && p.audience !== 'women') ||
+    !['draft', 'pending_review', 'published', 'suspended'].includes(String(p.state))
+  )
     throw new HttpFailure(502, 'INVALID_RESPONSE');
   return {
     id: string(p.id),
@@ -23,7 +26,8 @@ export function business(v: unknown): Business {
     public_address: nullable(p.public_address),
     public_phone: nullable(p.public_phone),
     version: number(p.version),
-    state: 'draft',
+    state: publicationState(p.state),
+    description: nullable(p.description),
     timezone: string(p.timezone),
     created_at: string(p.created_at),
   };
@@ -34,6 +38,7 @@ export function service(v: unknown): SalonService {
   return {
     id: string(p.id),
     name: string(p.name),
+    category_id: nullable(p.category_id),
     price_irr: number(p.price_irr),
     duration_minutes: number(p.duration_minutes),
     buffer_before_minutes: number(p.buffer_before_minutes),
@@ -47,6 +52,7 @@ export function staff(v: unknown): Staff {
   const p = record(v);
   return {
     id: string(p.id),
+    public_visible: boolean(p.public_visible),
     display_name: string(p.display_name),
     service_ids: array(p.service_ids, string),
     active: boolean(p.active),
@@ -85,4 +91,9 @@ export function page<T>(v: unknown, decode: (x: unknown) => T): Page<T> {
     items: array(p.items, decode),
     next_cursor: nullable(p.next_cursor),
   };
+}
+
+export function publicationState(v: unknown): Business['state'] {
+  if (v === 'draft' || v === 'pending_review' || v === 'published' || v === 'suspended') return v;
+  throw new HttpFailure(502, 'INVALID_RESPONSE');
 }

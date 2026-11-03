@@ -12,6 +12,7 @@ import {
   IdentityExceptionFilter,
 } from '../../../identity/public.js';
 import { ApiErrorDto } from '../../../../common/http/api-error.js';
+import * as publicationDto from './dto/publication.dto.js';
 import * as dto from './dto/management.dto.js';
 export function ManagementApi() {
   return applyDecorators(
@@ -19,7 +20,7 @@ export function ManagementApi() {
     UseFilters(IdentityExceptionFilter),
     ApiCookieAuth('session'),
     ApiTags('salon-management'),
-    ApiExtraModels(...Object.values(dto)),
+    ApiExtraModels(...Object.values(dto), ...Object.values(publicationDto)),
     ...[400, 401, 403, 404, 409, 413, 415, 422, 428, 429, 503].map((status) =>
       ApiResponse({ status, type: ApiErrorDto }),
     ),

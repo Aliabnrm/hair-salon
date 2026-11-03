@@ -39,7 +39,7 @@ export function BusinessSettingsScreen({ businessId }: { businessId: string }) {
       >
         {query.data && (
           <div className="mt-3">
-            <DraftBadge />
+            <DraftBadge state={query.data.state} />
           </div>
         )}
       </PrivatePageHeader>
@@ -51,7 +51,8 @@ export function BusinessSettingsScreen({ businessId }: { businessId: string }) {
         <div>
           <h2 className="text-xl font-bold">مشخصات سالن</h2>
           <p className="mt-2 text-sm leading-7 text-muted">
-            این پیش‌نویس خصوصی است و هنوز منتشر یا قابل رزرو نیست.
+            وضعیت واقعی انتشار بالا نمایش داده می‌شود. هر ویرایش تازه به بررسی مجدد نیاز دارد؛ رزرو
+            هنوز فعال نیست.
           </p>
         </div>
         <LoadState

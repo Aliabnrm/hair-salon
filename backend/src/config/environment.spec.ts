@@ -15,12 +15,21 @@ const validate = (input: Record<string, unknown>) =>
 describe('environment validation', () => {
   it('uses documented defaults only for absent settings', () => {
     expect(validate({})).toEqual({
+      HOST: '127.0.0.1',
       PORT: 3001,
       NODE_ENV: 'development',
       DATABASE_URL,
       AUTH_ALLOWED_ORIGINS: [AUTH_ALLOWED_ORIGINS],
       AUTH_RATE_LIMIT_SECRET,
     });
+  });
+
+  it('allows container listening only through an explicit host setting', () => {
+    expect(validate({ HOST: '0.0.0.0' }).HOST).toBe('0.0.0.0');
+    expect(() => validate({ HOST: 'untrusted-host' })).toThrow(
+      'HOST must be 127.0.0.1 or 0.0.0.0.',
+    );
+    expect(() => validate({ HOST: '' })).toThrow('HOST must be');
   });
 
   it.each(['1', '3001', '65535'])('accepts decimal port %s', (port) => {
@@ -68,6 +77,7 @@ describe('environment validation', () => {
 
   it('returns only the settings consumed by the application', () => {
     expect(validate({ INTERNAL_SECRET: 'test-only-value' })).toEqual({
+      HOST: '127.0.0.1',
       PORT: 3001,
       NODE_ENV: 'development',
       DATABASE_URL,

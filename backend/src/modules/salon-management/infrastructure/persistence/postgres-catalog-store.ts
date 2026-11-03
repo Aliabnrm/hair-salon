@@ -10,7 +10,7 @@ import type {
 } from '../../domain/management.types.js';
 import { BusinessWriteTransaction } from './business-write-transaction.js';
 import { cursor, page, scope } from './management-pagination.js';
-const projection = `id,name,price_irr::float8 AS price_irr,duration_minutes,buffer_before_minutes,buffer_after_minutes,active,version,'IRR'::text AS currency`;
+const projection = `category_id,id,name,price_irr::float8 AS price_irr,duration_minutes,buffer_before_minutes,buffer_after_minutes,active,version,'IRR'::text AS currency`;
 @Injectable()
 export class PostgresCatalogStore extends CatalogStore {
   constructor(private readonly write: BusinessWriteTransaction) {
@@ -43,7 +43,7 @@ export class PostgresCatalogStore extends CatalogStore {
       if ((c.rows[0]?.count ?? 0) >= managementLimits.servicesPerBusiness)
         conflict('SERVICE_LIMIT', 'حداکثر صد خدمت مجاز است.');
       const r = await tx.query<SalonService>(
-        `INSERT INTO app.services(business_id,name,price_irr,duration_minutes,buffer_before_minutes,buffer_after_minutes) VALUES($1,$2,$3,$4,$5,$6) RETURNING ${projection}`,
+        `INSERT INTO app.services(business_id,name,price_irr,duration_minutes,buffer_before_minutes,buffer_after_minutes,category_id) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING ${projection}`,
         [
           command.businessId,
           input.name,
@@ -51,6 +51,7 @@ export class PostgresCatalogStore extends CatalogStore {
           input.duration_minutes,
           input.buffer_before_minutes,
           input.buffer_after_minutes,
+          input.category_id ?? null,
         ],
       );
       return r.rows[0] ?? notFound();
@@ -65,7 +66,7 @@ export class PostgresCatalogStore extends CatalogStore {
       if (!old.rows[0]) notFound();
       this.write.version(old.rows[0].version, command.version);
       const r = await tx.query<SalonService>(
-        `UPDATE app.services SET name=$3,price_irr=$4,duration_minutes=$5,buffer_before_minutes=$6,buffer_after_minutes=$7,active=$8,version=version+1,updated_at=now() WHERE business_id=$1 AND id=$2 RETURNING ${projection}`,
+        `UPDATE app.services SET name=$3,price_irr=$4,duration_minutes=$5,buffer_before_minutes=$6,buffer_after_minutes=$7,category_id=$8,active=$9,version=version+1,updated_at=now() WHERE business_id=$1 AND id=$2 RETURNING ${projection}`,
         [
           command.businessId,
           id,
@@ -74,6 +75,7 @@ export class PostgresCatalogStore extends CatalogStore {
           input.duration_minutes,
           input.buffer_before_minutes,
           input.buffer_after_minutes,
+          input.category_id ?? null,
           active,
         ],
       );

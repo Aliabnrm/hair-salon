@@ -25,7 +25,10 @@
     "db:migrate": "pnpm --filter @hair-salon/api run db:migrate",
     "test:integration": "pnpm --filter @hair-salon/api run test:integration",
     "dev:frontend": "pnpm --filter @hair-salon/frontend run dev",
-    "test:browser": "pnpm --filter @hair-salon/frontend run test:browser"
+    "test:browser": "pnpm --filter @hair-salon/frontend run test:browser",
+    "docker:up": "docker compose --profile app up --build -d --wait",
+    "docker:down": "docker compose --profile app down",
+    "docker:logs": "docker compose --profile app logs -f"
   },
   "devDependencies": {
     "prettier": "3.9.10"

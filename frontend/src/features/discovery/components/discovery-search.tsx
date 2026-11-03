@@ -18,6 +18,7 @@ export function DiscoverySearch({
         enterKeyHint="search"
         onChange={(event) => onChange(event.target.value)}
         placeholder="جستجوی خدمت، سالن یا محله"
+        maxLength={100}
         type="search"
         value={query}
       />

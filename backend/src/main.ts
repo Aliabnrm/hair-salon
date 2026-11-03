@@ -15,7 +15,7 @@ async function bootstrap(): Promise<void> {
   await configureApplication(app);
   app.enableShutdownHooks();
   const config = app.get(ConfigService<Environment, true>);
-  await app.listen(config.get('PORT', { infer: true }), '127.0.0.1');
+  await app.listen(config.get('PORT', { infer: true }), config.get('HOST', { infer: true }));
 }
 
 try {
@@ -23,7 +23,7 @@ try {
 } catch {
   // Do not echo the configuration or an arbitrary exception containing secrets.
   process.stderr.write(
-    'API startup failed. Check PORT, NODE_ENV, DATABASE_URL, AUTH settings and local setup.\n',
+    'API startup failed. Check HOST, PORT, NODE_ENV, DATABASE_URL, AUTH settings and local setup.\n',
   );
   process.exitCode = 1;
 }

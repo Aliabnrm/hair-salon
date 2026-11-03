@@ -31,6 +31,11 @@ export const businesses = appSchema.table(
     district: text('district'),
     publicAddress: text('public_address'),
     publicPhone: text('public_phone'),
+    description: text('description'),
+    contentRevision: integer('content_revision').notNull().default(1),
+    publicationVersion: integer('publication_version').notNull().default(1),
+    currentRequestId: uuid('current_request_id'),
+    searchText: text('search_text').notNull().default(''),
     state: text('state').notNull().default('draft'),
     timezone: text('timezone').notNull().default('Asia/Tehran'),
     version: integer('version').notNull().default(1),
@@ -38,7 +43,22 @@ export const businesses = appSchema.table(
     ...times(),
   },
   (t) => [
-    check('business_state', sql`${t.state} = 'draft'`),
+    check('business_state', sql`${t.state} IN ('draft','pending_review','published','suspended')`),
+    index('public_businesses_order_idx')
+      .on(t.createdAt, t.id)
+      .where(sql`${t.state}='published'`),
+    check(
+      'business_publication_versions',
+      sql`${t.contentRevision}>0 AND ${t.publicationVersion}>0`,
+    ),
+    check(
+      'business_description_length',
+      sql`${t.description} IS NULL OR char_length(${t.description})<=600`,
+    ),
+    check(
+      'publication_request_required',
+      sql`(${t.state} IN ('pending_review','published')) = (${t.currentRequestId} IS NOT NULL)`,
+    ),
     check('business_timezone', sql`${t.timezone} = 'Asia/Tehran'`),
     check('business_audience', sql`${t.audience} IN ('men','women')`),
     check('business_name', sql`char_length(trim(${t.name})) BETWEEN 2 AND 120`),
@@ -73,6 +93,7 @@ export const services = appSchema.table(
       .notNull()
       .references(() => businesses.id),
     name: text('name').notNull(),
+    categoryId: text('category_id').references(() => serviceCategories.id),
     priceIrr: bigint('price_irr', { mode: 'number' }).notNull(),
     durationMinutes: integer('duration_minutes').notNull(),
     bufferBeforeMinutes: integer('buffer_before_minutes').notNull(),
@@ -101,6 +122,7 @@ export const staffProfiles = appSchema.table(
       .notNull()
       .references(() => businesses.id),
     displayName: text('display_name').notNull(),
+    publicVisible: boolean('public_visible').notNull().default(false),
     active: boolean('active').notNull().default(true),
     version: integer('version').notNull().default(1),
     hoursVersion: integer('hours_version').notNull().default(1),
@@ -255,3 +277,49 @@ export const managementAudit = appSchema.table(
   },
   (t) => [index('management_audit_business_idx').on(t.businessId, t.occurredAt)],
 );
+
+export const serviceCategories = appSchema.table('service_categories', {
+  id: text('id').primaryKey(),
+  label: text('label').notNull(),
+  sortOrder: integer('sort_order').notNull(),
+  active: boolean('active').notNull().default(true),
+});
+export const publicationEvents = appSchema.table(
+  'publication_events',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    businessId: uuid('business_id')
+      .notNull()
+      .references(() => businesses.id),
+    actorId: uuid('actor_id')
+      .notNull()
+      .references(() => users.id),
+    action: text('action').notNull(),
+    revision: integer('revision').notNull(),
+    publicationVersion: integer('publication_version').notNull().default(1),
+    requestId: uuid('request_id'),
+    reason: text('reason'),
+    consent: boolean('consent').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('publication_events_business_idx').on(t.businessId, t.createdAt),
+    unique('publication_event_version').on(t.businessId, t.publicationVersion),
+    unique('publication_event_tenant_id').on(t.businessId, t.id),
+  ],
+);
+export const reviewerPermissions = appSchema.table('reviewer_permissions', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id),
+  active: boolean('active').notNull().default(false),
+});
+export const reviewerPermissionHistory = appSchema.table('reviewer_permission_history', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  active: boolean('active').notNull(),
+  reason: text('reason').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});

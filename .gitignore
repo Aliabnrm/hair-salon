@@ -8,3 +8,8 @@ coverage/
 work/
 .DS_Store
 *.log
+
+# Frontend generated output and local browser artifacts
+.next/
+playwright-report/
+test-results/

@@ -1,0 +1,42 @@
+{
+  "fileKey": "Pxck6iAPnHETK1U4nIryUx",
+  "extractedAt": "2026-10-29",
+  "method": "Figma desktop Files; read-only source selection/copy; original files kept under ignored work/figma-source",
+  "files": [
+    {
+      "path": "src/App.tsx",
+      "bytes": 108486,
+      "sha256": "ab1da01af909adffc16d91c989e64453aaddb89f15a6536cd6efdefe932f4ca7"
+    },
+    {
+      "path": "src/salon/BusinessApp.tsx",
+      "bytes": 51610,
+      "sha256": "03005a7497d80a86864a627522f0324067488e249f186fd04e1562383a856152"
+    },
+    {
+      "path": "src/salon/data.ts",
+      "bytes": 21358,
+      "sha256": "94ec3f39e0400ece216f556dedce36572f51bcb64d22c4bfa76fc6cb33f2cfe1"
+    },
+    {
+      "path": "src/salon/format.ts",
+      "bytes": 3625,
+      "sha256": "88c1ca09cee9425cf06a7d0bae10db5c28483d4179fbc769205cbd18c2825f3e"
+    },
+    {
+      "path": "src/salon/ui.tsx",
+      "bytes": 13320,
+      "sha256": "8cd91dee6ef11dd4787c0ef5dd8c19ba61dd76a46df198ff5e1b7001695535ef"
+    },
+    {
+      "path": "src/index.css",
+      "bytes": 3175,
+      "sha256": "f3d2046b93ba1bb8752b4ebb451736a7de1eb04e3225bc37ff14406b50eddad5"
+    },
+    {
+      "path": "public/favicon.svg",
+      "bytes": 3235,
+      "sha256": "84856b1fa530b1ef445f1ea2c8eba3fe6518f6f90f8ef21f15177644ddeaeac5"
+    }
+  ]
+}

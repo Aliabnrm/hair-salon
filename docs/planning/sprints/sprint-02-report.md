@@ -1,5 +1,7 @@
 # گزارش اجرای اسپرینت ۲ — PostgreSQL Foundation
 
+یادداشت مسیر: API در اسپرینت ۳ به backend منتقل شد؛ فرمان‌ها و نتیجه‌های این گزارش مربوط به زمان همان اجرا هستند.
+
 تاریخ: ۲۰۲۶-۱۰-۲۹، Asia/Tehran. محدوده: [طرح مصوب](sprint-02-plan.md) و [پرامپت](../../prompts/sprint-02.md). پیاده‌سازی و آزمون محلی انجام شده؛ وضعیت CI آخرین commit و تحویل برای مرور در [PR #3](https://github.com/Aliabnrm/hair-salon/pull/3) قابل مشاهده است. اسپرینت ۳ شروع نشده است.
 
 ## چه ساخته شد و چرا؟
@@ -21,18 +23,18 @@ migration اولیه فقط namespace مشترک app و extension btree_gist ر�
 
 ## فایل‌های اصلی
 
-| مسیر | مسئولیت |
-|---|---|
-| `apps/api/src/database/database.provider.ts` و `database.module.ts` | مالکیت Pool/Drizzle، DI و shutdown |
-| `database-health.port.ts` و `postgres-health-check.ts` | قرارداد Health و adapter محدود از نظر زمان |
-| `schema.ts`، `drizzle.config.ts` و `apps/api/drizzle/` | namespace واقعی و artifactهای migration |
-| `apps/api/src/database/migrate.ts` | CLI مستقل runner رسمی، exit درست و finally |
-| `apps/api/src/config/environment.ts` | validation مرکزی بدون echo مقدار |
-| `apps/api/src/modules/health/` | readiness، DI و پاسخ HTTP |
-| `apps/api/test/database.integration-spec.ts` | migration از صفر، journal/hash و اجرای مجدد |
-| `apps/api/test/readiness.integration-spec.ts` | قطعی/recovery، timeout، صف Pool و privacy |
-| `apps/api/test/helpers/test-database.ts` | guard مقصد و مالکیت cleanup |
-| `compose.yml` و `.github/workflows/ci.yml` | image هماهنگ، محیط محلی و CI واقعی |
+| مسیر                                                                | مسئولیت                                     |
+| ------------------------------------------------------------------- | ------------------------------------------- |
+| `apps/api/src/database/database.provider.ts` و `database.module.ts` | مالکیت Pool/Drizzle، DI و shutdown          |
+| `database-health.port.ts` و `postgres-health-check.ts`              | قرارداد Health و adapter محدود از نظر زمان  |
+| `schema.ts`، `drizzle.config.ts` و `apps/api/drizzle/`              | namespace واقعی و artifactهای migration     |
+| `apps/api/src/database/migrate.ts`                                  | CLI مستقل runner رسمی، exit درست و finally  |
+| `apps/api/src/config/environment.ts`                                | validation مرکزی بدون echo مقدار            |
+| `apps/api/src/modules/health/`                                      | readiness، DI و پاسخ HTTP                   |
+| `apps/api/test/database.integration-spec.ts`                        | migration از صفر، journal/hash و اجرای مجدد |
+| `apps/api/test/readiness.integration-spec.ts`                       | قطعی/recovery، timeout، صف Pool و privacy   |
+| `apps/api/test/helpers/test-database.ts`                            | guard مقصد و مالکیت cleanup                 |
+| `compose.yml` و `.github/workflows/ci.yml`                          | image هماهنگ، محیط محلی و CI واقعی          |
 
 در جدول، فایل‌های بدون prefix در ردیف database در همان پوشه `apps/api/src/database/` هستند. [ساختار واقعی کامل](../../architecture/codebase-structure.md) و [درس با فایل واقعی](../../learning/sprint-02.md) به‌روز شدند.
 
@@ -54,19 +56,19 @@ tag و digest از Docker Hub و official-images بررسی شدند. daemon Doc
 
 فرمان‌ها از ریشه و با runtime منتخب روی PATH اجرا شدند؛ TEST_DATABASE_URL به DB مدیریتی اختصاصی با نام hair_salon_test_admin اشاره داشت.
 
-| فرمان / بررسی | نتیجه |
-|---|---|
-| `npm install` با نسخه‌های exact و سپس `npm ci` | موفق، نصب تکرارپذیر از lockfile |
-| `npm run check` | exit 0؛ build/typecheck/lint/format:check و تمام تست‌ها |
-| `npm test` | ۴۳ تست واحد؛ config و HealthService از Port؛ موفق |
-| `npm run test:e2e` | ۳۲ تست؛ HTTP، OpenAPI، guard و startup فرایند واقعی؛ موفق |
-| `npm run test:integration` | ۹ تست با PostgreSQL واقعی، دو فایل متوالی؛ موفق |
-| `npm run db:migrate` | اجرای مستقل روی DB اختصاصی خالی، exit 0 و پایان فرایند |
-| Drizzle Kit generate پس از هماهنگی snapshot | No schema changes؛ migration اضافی تولید نشد |
-| `docker compose -f compose.yml config --quiet` | exit 0؛ فقط validation تنظیمات، نه اجرای کانتینر |
-| `git diff --check` | موفق |
-| `npm audit --omit=dev --json` | صفر advisory شناخته‌شده runtime در زمان بررسی |
-| `npm audit --json` | چهار moderate در ابزار توسعه؛ جزئیات زیر |
+| فرمان / بررسی                                  | نتیجه                                                     |
+| ---------------------------------------------- | --------------------------------------------------------- |
+| `npm install` با نسخه‌های exact و سپس `npm ci` | موفق، نصب تکرارپذیر از lockfile                           |
+| `npm run check`                                | exit 0؛ build/typecheck/lint/format:check و تمام تست‌ها   |
+| `npm test`                                     | ۴۳ تست واحد؛ config و HealthService از Port؛ موفق         |
+| `npm run test:e2e`                             | ۳۲ تست؛ HTTP، OpenAPI، guard و startup فرایند واقعی؛ موفق |
+| `npm run test:integration`                     | ۹ تست با PostgreSQL واقعی، دو فایل متوالی؛ موفق           |
+| `npm run db:migrate`                           | اجرای مستقل روی DB اختصاصی خالی، exit 0 و پایان فرایند    |
+| Drizzle Kit generate پس از هماهنگی snapshot    | No schema changes؛ migration اضافی تولید نشد              |
+| `docker compose -f compose.yml config --quiet` | exit 0؛ فقط validation تنظیمات، نه اجرای کانتینر          |
+| `git diff --check`                             | موفق                                                      |
+| `npm audit --omit=dev --json`                  | صفر advisory شناخته‌شده runtime در زمان بررسی             |
+| `npm audit --json`                             | چهار moderate در ابزار توسعه؛ جزئیات زیر                  |
 
 مجموع **۸۴ تست** واقعی موفق بودند؛ ۹ integration جایگزین با SQLite یا mock نشده‌اند. migration تست‌ها child process واقعی است و بعد از پایان منابعش باز نمی‌مانند. بررسی‌های قبلی اسپرینت ۱ جای تست جدید استفاده نشدند؛ تمام آن‌ها در check تازه دوباره اجرا شدند.
 
@@ -84,14 +86,14 @@ tag و digest از Docker Hub و official-images بررسی شدند. daemon Doc
 
 جدا از Vitest، `npm run db:migrate` و سپس برنامه ساخته‌شده در production روی پورت آزاد اجرا شدند. PostgreSQL فقط cluster اختصاصی همین کار بود؛ stop/start با pg_ctl روی مسیر همان cluster انجام شد.
 
-| وضعیت | liveness | readiness | شاهد |
-|---|---|---|---|
-| startup در حالی که DB خاموش است | 200 | 503 | Pool lazy، فرایند زنده |
-| روشن‌شدن DB | 200 | 200 | همان PID برنامه |
-| توقف فیزیکی دوباره DB | 200 | 503 | پاسخ امن و request-id صحیح |
-| روشن‌شدن دوباره DB | 200 | 200 | recovery بدون restart API |
-| production docs | — | — | /api/docs برابر 404 |
-| SIGTERM | — | — | فرایند با signal بسته شد؛ پورت بسته و log بدون sentinel |
+| وضعیت                           | liveness | readiness | شاهد                                                    |
+| ------------------------------- | -------- | --------- | ------------------------------------------------------- |
+| startup در حالی که DB خاموش است | 200      | 503       | Pool lazy، فرایند زنده                                  |
+| روشن‌شدن DB                     | 200      | 200       | همان PID برنامه                                         |
+| توقف فیزیکی دوباره DB           | 200      | 503       | پاسخ امن و request-id صحیح                              |
+| روشن‌شدن دوباره DB              | 200      | 200       | recovery بدون restart API                               |
+| production docs                 | —        | —         | /api/docs برابر 404                                     |
+| SIGTERM                         | —        | —         | فرایند با signal بسته شد؛ پورت بسته و log بدون sentinel |
 
 DB موقت smoke حذف و cluster اختصاصی هم در پایان متوقف شد؛ API و relay آزمایشی روشن باقی نماندند. guard/cleanup تست‌ها فقط DB ساخته‌شده خودشان را حذف کردند. پیش از smoke تنها DB تست مدیریتی باقی مانده بود.
 
@@ -103,16 +105,16 @@ baseline: PR #1 روی main و PR #2 طرح روی شاخه foundation در شر
 
 CI از clone تمیز، Node منتخب، npm ci و check شامل PostgreSQL واقعی با همان image استفاده می‌کند. [Checks آخرین commit PR](https://github.com/Aliabnrm/hair-salon/pull/3/checks) مرجع نتیجه آنلاین همان SHA است؛ موفقیت محلی جدا از CI ثبت شده و نتیجه نهایی CI پس از مشاهده در تحویل اعلام می‌شود.
 
-| معیار | شاهد |
-|---|---|
-| S2-AC-01 | npm ci/check محلی، README دقیق و نصب از checkout در CI |
-| S2-AC-02 | unit URL و startup compiled با env غایب/نامعتبر، بدون sentinel |
+| معیار    | شاهد                                                                  |
+| -------- | --------------------------------------------------------------------- |
+| S2-AC-01 | npm ci/check محلی، README دقیق و نصب از checkout در CI                |
+| S2-AC-02 | unit URL و startup compiled با env غایب/نامعتبر، بدون sentinel        |
 | S2-AC-03 | integration migration از صفر، app/btree_gist/journal/hash و اجرای دوم |
-| S2-AC-04 | PostgreSQL واقعی، 200/503، timeout و liveness مستقل |
-| S2-AC-05 | recovery همان app، صف/socket cleanup، SIGTERM و پورت بسته |
-| S2-AC-06 | response/logهای ثبت‌شده بدون sentinel/URL/SQL/DB identity |
-| S2-AC-07 | check محلی ۸۴ تست؛ نتیجه CI همان SHA در PR checks |
-| S2-AC-08 | ADR، README، قرارداد، ساختار، راهنمای تست، این گزارش و درس فارسی |
+| S2-AC-04 | PostgreSQL واقعی، 200/503، timeout و liveness مستقل                   |
+| S2-AC-05 | recovery همان app، صف/socket cleanup، SIGTERM و پورت بسته             |
+| S2-AC-06 | response/logهای ثبت‌شده بدون sentinel/URL/SQL/DB identity             |
+| S2-AC-07 | check محلی ۸۴ تست؛ نتیجه CI همان SHA در PR checks                     |
+| S2-AC-08 | ADR، README، قرارداد، ساختار، راهنمای تست، این گزارش و درس فارسی      |
 
 مرور diff، مرز import، تکرار، مدیریت خطا، dependencyها و اطلاعات حساس انجام شد. common به Health وابسته نیست؛ HealthService فقط Port را می‌شناسد؛ pool/query فقط در adapter و CLI هستند. any/ts-ignore/cast پنهان‌کننده خطا و GenericRepository اضافه نشدند. آموزش کوتاه FK/index/transaction ادعای ساخته‌شدن مدل رزرو ندارد.
 

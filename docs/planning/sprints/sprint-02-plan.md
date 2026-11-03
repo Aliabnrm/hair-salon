@@ -68,16 +68,16 @@ apps/api/
 
 ## بررسی و معیار پذیرش
 
-| شناسه | معیار | شاهد لازم |
-|---|---|---|
-| S2-AC-01 | clone تمیز با env نمونه و دستورهای README به DB اختصاصی وصل شود | اجرای محلی و CI |
-| S2-AC-02 | URL غایب/خالی/نامعتبر قبل listen رد، مقدار حساس چاپ نشود | unit و startup واقعی |
-| S2-AC-03 | migration روی DB خالی app/btree_gist/journal معتبر بسازد و اجرای دوباره اثر اضافی نداشته باشد | integration روی PostgreSQL واقعی |
-| S2-AC-04 | readiness با DB واقعی 200 و با DB قطع/timeout،503 بدهد؛ liveness مستقل 200 بماند | HTTP integration؛ mock کافی نیست |
-| S2-AC-05 | برگشت DB باعث recovery همان app شود؛ pool/error/shutdown منابع را سالم مدیریت کنند | integration و بررسی بسته‌شدن فرایند |
-| S2-AC-06 | query و URL و sentinel حساس در خطا/log عمومی دیده نشوند | سناریوی خطا و ثبت log |
-| S2-AC-07 | تمام بررسی‌های اسپرینت ۱، تست‌های تازه و CI نهایی پاس شوند | check محلی و check همان SHA در GitHub |
-| S2-AC-08 | تصمیم، migration و ساختار واقعی مستند و درس ساده ارائه شود | ADR تکمیل‌شده، گزارش و درس پس از اجرا |
+| شناسه    | معیار                                                                                         | شاهد لازم                             |
+| -------- | --------------------------------------------------------------------------------------------- | ------------------------------------- |
+| S2-AC-01 | clone تمیز با env نمونه و دستورهای README به DB اختصاصی وصل شود                               | اجرای محلی و CI                       |
+| S2-AC-02 | URL غایب/خالی/نامعتبر قبل listen رد، مقدار حساس چاپ نشود                                      | unit و startup واقعی                  |
+| S2-AC-03 | migration روی DB خالی app/btree_gist/journal معتبر بسازد و اجرای دوباره اثر اضافی نداشته باشد | integration روی PostgreSQL واقعی      |
+| S2-AC-04 | readiness با DB واقعی 200 و با DB قطع/timeout،503 بدهد؛ liveness مستقل 200 بماند              | HTTP integration؛ mock کافی نیست      |
+| S2-AC-05 | برگشت DB باعث recovery همان app شود؛ pool/error/shutdown منابع را سالم مدیریت کنند            | integration و بررسی بسته‌شدن فرایند   |
+| S2-AC-06 | query و URL و sentinel حساس در خطا/log عمومی دیده نشوند                                       | سناریوی خطا و ثبت log                 |
+| S2-AC-07 | تمام بررسی‌های اسپرینت ۱، تست‌های تازه و CI نهایی پاس شوند                                    | check محلی و check همان SHA در GitHub |
+| S2-AC-08 | تصمیم، migration و ساختار واقعی مستند و درس ساده ارائه شود                                    | ADR تکمیل‌شده، گزارش و درس پس از اجرا |
 
 `npm run test:integration` به root/workspace اضافه شود؛ مقصد تست با `TEST_DATABASE_URL` مستقل است. مقدار آن اجباری، نام دیتابیس دارای پسوند `_test` یا پیشوند `hair_salon_test_` و میزبان محلی/سرویس CI صریح باشد. نبود آن نباید به DATABASE_URL توسعه fallback کند. cleanup فقط دیتابیس/schema موقت ایجادشده توسط همان suite را حذف کند؛ از دستور تخریب بدون guard یا داده مشترک استفاده نشود. چند suite روی DB مشترک migration یا DROP هم‌زمان اجرا نکنند.
 

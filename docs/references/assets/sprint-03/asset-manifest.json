@@ -1,0 +1,108 @@
+{
+  "fontLicense": "frontend/public/fonts/OFL.txt",
+  "photoSource": "Exact photo IDs/query parameters in Make; Unsplash Imgix CDN alias used because images.unsplash.com DNS was unavailable.",
+  "assets": [
+    {
+      "path": "frontend/public/fonts/vazirmatn-400.ttf",
+      "source": "https://fonts.gstatic.com/s/vazirmatn/v16/Dxx78j6PP2D_kU2muijPEe1n2vVbfJRklWgzORc.ttf",
+      "sha256": "7f3c44f0a0b45cd748519b2ad5729f8af5f7bf58dd48767c956d79f46611a3fb",
+      "bytes": 104640
+    },
+    {
+      "path": "frontend/public/fonts/vazirmatn-500.ttf",
+      "source": "https://fonts.gstatic.com/s/vazirmatn/v16/Dxx78j6PP2D_kU2muijPEe1n2vVbfJRklVozORc.ttf",
+      "sha256": "17eeef398c3fba0f4e1ca63df880ce2c4d35e4a01d77c58213cc1197b8609b10",
+      "bytes": 104724
+    },
+    {
+      "path": "frontend/public/fonts/vazirmatn-600.ttf",
+      "source": "https://fonts.gstatic.com/s/vazirmatn/v16/Dxx78j6PP2D_kU2muijPEe1n2vVbfJRklbY0ORc.ttf",
+      "sha256": "592ee06087937cd8703af1ffa0fda1db26b15e327a45d855aa745ea92217bb5c",
+      "bytes": 104868
+    },
+    {
+      "path": "frontend/public/fonts/vazirmatn-700.ttf",
+      "source": "https://fonts.gstatic.com/s/vazirmatn/v16/Dxx78j6PP2D_kU2muijPEe1n2vVbfJRklY80ORc.ttf",
+      "sha256": "489c29f4ba685a8f4aeb3f15e66f51197362cc60ae96bc7cdaa8ea1a52d58235",
+      "bytes": 105228
+    },
+    {
+      "path": "frontend/public/fonts/vazirmatn-800.ttf",
+      "source": "https://fonts.gstatic.com/s/vazirmatn/v16/Dxx78j6PP2D_kU2muijPEe1n2vVbfJRkleg0ORc.ttf",
+      "sha256": "83af90d73619a6cbd22b8e35656fdf83744214ed073b5823835de2569cd10bad",
+      "bytes": 105404
+    },
+    {
+      "path": "frontend/public/assets/salons/salon-mahour.jpg",
+      "source": "https://unsplash.imgix.net/photo-1576168056582-0a851a87ab8e?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=640",
+      "sha256": "7ed9a137d5b20db692b2739652ac22823eb72c074e8129048b82373d82a5815b",
+      "bytes": 134605
+    },
+    {
+      "path": "frontend/public/assets/salons/salon-niloufar.jpg",
+      "source": "https://unsplash.imgix.net/photo-1637777277435-3c44f82fd0c9?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=640",
+      "sha256": "934e1a71d8c1b827fdb49228383fe1401ffb43abcbf461867edea3e2846bc281",
+      "bytes": 55641
+    },
+    {
+      "path": "frontend/public/assets/salons/salon-sarv.jpg",
+      "source": "https://unsplash.imgix.net/photo-1790009419857-51fa0a2d9354?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=640",
+      "sha256": "00e77f3339d0f486dd0909e216ab6ddfdac50ef354a8a0dcc985954c26540452",
+      "bytes": 135601
+    },
+    {
+      "path": "frontend/public/assets/salons/salon-termeh.jpg",
+      "source": "https://unsplash.imgix.net/photo-1788985375145-81da8cc731a2?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=640",
+      "sha256": "dca664306f05e5797505ddf931c7e40952f55b9952cbade293fbe3f5f2cb29ae",
+      "bytes": 74857
+    },
+    {
+      "path": "frontend/public/assets/salons/salon-golbarg.jpg",
+      "source": "https://unsplash.imgix.net/photo-1775500835259-d3b3f6d6e2f2?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=640",
+      "sha256": "34d523766ff2f2526ad2bee1af99e88bdc721757d73ce5ac2c5dc8cf4c03e917",
+      "bytes": 207150
+    },
+    {
+      "path": "frontend/public/assets/salons/salon-arta.jpg",
+      "source": "https://unsplash.imgix.net/photo-1621645582931-d1d3e6564943?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=640",
+      "sha256": "56806bce8103de2b51a6c6f6406f701c15a226b4b54540e026a46765f013d4af",
+      "bytes": 78712
+    },
+    {
+      "path": "frontend/public/assets/salons/salon-yas.jpg",
+      "source": "https://unsplash.imgix.net/photo-1781450090585-1a511b7066d9?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=640",
+      "sha256": "c5466dc66cd55a43c83267390d1d4e0ca4f9d0cd169798b0e7275c47b987bffc",
+      "bytes": 105869
+    },
+    {
+      "path": "frontend/public/assets/salons/salon-kohandezh.jpg",
+      "source": "https://unsplash.imgix.net/photo-1773904215697-e6c21fc27ac2?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=640",
+      "sha256": "d2386513de20ae8e80f37eebb56757c22b48a601b98859ee6e23799b929aa030",
+      "bytes": 147397
+    },
+    {
+      "path": "frontend/public/assets/salons/salon-zayandeh.jpg",
+      "source": "https://unsplash.imgix.net/photo-1734723836256-0e168f4721a7?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=640",
+      "sha256": "974fe15069516c6992b8dcfeeca29dad986761fec2f8a881ed5ecc28434f84ca",
+      "bytes": 123008
+    },
+    {
+      "path": "frontend/public/assets/salons/salon-mahbanoo.jpg",
+      "source": "https://unsplash.imgix.net/photo-1536520002442-39764a41e987?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=640",
+      "sha256": "abf2388a73dae2c324de200dac1b243212bf70bc577d4eac01fa89b621fdbd8b",
+      "bytes": 123868
+    },
+    {
+      "path": "frontend/public/assets/salons/salon-parseh.jpg",
+      "source": "https://unsplash.imgix.net/photo-1734807649640-2c4bfafcb580?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=640",
+      "sha256": "e494b1fd6b4d97d0919391857666516025955b6630d45f1c345a9283ede3ddac",
+      "bytes": 88417
+    },
+    {
+      "path": "frontend/public/assets/salons/salon-roz.jpg",
+      "source": "https://unsplash.imgix.net/photo-1695527081882-a8b051dac51e?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=640",
+      "sha256": "27c3dff867b622f704b1c7a94567e960a69048c76b46eb04ad9422754ac20c69",
+      "bytes": 59309
+    }
+  ]
+}

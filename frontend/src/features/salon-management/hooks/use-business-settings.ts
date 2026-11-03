@@ -17,7 +17,10 @@ export function useBusinessSettings(businessId: string) {
   const denied = query.error instanceof HttpFailure && [401, 403, 404].includes(query.error.status);
   return {
     ...query,
-    data: denied ? null : (current ?? query.data),
+    // Expose the accepted snapshot with its revision in one render. Rendering
+    // query.data first would mount the form, then immediately remount it and
+    // discard input entered before this effect updates formRevision.
+    data: denied || current?.id !== businessId ? null : current,
     formRevision,
     acceptSaved: setCurrent,
   };

@@ -169,3 +169,22 @@ Origin دقیق allowlist و JSON برای mutation دارای بدنه؛ DELETE
 ناشناس در خصوصی401، نقش بررسی نامعتبر403، سالن متعلق به دیگری در API مالک404، validation422، state/request/version کهنه409 و If-Match غایب428 است. mutationها Origin دقیق/JSON/بدنه محدود فعلی را حفظ می‌کنند. نرخ catalog تا180درخواست/IP در دقیقه و mutation انتشار داخل سقف مدیریت60درخواست/حساب در دقیقه است؛ حساب پشت NAT در پایلوت اندازه‌گیری شود. ورودی ناشناخته و query تکراری رد می‌شوند. هیچ PATCH عمومی state یا endpoint اعطای reviewer وجود ندارد.
 
 min_price_irr کمینه خدمات منطبق بر فیلتر در سرور، integer IRR است؛ تومان در UI دقیق نمایش داده می‌شود. cursor به فیلتر و ترتیب ایجاد/UUID بسته است و timestamp کامل PostgreSQL را دارد. q از strpos پارامتری استفاده می‌کند؛ `%` و `_` wildcard نمی‌شوند. profile روزهای خاص آینده تا۹۳روز را با متخصص عمومی مرتبط نمایش می‌دهد؛ ساعات، availability نیستند. دلیل تصمیم فقط در مسیر خصوصی مالک/reviewer دیده می‌شود.
+
+## قرارداد جاری اسپرینت۶ — زمان‌های پیشنهادی
+
+`GET /api/v1/catalog/salons/{businessId}/availability` عمومی، بدون نشست و بدون ایجاد رزرو است. تصمیم: [ADR-011](adr/ADR-011-schedule-only-availability.md)، schema اجرایی و نمونه فیلدها در `AvailabilityDto` و OpenAPI `/api/openapi.json` هستند.
+
+| ورودی      | قرارداد                                                                         |
+| ---------- | ------------------------------------------------------------------------------- |
+| businessId | UUID؛ سالن published                                                            |
+| service_id | UUID الزامی؛ خدمت فعال و دسته فعال همان سالن                                    |
+| staff_id   | پیش‌فرض any؛ یا UUID متخصص فعال/عمومی/تخصیص‌یافته همان سالن                     |
+| from/to    | هر دو غایب یا حاضر؛ ISO روز محلی، inclusive و حداکثرهفت روز داخل افق۳۰روز تهران |
+
+بدون تاریخ، امروز سرور تا today+6 بازگردانده می‌شود. ناشناخته/تکراری/آرایه، تاریخ ناموجود/گذشته/خارج افق، UUID خراب یا تزریق قیمت/مدت/بافر/timezone برابر422 است. شناسه معتبر ولی غیرعمومی/نامرتبط404 یکسان دارد. UUIDها در این قرارداد canonical lowercase می‌شوند.
+
+در envelope معمول data/meta.request_id، data شامل business_id، service_id، service={id,name,price_irr,duration_minutes}، staff_id، timezone=Asia/Tehran، checked_at UTC، policy، from/to و days است. policy شامل slot_step_minutes=15، minimum_notice_minutes=60، first_allowed_date و last_allowed_date است. هر day دارای local_date و slots است؛ تمام روزها حتی بسته حاضرند. هر slot فقط starts_at/ends_at UTC، start_local/end_local با ساعت۲۴ساعته و available_staff_count از۱تا۵۰ دارد. پایان24:00 فقط مرزروز است. سقف پاسخ۷۰۰slot بدون truncation؛ نقض غیرمنتظره503 است.
+
+`availability_basis=schedule_only` و `booking_enabled=false` اجباری‌اند. خروجی، ظرفیت طبق برنامه ثبت‌شده است؛ موجودی واقعی رزرو نیست. بافرها، متخصص پنهان، email، عضویت، دلیل تعطیلی/بررسی و audit در خروجی نیستند. انتخاب any فقط اجتماع و count می‌دهد؛ متخصص نهایی تعیین نمی‌کند. قیمت صفر معتبر است و فرانت از formatter دقیق IRR→تومان جاری استفاده می‌کند.
+
+همه پاسخ‌ها no-store؛ هم quota عمومی۱۸۰ و هم اختصاصی۶۰درخواست/IP/دقیقه مصرف می‌شوند.429 دارای Retry-After است. شکست I/O503 امن است؛500/503 یا خطای decoding به slots=[] تبدیل نمی‌شود. GET، If-Match/Idempotency-Key/quote/hold ندارد؛ خطای شبکه یا timeout را با دریافت دوباره اصلاح کنید.

@@ -50,3 +50,9 @@ Idempotency: محدوده (actor, operation, key) یکتا، request hash لاز
 ## مرز اجرایی اسپرینت۴
 
 مدیریت خصوصی سالن، خدمات، پروفایل متخصص و برنامه محلی در salon-management ساخته شده‌اند؛ [ADR-007](adr/ADR-007-private-salon-management.md). تابع intersectIntervals اشتراک بازه سالن/متخصص را بیان می‌کند؛ تعطیلی سالن نتیجه بسته دارد. ذخیره weekly و override، موتور availability یا رزرو نیست؛ مدل چرخه رزرو این سند همچنان طرح آینده است. متخصص این برش user_id ندارد؛ خدمات پیوسته تک‌متخصص‌اند. برنامه خالی به معنی بسته است و active=false خدمت تخصیص تاریخی را حذف نمی‌کند.
+
+## برش اجراشده اسپرینت۶
+
+استخراج slot بر اساس برنامه واقعی، در [ADR-011](adr/ADR-011-schedule-only-availability.md) و [ساختار۶](sprint-06-structure.md) ثبت شد. exception جایگزین scope، سپس اشتراک سالن/متخصص؛ مدت و دو بافر در بازه پیوسته نیمه‌باز؛ گام۱۵، فاصله۶۰ و افق۳۰روز محلی تهران اجرا شده‌اند. timestamp خروجی UTC و روز query محلی است. gap تاریخی slot نمی‌سازد و fold دو instant مستقل دارد.
+
+این نسخه هنوز Appointment یا ScheduleAllocation ندارد. busy ورودی موتور خالص فقط در تست استفاده می‌شود؛ runtime با schedule_only/booking_enabled=false این مرز را اعلام می‌کند. مدل چرخه رزرو و قواعد ثبت اتمیک بالای سند همچنان طرح آینده‌اند؛ انتخاب UI هیچ اثر DB محصول ندارد.

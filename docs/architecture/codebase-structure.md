@@ -75,3 +75,7 @@ modules/bookings/
 ## اجرای کانتینری محلی
 
 `Dockerfile` ریشه targetهای API و فرانت و `compose.yml` profile کامل `app` دارد؛ PostgreSQL بدون profile برای توسعه میزبان باقی است. migration سرویس یک‌بارمصرف پیش از API است. جزئیات packaging، standalone فرانت و تنظیمات شبکه در [ADR-010](adr/ADR-010-local-docker-runtime.md) و دستورهای استفاده در [README](../../README.md) هستند.
+
+## افزوده اجرایی اسپرینت۶
+
+[ساختار۶](sprint-06-structure.md) و [ADR-011](adr/ADR-011-schedule-only-availability.md) مرجع availability خواندنی در همان salon-management هستند. Domain موتور خالص، Application هماهنگ‌کننده، Reader یک snapshot PostgreSQL و Clock قابل جایگزینی دارد. feature فرانت availability و route عمومی times به transport/Design System جاری متصل‌اند؛ رزرو/دفتر اشغال و migration تازه ساخته نشده‌اند.

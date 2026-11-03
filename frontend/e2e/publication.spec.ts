@@ -36,6 +36,11 @@ test('owner requests, independent reviewer decides and anonymous customer sees o
   await page.getByLabel('موبایل عمومی سالن (اختیاری)').fill('09121234567');
   await page.getByRole('button', { name: 'ذخیره تغییرات' }).click();
   await expect(page.getByText('مشخصات ذخیره شد.', { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel('آدرس عمومی (اختیاری)')).toHaveValue(
+    'تهران، نشانی عمومی مسیر آزمون',
+  );
+  await expect(page.getByLabel('موبایل عمومی سالن (اختیاری)')).toHaveValue('+989121234567');
   await nav(page, 'خدمات');
   await page.getByRole('button', { name: 'خدمت جدید', exact: true }).click();
   await page.getByLabel('نام خدمت', { exact: true }).fill('کوتاهی واقعی');
@@ -160,10 +165,27 @@ test('owner requests, independent reviewer decides and anonymous customer sees o
     );
     // A real owner mutation removes publication; the next anonymous request is an actual 404.
     await page.goto(stack.origin + root + '/services');
-    await page.getByRole('button', { name: 'ویرایش کوتاهی واقعی', exact: true }).click();
-    await page.getByLabel('قیمت (تومان)', { exact: true }).fill('۲۶۰۰۰۰');
-    await page.getByRole('button', { name: 'ذخیره خدمت', exact: true }).click();
-    await expect(page.getByText('۲۶۰٬۰۰۰ تومان', { exact: false })).toBeVisible();
+    const categoriesGate = Promise.withResolvers<void>();
+    await page.route('**/api/v1/catalog/categories', async (route) => {
+      await categoriesGate.promise;
+      await route.continue();
+    });
+    try {
+      const categoriesRequest = page.waitForRequest('**/api/v1/catalog/categories');
+      await page.getByRole('button', { name: 'ویرایش کوتاهی واقعی', exact: true }).click();
+      await categoriesRequest;
+      await page.getByLabel('قیمت (تومان)', { exact: true }).fill('۲۶۰۰۰۰');
+      const save = page.getByRole('button', { name: 'ذخیره خدمت', exact: true });
+      await expect(save).toBeDisabled();
+      categoriesGate.resolve();
+      await expect(page.getByLabel('دسته خدمت', { exact: true })).toHaveValue('haircut');
+      await expect(save).toBeEnabled();
+      await save.click();
+      await expect(page.getByText('۲۶۰٬۰۰۰ تومان', { exact: false })).toBeVisible();
+    } finally {
+      categoriesGate.resolve();
+      await page.unrouteAll({ behavior: 'wait' });
+    }
     expect((await customer.reload())?.status()).toBe(404);
     await page.goto(stack.origin + root + '/publication');
     await page.getByRole('checkbox').check();

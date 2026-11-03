@@ -33,14 +33,7 @@ export function jalaliToIso(value: string): string {
     throw new FormError('local_date', 'تاریخ خارج از بازه مجاز است.');
   return iso;
 }
-export function persianDate(iso: string): string {
-  return new Intl.DateTimeFormat('fa-IR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: 'Asia/Tehran',
-  }).format(new Date(iso + 'T12:00:00Z'));
-}
+export { persianDate, inDays } from '../../../lib/format/local-date';
 export function todayIso(): string {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Tehran',
@@ -48,9 +41,4 @@ export function todayIso(): string {
     month: '2-digit',
     day: '2-digit',
   }).format(new Date());
-}
-export function inDays(iso: string, count: number): string {
-  const d = new Date(iso + 'T12:00:00Z');
-  d.setUTCDate(d.getUTCDate() + count);
-  return d.toISOString().slice(0, 10);
 }

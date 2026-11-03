@@ -36,6 +36,11 @@ test('owner requests, independent reviewer decides and anonymous customer sees o
   await page.getByLabel('موبایل عمومی سالن (اختیاری)').fill('09121234567');
   await page.getByRole('button', { name: 'ذخیره تغییرات' }).click();
   await expect(page.getByText('مشخصات ذخیره شد.', { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel('آدرس عمومی (اختیاری)')).toHaveValue(
+    'تهران، نشانی عمومی مسیر آزمون',
+  );
+  await expect(page.getByLabel('موبایل عمومی سالن (اختیاری)')).toHaveValue('+989121234567');
   await nav(page, 'خدمات');
   await page.getByRole('button', { name: 'خدمت جدید', exact: true }).click();
   await page.getByLabel('نام خدمت', { exact: true }).fill('کوتاهی واقعی');

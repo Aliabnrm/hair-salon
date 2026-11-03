@@ -21,6 +21,7 @@ export function ServiceEditor({
 }) {
   const categoryFieldId = useId();
   const categories = useRemote('service-categories', loadCategories);
+  const categoriesReady = !categories.loading && !categories.error && categories.data !== null;
   const [form, setForm] = useState({
     category_id: service?.category_id ?? '',
     name: service?.name ?? '',
@@ -34,6 +35,7 @@ export function ServiceEditor({
     setForm((old) => ({ ...old, [key]: value }));
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (!categoriesReady) return;
     try {
       const body = {
         category_id: form.category_id,
@@ -156,7 +158,12 @@ export function ServiceEditor({
           تک‌متخصص‌اند.
         </p>
         <div className="flex flex-wrap gap-2">
-          <Button type="submit">ذخیره خدمت</Button>
+          <Button
+            type="submit"
+            disabled={!categoriesReady}
+          >
+            ذخیره خدمت
+          </Button>
           <Button
             variant="ghost"
             onClick={onCancel}

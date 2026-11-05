@@ -118,8 +118,9 @@ test('cursor navigation stays in the URL and filter changes reset the page', asy
   await page.getByRole('button', { name: 'صفحه بعد', exact: true }).click();
   await expect(page).toHaveURL(/cursor=/);
   await expect(page.getByText('۱ سالن در این صفحه', { exact: true })).toBeVisible();
-  expect(await page.getByRole('region').getByRole('link').first().getAttribute('href')).not.toBe(
-    first,
+  await expect(page.getByRole('region').getByRole('link').first()).not.toHaveAttribute(
+    'href',
+    first ?? '',
   );
   await page.goBack();
   await expect(page.getByRole('region').getByRole('link').first()).toHaveAttribute(

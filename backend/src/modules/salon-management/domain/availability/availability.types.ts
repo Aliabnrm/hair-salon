@@ -59,8 +59,8 @@ export interface AvailabilityResult extends AvailabilityQuery {
   service: Pick<AvailabilityService, 'id' | 'name' | 'price_irr' | 'duration_minutes'>;
   timezone: 'Asia/Tehran';
   checked_at: string;
-  availability_basis: 'schedule_only';
-  booking_enabled: false;
+  availability_basis: 'live_occupancy';
+  booking_enabled: true;
   policy: AvailabilityPolicy;
   days: { local_date: string; slots: AvailabilitySlot[] }[];
 }

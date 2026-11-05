@@ -1,3 +1,4 @@
+import { busyByStaff } from '../../domain/availability/schedule-inventory.types.js';
 import { Injectable } from '@nestjs/common';
 import { AvailabilityReader } from '../ports/availability-reader.js';
 import { Clock } from '../ports/clock.js';
@@ -27,10 +28,10 @@ export class AvailabilityService {
       timezone: snapshot.timezone,
       checked_at: now.toISOString(),
       policy,
-      availability_basis: 'schedule_only',
-      booking_enabled: false,
-      // Baseline has no Appointment/allocation model. This is schedule capacity, not free inventory.
-      days: calculateAvailability(snapshot, query, now, new Map()),
+      availability_basis: 'live_occupancy',
+      booking_enabled: true,
+      // The statement contains schedule and allocations from the same MVCC snapshot.
+      days: calculateAvailability(snapshot, query, now, busyByStaff(snapshot)),
     };
   }
 }

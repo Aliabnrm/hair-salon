@@ -5,14 +5,17 @@ const labels: Record<string, string> = {
   approve: 'تأیید انتشار',
   reject: 'رد درخواست',
   suspend: 'تعلیق انتشار',
-  content_changed: 'نیاز به بررسی مجدد پس از ویرایش',
+  content_changed: 'اطلاعات تغییر کرد؛ انتشار متوقف شد',
+  publish: 'انتشار مستقیم توسط مالک',
+  content_updated: 'اطلاعات به‌روز شد؛ انتشار ادامه دارد',
+  publication_incomplete: 'توقف انتشار؛ اطلاعات نیاز به تکمیل دارد',
 };
 export function PublicationHistory({ history }: { history: Publication['history'] }) {
   return (
     <section className="rounded-3xl border border-line bg-surface p-4">
       <h2 className="mb-4 text-lg font-bold">سابقه انتشار</h2>
       {!history.length ? (
-        <p className="text-muted">هنوز درخواستی ارسال نشده است.</p>
+        <p className="text-muted">هنوز سابقه انتشاری ثبت نشده است.</p>
       ) : (
         <ol className="space-y-4">
           {history.map((h) => (

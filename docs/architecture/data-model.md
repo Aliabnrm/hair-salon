@@ -123,3 +123,17 @@ deferred trigger سازگاری closed/intervalها را در commit enforce م�
 | reviewer_permission_history          | سابقه محدود grant/revoke با دلیل و زمان                                                                                                 |
 
 index جزئی public_businesses_order_idx روی created_at/id فقط برای published و index تاریخچه برای خواندن محدود اضافه شده‌اند. FKهای tenant، exclusion و triggerهای پیشین محفوظ‌اند. normalize_search، business_search، service_category_valid و FK چرخه‌ای current_request_id در SQL صریح‌اند؛ Drizzle جای SQL لازم را نگرفته است. رضایت به revision رویداد درخواست و request_id همان رویداد بسته می‌شود. برای تعلیق و رد، reason خصوصی است. API تاریخچه را حذف/ویرایش نمی‌کند؛ سیاست retention نهایی قبل بهره‌برداری عمومی تعیین شود.
+
+## مدل اجرایی اسپرینت۷ — جایگزین فرض عدم وجود رزرو
+
+چهار جدول افزایشی در migration0005: appointments، schedule_allocations، booking_events و booking_writes. [ADR-012](adr/ADR-012-booking-ledger.md) مرجع چرخه است. مدل کامل CRM/چندمنبعی بالاتر، دامنه اجرایی۷ نیست.
+
+Appointment دارای FK مرکب سالن/خدمت و سالن/متخصص است. booking_user_id فقط آنلاین و created_by عامل واقعی است؛ دستی به شماره یا User متصل نمی‌شود. snapshot خصوصی شامل نام‌ها، تماس، قیمت صحیح IRR، مدت، بافر، نسخه خدمت، timezone و سیاست است. start/end UTC و snapshot پس از ایجاد ثابت‌اند. وضعیت فقط confirmed→cancelled با افزایش version، دلیل و cancelled_at تغییر می‌کند.
+
+allocation یک سطر تاریخی با PK نوبت، FK مرکب سالن/متخصص/نوبت، بازه generated tstzrange نیمه‌باز شامل بافر و released_at دارد. exclusion GiST فقط سطرهای فعال را بررسی می‌کند. trigger deferred در commit، تطابق دقیق زمان/بافر/tenant و لغوشده↔release و event نسخه جاری را enforce می‌کند؛ ledger ناقص یا snapshot متغیر commit نمی‌شود. event/write حذف و ویرایش نمی‌شوند؛ retention نهایی و الزامات حذف اطلاعات پیش از انتشار عمومی باید جدا تصمیم‌گیری شوند.
+
+idempotency روی actor/operation/key یکتا و به fingerprint و resource متصل است؛ payload خصوصی دوباره cache نمی‌شود. عمر نگهداری با عمر نوبت است؛ replay بعد لغو resource جاری را می‌خواند. indexهای agenda و customer روی starts_at/id، و index نوبت فعال/متخصص و exclusion، بر اساس query مصرف‌کننده ساخته شده‌اند.
+
+## معنای جاری انتشار — ADR-013
+
+بدون تغییر schema، pending_review فقط وضعیت تاریخی است و رویداد publish با consent=true مرجع current_request_id می‌شود. content_updated برای ویرایش معتبر و publication_incomplete برای توقف انتشار در اثر نقص ثبت می‌شوند. نسخه و FK مرکب موجود، ترتیب و اتصال به همان سالن را حفظ می‌کنند؛ migrationهای قبلی دست‌نخورده‌اند.

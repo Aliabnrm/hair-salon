@@ -12,8 +12,8 @@ const response = {
   staff_id: 'any',
   timezone: 'Asia/Tehran',
   checked_at: '2026-11-03T00:00:00.000Z',
-  availability_basis: 'schedule_only',
-  booking_enabled: false,
+  availability_basis: 'live_occupancy',
+  booking_enabled: true,
   policy: {
     slot_step_minutes: 15,
     minimum_notice_minutes: 60,
@@ -40,7 +40,7 @@ const response = {
 it('preserves zero price and rejects invalid semantics, time ranges and staff counts', () => {
   expect(decodeAvailability(response).service.price_irr).toBe(0);
   for (const patch of [
-    { booking_enabled: true },
+    { booking_enabled: false },
     { availability_basis: 'bookable' },
     { timezone: 'UTC' },
     { days: [] },

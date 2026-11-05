@@ -35,7 +35,10 @@ describe('real PostgreSQL migrations', () => {
       );
       expect(tables.rows).toEqual(
         [
+          'appointments',
           'auth_attempt_buckets',
+          'booking_events',
+          'booking_writes',
           'business_hours',
           'business_memberships',
           'businesses',
@@ -46,6 +49,7 @@ describe('real PostgreSQL migrations', () => {
           'publication_events',
           'reviewer_permission_history',
           'reviewer_permissions',
+          'schedule_allocations',
           'schedule_exceptions',
           'service_categories',
           'services',
@@ -59,7 +63,7 @@ describe('real PostgreSQL migrations', () => {
       const first = await pool.query(
         'SELECT id, hash, created_at FROM drizzle.__drizzle_migrations ORDER BY id',
       );
-      expect(first.rows).toHaveLength(5);
+      expect(first.rows).toHaveLength(6);
       const sql = await readFile(
         new URL('../drizzle/0000_database_foundation.sql', import.meta.url),
         'utf8',
@@ -112,7 +116,7 @@ describe('real PostgreSQL migrations', () => {
           'SELECT id, hash, created_at FROM drizzle.__drizzle_migrations ORDER BY id',
         )
       ).rows;
-      expect(upgraded).toHaveLength(5);
+      expect(upgraded).toHaveLength(6);
       expect(upgraded[0]).toEqual(oldJournal[0]);
       expect((await runMigration(target.url)).status).toBe(0);
       expect(
@@ -199,7 +203,7 @@ describe('real PostgreSQL migrations', () => {
         await pool.query('SELECT id,hash,created_at FROM drizzle.__drizzle_migrations ORDER BY id')
       ).rows;
       expect(after.slice(0, 2)).toEqual(before);
-      expect(after).toHaveLength(5);
+      expect(after).toHaveLength(6);
       expect((await runMigration(target.url)).status).toBe(0);
       expect(
         (

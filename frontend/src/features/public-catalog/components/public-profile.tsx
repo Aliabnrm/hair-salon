@@ -79,7 +79,7 @@ export function PublicProfile({ profile }: { profile: Profile }) {
       <section className="rounded-3xl border border-line bg-surface p-4">
         <h2 className="mb-3 text-xl font-bold">ساعات کاری</h2>
         <p className="mb-4 text-sm leading-7 text-ink-soft">
-          ساعات به وقت تهران است؛ این برنامه نشان‌دهنده وقت آزاد نیست. رزرو آنلاین هنوز فعال نیست.
+          ساعات به وقت تهران است؛ برای رزرو، زمان‌های آزاد را بررسی کنید.
         </p>
         <PublicHoursList hours={profile.hours} />
       </section>

@@ -19,8 +19,8 @@ it('documents public schedule semantics, dates, privacy, no-store and failure st
     expect(operation.responses[200].headers['Cache-Control'].schema.enum).toEqual(['no-store']);
     expect(operation.responses[429].headers['Retry-After']).toBeDefined();
     const schema = body.components.schemas.AvailabilityDto;
-    expect(schema.properties.availability_basis.enum).toEqual(['schedule_only']);
-    expect(schema.properties.booking_enabled.enum).toEqual([false]);
+    expect(schema.properties.availability_basis.enum).toEqual(['live_occupancy']);
+    expect(schema.properties.booking_enabled.enum).toEqual([true]);
     expect(
       body.components.schemas.AvailabilitySlotDto.properties.available_staff_count.maximum,
     ).toBe(50);

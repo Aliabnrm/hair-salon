@@ -13,17 +13,19 @@ export function TimeSlots({
 }) {
   return (
     <section
-      className="rounded-3xl border border-line bg-surface p-4 shadow-card"
+      className="rounded-3xl border border-line bg-surface p-4"
       aria-label="زمان‌های قابل ارائه"
     >
-      <h2 className="mb-2 text-lg font-bold">۳. ساعت شروع خدمت</h2>
-      <p className="mb-4 text-sm leading-7 text-muted">ساعت‌ها به وقت تهران هستند.</p>
+      <h2 className="mb-2 text-lg font-extrabold">ساعت‌های آزاد</h2>
+      <p className="mb-4 text-sm leading-7 text-muted">
+        یک ساعت انتخاب کنید. ساعت‌ها به وقت تهران‌اند.
+      </p>
       {slots.length === 0 ? (
         <p
           role="status"
           className="rounded-2xl bg-sand p-4 leading-8"
         >
-          در این روز زمانی طبق برنامه ثبت‌شده پیدا نشد. روز یا متخصص دیگری را بررسی کنید.
+          برای این روز زمان آزادی پیدا نشد. روز یا متخصص دیگری انتخاب کنید.
         </p>
       ) : (
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">

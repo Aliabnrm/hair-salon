@@ -1,11 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
 import { Icon, type IconName } from '../ui/icon';
-import { Sheet } from '../ui/sheet';
-import { StatePanel } from '../ui/state-panel';
-import { Button } from '../ui/button';
 
 const itemClass =
   'relative flex h-16 flex-col items-center justify-center gap-1 text-xs font-bold transition-colors';
@@ -23,7 +19,7 @@ function NavContent({ label, icon, active }: { label: string; icon: IconName; ac
 }
 export function BottomNavigation() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const appointmentsActive = pathname === '/appointments' || pathname.startsWith('/appointments/');
   const accountActive =
     pathname === '/account' || pathname === '/manage' || pathname.startsWith('/manage/');
   return (
@@ -43,17 +39,17 @@ export function BottomNavigation() {
             active={pathname === '/'}
           />
         </Link>
-        <button
-          type="button"
-          className={`${itemClass} text-muted hover:text-ink`}
-          onClick={() => setOpen(true)}
+        <Link
+          href="/appointments"
+          aria-current={appointmentsActive ? 'page' : undefined}
+          className={`${itemClass} ${appointmentsActive ? 'text-petrol' : 'text-muted hover:text-ink'}`}
         >
           <NavContent
             label="نوبت‌های من"
             icon="ticket"
-            active={false}
+            active={appointmentsActive}
           />
-        </button>
+        </Link>
         <Link
           href="/account"
           aria-current={accountActive ? 'page' : undefined}
@@ -66,19 +62,6 @@ export function BottomNavigation() {
           />
         </Link>
       </nav>
-      <Sheet
-        open={open}
-        onClose={() => setOpen(false)}
-        title="نوبت‌های من"
-      >
-        <StatePanel
-          icon="calendar"
-          title="رزرو هنوز فعال نیست"
-          description="در این نسخه فقط کشف سالن‌های نمونه و حساب کاربری فعال است. هیچ نوبتی ثبت یا ذخیره نمی‌شود."
-        >
-          <Button onClick={() => setOpen(false)}>متوجه شدم</Button>
-        </StatePanel>
-      </Sheet>
     </>
   );
 }

@@ -49,8 +49,8 @@ export function decodeAvailability(v: unknown): Availability {
     policy = record(p.policy);
   if (
     p.timezone !== 'Asia/Tehran' ||
-    p.availability_basis !== 'schedule_only' ||
-    p.booking_enabled !== false ||
+    p.availability_basis !== 'live_occupancy' ||
+    p.booking_enabled !== true ||
     policy.slot_step_minutes !== 15 ||
     policy.minimum_notice_minutes !== 60
   )

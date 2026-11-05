@@ -26,5 +26,9 @@ test('uses the new Tehran day after midnight, even in a browser in a different t
   await page.keyboard.press('Tab');
   await expect(page.getByLabel('متخصص', { exact: true })).toBeFocused();
   await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'روزهای قبل', exact: true })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'روزهای بعد', exact: true })).toBeFocused();
+  await page.keyboard.press('Tab');
   await expect(page.locator('[data-date="2026-11-04"]')).toBeFocused();
 });

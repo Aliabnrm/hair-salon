@@ -12,8 +12,8 @@ export interface Availability {
   staff_id: string;
   timezone: 'Asia/Tehran';
   checked_at: string;
-  availability_basis: 'schedule_only';
-  booking_enabled: false;
+  availability_basis: 'live_occupancy';
+  booking_enabled: true;
   policy: {
     slot_step_minutes: 15;
     minimum_notice_minutes: 60;

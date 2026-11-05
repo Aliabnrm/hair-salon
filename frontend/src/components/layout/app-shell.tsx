@@ -13,6 +13,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         >
           <div className="screen-enter flex min-h-full flex-col">{children}</div>
         </main>
+        <div
+          id="page-actions"
+          className="shrink-0"
+        />
         <BottomNavigation />
       </div>
     </div>

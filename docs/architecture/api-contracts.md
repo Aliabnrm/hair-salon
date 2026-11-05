@@ -150,7 +150,7 @@ Origin دقیق allowlist و JSON برای mutation دارای بدنه؛ DELETE
 
 ## قرارداد اجرایی اسپرینت ۵
 
-طبق ADR-009، تمام مسیرهای catalog/review/publication نیز no-store هستند. schema دقیق از OpenAPI واقعی `dto/publication.dto.ts` تولید می‌شود؛ این بخش محدوده فعلی را از APIهای آینده رزرو جدا می‌کند.
+طبق ADR-009 و اصلاح انتشار عادی در [ADR-013](adr/ADR-013-owner-self-publication.md)، تمام مسیرهای catalog/review/publication نیز no-store هستند. schema دقیق از OpenAPI واقعی `dto/publication.dto.ts` تولید می‌شود؛ این بخش محدوده فعلی را از APIهای آینده رزرو جدا می‌کند.
 
 | مسیر پس از /api/v1                                    | رفتار                                                                                                                             |
 | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -159,7 +159,7 @@ Origin دقیق allowlist و JSON برای mutation دارای بدنه؛ DELETE
 | GET /catalog/salons/{businessId}                      | PublicProfile allowlist، فقط published؛ منابع دیگر404                                                                             |
 | GET /businesses/{businessId}/publication              | مالک؛ state/version/content_revision/request_id/issues/history حداکثر50رویداد آخر                                                 |
 | GET /businesses/{businessId}/preview                  | projection مشترک با مجوز مالک                                                                                                     |
-| POST /businesses/{businessId}/publication/requests    | مالک، consent=true؛ If-Match نسخه انتشار و Idempotency-Key                                                                        |
+| POST /businesses/{businessId}/publication/requests    | مالک، consent=true؛ انتشار فوری draft/pending قدیمی پس از readiness؛ If-Match/Idempotency-Key                                     |
 | POST /businesses/{businessId}/publication/withdrawals | مالک، body={}؛ انصراف pending یا توقف published؛ همان هدرها                                                                       |
 | GET /review/access                                    | حساب واردشده؛ can_review از DB                                                                                                    |
 | GET /review/businesses                                | reviewer مستقل؛ صف صفحه‌بندی‌شده pending/published/suspended، بدون سالن خود و draft هرگز ارسال‌نشده                               |
@@ -188,3 +188,33 @@ min_price_irr کمینه خدمات منطبق بر فیلتر در سرور، i
 `availability_basis=schedule_only` و `booking_enabled=false` اجباری‌اند. خروجی، ظرفیت طبق برنامه ثبت‌شده است؛ موجودی واقعی رزرو نیست. بافرها، متخصص پنهان، email، عضویت، دلیل تعطیلی/بررسی و audit در خروجی نیستند. انتخاب any فقط اجتماع و count می‌دهد؛ متخصص نهایی تعیین نمی‌کند. قیمت صفر معتبر است و فرانت از formatter دقیق IRR→تومان جاری استفاده می‌کند.
 
 همه پاسخ‌ها no-store؛ هم quota عمومی۱۸۰ و هم اختصاصی۶۰درخواست/IP/دقیقه مصرف می‌شوند.429 دارای Retry-After است. شکست I/O503 امن است؛500/503 یا خطای decoding به slots=[] تبدیل نمی‌شود. GET، If-Match/Idempotency-Key/quote/hold ندارد؛ خطای شبکه یا timeout را با دریافت دوباره اصلاح کنید.
+
+## قرارداد اجرایی اسپرینت۷ — رزرو قطعی
+
+این افزوده semantics خواندنی۶ را ارتقا می‌دهد: availability_basis=live_occupancy و booking_enabled=true؛ پیشنهاد زمان hold نیست و ثبت زیر قفل دوباره بررسی می‌شود. public response همچنان فاقد تماس مشتری/بافر/ledger خصوصی است.
+
+| مسیر با پیشوند /api/v1                                        | دسترسی و نتیجه                                                                                       |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| POST /appointments                                            | نشست مشتری؛ ۲۰۱ resource قطعی                                                                        |
+| GET /me/appointments?period=upcoming یا past                  | فقط حساب جاری؛ limit۲۰/حداکثر۵۰ و cursor UUID آخرین مورد                                             |
+| GET /appointments/{id}                                        | فقط booking_user_id؛ حتی پس از آرشیو/عدم انتشار                                                      |
+| GET /me/booking-intents/{key}?operation=online/manual/cancel  | نتیجه intent همان عامل؛ برای دستی/لغو مجوز مالک فعلی دوباره بررسی می‌شود                             |
+| GET /businesses/{b}/appointments?date=YYYY-MM-DD&staff_id=any | owner فعال؛ روز تهران، متخصص اختیاری، pagination                                                     |
+| GET /businesses/{b}/appointments/{id}                         | owner همان سالن، تماس خصوصی و snapshot                                                               |
+| POST /businesses/{b}/appointments                             | owner؛ نام لازم و تماس اختیاری، همان ledger، draft معتبر مجاز                                        |
+| GET /businesses/{b}/booking-options                           | owner؛ service_id، staff_id، from/to مطابق افق۶؛ پیشنهاد دستی با noticeصفر، استثنای ثبت نیازمند دلیل |
+| POST /businesses/{b}/appointments/{id}/cancellation           | owner؛ reason۳..۳۰۰ و If-Match، فقط قبل شروع                                                         |
+
+ایجاد: business_id/service_id/staff_id/starts_at/expected_price_irr/expected_duration_minutes/customer_name/customer_mobile؛ staff_id برابرany یا UUID. starts_at دقیقه کامل UTC روی گام۱۵ محلی و افق۳۰روز؛ مبلغ/مدت پس از قفل دوباره مقایسه می‌شوند. نام۲..۱۲۰؛ تماس ایران نرمال۰۹xxxxxxxxx، بدون OTP و بدون هویت‌سازی. در دستی business از path است؛ فقط notice_override_reason۳..۳۰۰ برای کمتر از۶۰دقیقه اضافه می‌شود؛ سایر قواعد قابل دورزدن نیستند.
+
+mutationها Idempotency-Key دارند؛ لغو If-Match لازم دارد (نبود428). همان key با payload/path متفاوت409؛ replay یکسان همان resource با وضعیت جاری را برمی‌گرداند، نه نوبت تازه. ایجاد حداکثر۱۰در دقیقه actor؛ سقف۳confirmed آنلاین آینده حساب در هر سالن، اتمیک. کد پیگیری مجوز خواندن نیست.
+
+پاسخ data شامل id/business_id/service_id/staff_id/code/source/status/version/starts_at/ends_at/snapshot/cancellation_reason/cancelled_at، meta.request_id و no-store است. snapshot شامل نام سالن/خدمت/متخصص، نشانی/تماس عمومی سالن، نام/موبایل مراجعه‌کننده، قیمت/مدت/بافر توافقی، نسخه خدمت و policy است و فقط خصوصی برمی‌گردد. cursorها داده خصوصی نیستند؛ مسیرهای list همواره tenant/actor را از نشست enforce می‌کنند.
+
+خطاهای مهم409: SLOT_UNAVAILABLE، SERVICE_CHANGED، CUSTOMER_BOOKING_LIMIT، IDEMPOTENCY_CONFLICT، VERSION_CONFLICT، APPOINTMENT_STARTED و EXISTING_BOOKING_CONFLICT در تنظیمات. خطای DB ظرفیت خالی یا رسید موفق نمی‌سازد. frontend برای timeout همان intent را بررسی می‌کند؛ نام/موبایل در URL/storage ذخیره نمی‌شوند. پرداخت/SMS/لغو مشتری/جابه‌جایی/وضعیت پایان مراجعه هنوز فعال نیستند.
+
+## اصلاح جاری انتشار مالک — ADR-013
+
+POST publication/requests دیگر pending تازه تولید نمی‌کند؛ پاسخ موفق state=published و رویداد publish دارد. نسخه قبل و رضایت معتبر، همچنان الزامی‌اند. ویرایش معتبر سالن منتشرشده، آن را عمومی نگه می‌دارد؛ ویرایش ناقص در همان transaction آن را draft می‌کند و settings همان وضعیت نهایی را برمی‌گرداند. داده قدیمی pending در UI با رضایت مالک به انتشار فوری می‌رسد.
+
+تعلیق مدیریتی پابرجاست؛ owner publication برای suspended خطای409 دارد. approve مسئول مستقل برای suspended، پس از readiness و با request_id=null جاری، content_revision و If-Match دقیق و سابقه رضایت، رفع تعلیق می‌کند. approve/reject برای pending تاریخی نیز باقی است. مجوز، rate، CSRF و allowlistهای خصوصی/عمومی تغییر نکرده‌اند.

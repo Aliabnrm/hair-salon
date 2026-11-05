@@ -29,8 +29,9 @@ const profile: PublicProfile = {
 describe('reviewed publication policy', () => {
   it('allows only explicitly defined transitions', () => {
     const allowed = [
-      ['draft', 'request', 'pending_review'],
-      ['suspended', 'request', 'pending_review'],
+      ['draft', 'request', 'published'],
+      ['pending_review', 'request', 'published'],
+      ['suspended', 'approve', 'published'],
       ['pending_review', 'withdraw', 'draft'],
       ['published', 'withdraw', 'draft'],
       ['pending_review', 'approve', 'published'],

@@ -38,15 +38,16 @@ function effectiveHours(
     effective.map((h) => ({ start: minute(h.start_local), end: minute(h.end_local, true) })),
   ).map((r) => ({ start_local: clock(r.start), end_local: clock(r.end) }));
 }
-/** Pure schedule calculation. Runtime has no occupancy ledger yet; busy is an explicit input. */
+/** Pure schedule calculation; the caller supplies a consistent occupancy snapshot. */
 export function calculateAvailability(
   snapshot: AvailabilitySnapshot,
   query: AvailabilityQuery,
   now: Date,
   busyByStaff: ReadonlyMap<string, TimeRange[]>,
+  minimumNoticeMinutes: number = availabilityLimits.minimumNoticeMinutes,
 ): { local_date: string; slots: AvailabilitySlot[] }[] {
   const service = snapshot.service;
-  const earliest = now.getTime() + availabilityLimits.minimumNoticeMinutes * MINUTE_MS;
+  const earliest = now.getTime() + minimumNoticeMinutes * MINUTE_MS;
   const days: { local_date: string; slots: AvailabilitySlot[] }[] = [];
   let total = 0;
   for (let date = query.from; date <= query.to; date = addDays(date, 1)) {
@@ -109,4 +110,27 @@ export function calculateAvailability(
     days.push({ local_date: date, slots: ordered });
   }
   return days;
+}
+
+/** Validates existing frozen allocations without applying new-booking notice or current service duration. */
+export function fitsWorkingHours(
+  snapshot: AvailabilitySnapshot,
+  staffId: string,
+  date: string,
+  occupied: TimeRange,
+): boolean {
+  const staff = snapshot.staff.find((s) => s.id === staffId);
+  if (!staff) return false;
+  const allowed = instantRanges(
+    intersectIntervals(
+      effectiveHours(snapshot.hours, snapshot.exceptions, date, null),
+      effectiveHours(staff.hours, snapshot.exceptions, date, staffId),
+    ).map((h) => ({ start: minute(h.start_local), end: minute(h.end_local, true) })),
+    daySegments(date),
+  );
+  return (
+    occupied.start >= dayBoundary(date, 0) &&
+    occupied.end <= dayBoundary(date, 1440, true) &&
+    allowed.some((r) => occupied.start >= r.start && occupied.end <= r.end)
+  );
 }

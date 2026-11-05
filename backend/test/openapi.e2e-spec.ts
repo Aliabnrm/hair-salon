@@ -12,6 +12,14 @@ describe('OpenAPI availability and schema', () => {
         const response = await request(app.getHttpServer()).get('/api/openapi.json').expect(200);
         expect(Object.keys(response.body.paths).sort()).toEqual(
           [
+            '/api/v1/appointments',
+            '/api/v1/appointments/{id}',
+            '/api/v1/me/appointments',
+            '/api/v1/me/booking-intents/{key}',
+            '/api/v1/businesses/{businessId}/appointments',
+            '/api/v1/businesses/{businessId}/appointments/{id}',
+            '/api/v1/businesses/{businessId}/appointments/{id}/cancellation',
+            '/api/v1/businesses/{businessId}/booking-options',
             '/api/v1/businesses/{businessId}/publication',
             '/api/v1/businesses/{businessId}/preview',
             '/api/v1/businesses/{businessId}/publication/requests',

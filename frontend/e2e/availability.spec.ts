@@ -11,9 +11,7 @@ test.beforeEach(async ({ stack }) => {
 const times = (origin: string, query = '') => `${origin}/salons/${data.business}/times${query}`;
 async function ready(page: Page) {
   await expect(page.locator('[data-slot]').first()).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'دریافت دوباره زمان‌ها', exact: true }),
-  ).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'تازه‌سازی زمان‌ها', exact: true })).toBeEnabled();
 }
 test('anonymous real public flow, accurate buffers, any/specific, summary and URL history', async ({
   page,
@@ -22,9 +20,7 @@ test('anonymous real public flow, accurate buffers, any/specific, summary and UR
   await page.goto(`${stack.origin}/salons/${data.business}`);
   await page.getByRole('link', { name: 'بررسی زمان‌ها', exact: true }).click();
   await ready(page);
-  await expect(
-    page.getByText('زمان‌ها بر اساس برنامه ثبت‌شده سالن هستند؛ ثبت آنلاین نوبت هنوز فعال نیست.'),
-  ).toBeVisible();
+  await expect(page.getByText('خدمت، روز و ساعت مناسب خود را انتخاب کنید.')).toBeVisible();
   await page.getByLabel('خدمت', { exact: true }).selectOption(data.service);
   await ready(page);
   await expect(page.locator('[data-slot]')).toHaveCount(4);
@@ -35,7 +31,7 @@ test('anonymous real public flow, accurate buffers, any/specific, summary and UR
   await page.locator('[data-slot]').first().click();
   const summary = page.getByRole('region', { name: 'خلاصه انتخاب' });
   await expect(summary).toContainText('۲۵۰٬۰۰۰ تومان');
-  await expect(summary).toContainText('این انتخاب نوبت ثبت‌شده نیست');
+  await expect(summary).toContainText('ثبت نهایی در گام بعد است');
   await page.getByLabel('متخصص', { exact: true }).selectOption(data.staff);
   await ready(page);
   await expect(summary).toHaveCount(0);
@@ -71,9 +67,7 @@ test('closed days, invalid/expired links, hidden staff and reset have distinct h
   stack,
 }) => {
   await page.goto(times(stack.origin, `?service_id=${data.service}&date=2026-11-04`));
-  await expect(
-    page.getByText('در این روز زمانی طبق برنامه ثبت‌شده پیدا نشد.', { exact: false }),
-  ).toBeVisible();
+  await expect(page.getByText('برای این روز زمان آزادی پیدا نشد.', { exact: false })).toBeVisible();
   await expect(page.locator('[data-slot]')).toHaveCount(0);
   await page.goto(times(stack.origin, `?service_id=${data.service}&date=2026-11-02`));
   await expect(page.locator('article [role="alert"]')).toContainText(
@@ -85,7 +79,7 @@ test('closed days, invalid/expired links, hidden staff and reset have distinct h
   await page.goto(times(stack.origin, '?date=wrong'));
   await expect(page.locator('article [role="alert"]')).toContainText('نشانی انتخاب معتبر نیست');
   await page.goto(times(stack.origin, `?service_id=${data.service}&staff_id=${data.hidden}`));
-  await expect(page.locator('article [role="alert"]')).toContainText('دیگر در دسترس عمومی نیست');
+  await expect(page.locator('article [role="alert"]')).toContainText('در حال حاضر قابل رزرو نیست');
   await expect(page.locator('[data-slot]')).toHaveCount(0);
 });
 test('a network failure hides stale slots, retry and focus refresh reflect real new data and unpublication', async ({
@@ -96,7 +90,7 @@ test('a network failure hides stale slots, retry and focus refresh reflect real 
   await ready(page);
   await page.locator('[data-slot]').first().click();
   await page.route('**/api/v1/catalog/salons/*/availability?*', (r) => r.abort());
-  await page.getByRole('button', { name: 'دریافت دوباره زمان‌ها', exact: true }).click();
+  await page.getByRole('button', { name: 'تازه‌سازی زمان‌ها', exact: true }).click();
   await expect(page.locator('article [role="alert"]')).toBeVisible();
   await expect(page.locator('[data-slot]')).toHaveCount(0);
   await expect(page.getByRole('region', { name: 'خلاصه انتخاب' })).toHaveCount(0);
@@ -115,8 +109,8 @@ test('a network failure hides stale slots, retry and focus refresh reflect real 
     "UPDATE app.businesses SET state='suspended',current_request_id=NULL WHERE id=$1",
     [data.business],
   );
-  await page.getByRole('button', { name: 'دریافت دوباره زمان‌ها', exact: true }).click();
-  await expect(page.locator('article [role="alert"]')).toContainText('دیگر در دسترس عمومی نیست');
+  await page.getByRole('button', { name: 'تازه‌سازی زمان‌ها', exact: true }).click();
+  await expect(page.locator('article [role="alert"]')).toContainText('در حال حاضر قابل رزرو نیست');
   await expect(page.locator('[data-slot]')).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'بازگشت به کاوش سالن‌ها' })).toBeVisible();
 });
@@ -177,11 +171,9 @@ test('mobile, desktop, keyboard and enlarged text keep every action reachable in
   await page.keyboard.press('Enter');
   await expect(page.getByRole('region', { name: 'خلاصه انتخاب' })).toBeVisible();
   await page
-    .getByRole('button', { name: 'دریافت دوباره زمان‌ها', exact: true })
+    .getByRole('button', { name: 'تازه‌سازی زمان‌ها', exact: true })
     .scrollIntoViewIfNeeded();
-  await expect(
-    page.getByRole('button', { name: 'دریافت دوباره زمان‌ها', exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'تازه‌سازی زمان‌ها', exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   );

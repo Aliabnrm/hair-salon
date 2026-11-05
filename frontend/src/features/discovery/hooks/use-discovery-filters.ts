@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useRemote } from '../../../lib/hooks/use-remote';
 import * as api from '../../public-catalog/api/catalog.api';
 export function useDiscoveryFilters() {
-  const router = useRouter(),
-    params = useSearchParams(),
+  const params = useSearchParams(),
     query = params.toString();
   const urlQuery = params.get('q') ?? '';
   const [search, setSearch] = useState(urlQuery);
@@ -21,7 +20,7 @@ export function useDiscoveryFilters() {
       else next.delete(key);
     }
     const value = next.toString();
-    router.push(value ? '/?' + value : '/', { scroll: false });
+    window.history.pushState(null, '', value ? '/?' + value : '/');
   }
   useEffect(() => {
     if (!edit) return;
@@ -31,11 +30,11 @@ export function useDiscoveryFilters() {
       if (search.trim()) next.set('q', search.trim());
       else next.delete('q');
       const value = next.toString();
-      if (value !== query) router.push(value ? '/?' + value : '/', { scroll: false });
+      if (value !== query) window.history.pushState(null, '', value ? '/?' + value : '/');
       setEdit(false);
     }, 350);
     return () => clearTimeout(timer);
-  }, [search, edit, query, router]);
+  }, [search, edit, query]);
   const results = useRemote(query, (s) => api.salons(query, s));
   const categories = useRemote('categories', api.categories);
   const locations = useRemote('locations', api.locations);
@@ -56,13 +55,13 @@ export function useDiscoveryFilters() {
       if (c) {
         const p = new URLSearchParams(query);
         p.set('cursor', c);
-        router.push('/?' + p.toString(), { scroll: false });
+        window.history.pushState(null, '', '/?' + p.toString());
       }
     },
     reset: () => {
       setSearch('');
       setEdit(false);
-      router.push('/', { scroll: false });
+      window.history.pushState(null, '', '/');
     },
   };
 }

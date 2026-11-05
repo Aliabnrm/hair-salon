@@ -14,7 +14,10 @@ async function capture(page: Page, name: string) {
     else if (name === 'new' || name === 'settings')
       await expect(page.getByLabel('نام سالن', { exact: true })).toBeVisible();
     else if (name === 'empty') await expect(page.getByText(/هنوز سالنی ندارید/)).toBeVisible();
-    else await expect(page.getByRole('link', { name: /سالن آراسته/ })).toBeVisible();
+    else
+      await expect(
+        page.getByRole('link', { name: /سالن آراسته/ }).filter({ hasText: 'مدیریت' }),
+      ).toBeVisible();
     await expect(page.locator('.skeleton')).toHaveCount(0);
     await page.locator('main').evaluate((main) => {
       main.scrollTop = 0;
@@ -89,7 +92,9 @@ test('real private account and four management routes at mobile and desktop widt
   await capture(page, 'settings');
   const settingsUrl = page.url();
   await page.getByRole('link', { name: 'سالن‌های من', exact: true }).click();
-  await expect(page.getByRole('link', { name: /سالن آراسته/ })).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: /سالن آراسته/ }).filter({ hasText: 'مدیریت' }),
+  ).toBeVisible();
   await capture(page, 'salons');
   if ((process.env.REDESIGN_CAPTURE_PHASE ?? 'after') === 'after') {
     await page.goto(settingsUrl);

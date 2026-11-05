@@ -45,9 +45,6 @@ export function ManagementNavigation({
             />
             سالن‌های من
           </Link>
-          <p className="pb-2 text-sm leading-7 text-muted">
-            ویرایش تازه نیاز به بررسی انتشار مجدد دارد؛ رزرو هنوز فعال نیست.
-          </p>
         </div>
       )}
       <nav
@@ -56,6 +53,7 @@ export function ManagementNavigation({
         className="flex gap-1 overflow-x-auto px-4 py-2 sm:px-6"
       >
         {[
+          ['appointments', 'نوبت‌ها'],
           ['', 'مشخصات'],
           ['services', 'خدمات'],
           ['staff', 'متخصصان'],
@@ -64,7 +62,8 @@ export function ManagementNavigation({
           ['publication', 'انتشار'],
         ].map(([path, label]) => {
           const href = `${root}${path ? '/' + path : ''}`;
-          const active = pathname === href;
+          const active =
+            pathname === href || (path === 'appointments' && pathname.startsWith(href + '/'));
           return (
             <Link
               key={path}

@@ -19,7 +19,7 @@ const serviceBody = {
   buffer_after_minutes: 0,
 };
 const intervals = [{ weekday: 0, start_local: '09:00', end_local: '18:00' }];
-describe('reviewed catalog against real PostgreSQL', () => {
+describe('owner publication and legacy moderation against real PostgreSQL', () => {
   let target: Awaited<ReturnType<typeof createTestDatabase>>,
     fixture: Awaited<ReturnType<typeof createTestApplication>>,
     pool: Pool;
@@ -123,7 +123,7 @@ describe('reviewed catalog against real PostgreSQL', () => {
   async function status(id: string, session: string) {
     return (await get(`/businesses/${id}/publication`, session).expect(200)).body.data;
   }
-  async function submit(id: string, session: string) {
+  async function publish(id: string, session: string, key = randomUUID()) {
     const p = await status(id, session);
     return (
       await write(
@@ -131,11 +131,42 @@ describe('reviewed catalog against real PostgreSQL', () => {
         session,
         { consent: true },
         Number(p.version),
+        key,
       ).expect(200)
     ).body.data;
   }
+  // Upgrade fixture only: reproduce an already persisted v1 request, without routing new writes through the retired workflow.
+  async function legacyRequest(id: string, session: string) {
+    const user = (await get('/me', session).expect(200)).body.data.user.id;
+    const tx = await pool.connect();
+    try {
+      await tx.query('BEGIN');
+      const p = (
+        await tx.query(
+          'SELECT content_revision,publication_version FROM app.businesses WHERE id=$1 FOR UPDATE',
+          [id],
+        )
+      ).rows[0];
+      const event = randomUUID();
+      await tx.query(
+        "INSERT INTO app.publication_events(id,business_id,actor_id,action,revision,publication_version,request_id,consent) VALUES($1,$2,$3,'request',$4,$5,$1,true)",
+        [event, id, user, p.content_revision, p.publication_version + 1],
+      );
+      await tx.query(
+        "UPDATE app.businesses SET state='pending_review',current_request_id=$2,version=version+1,publication_version=publication_version+1 WHERE id=$1",
+        [id, event],
+      );
+      await tx.query('COMMIT');
+    } catch (e) {
+      await tx.query('ROLLBACK');
+      throw e;
+    } finally {
+      tx.release();
+    }
+    return status(id, session);
+  }
   async function approve(id: string, owner: string, review: string) {
-    const p = await submit(id, owner);
+    const p = await legacyRequest(id, owner);
     return (
       await write(
         `/review/businesses/${id}/decisions`,
@@ -145,6 +176,142 @@ describe('reviewed catalog against real PostgreSQL', () => {
       ).expect(200)
     ).body.data;
   }
+  it('publishes immediately without a reviewer and replays exactly one consented publication', async () => {
+    const owner = await actor(),
+      other = await actor(),
+      b = await ready(owner.session);
+    const before = await status(b.id, owner.session),
+      key = randomUUID();
+    await write(
+      `/businesses/${b.id}/publication/requests`,
+      other.session,
+      { consent: true },
+      Number(before.version),
+    ).expect(404);
+    await write(
+      `/businesses/${b.id}/publication/requests`,
+      owner.session,
+      { consent: false },
+      Number(before.version),
+    ).expect(422);
+    const published = await publish(b.id, owner.session, key);
+    expect(published.state).toBe('published');
+    expect(published.history[0]).toMatchObject({
+      action: 'publish',
+      request_id: published.request_id,
+    });
+    expect(
+      (await pool.query('SELECT count(*)::int n FROM app.reviewer_permissions WHERE active'))
+        .rows[0].n,
+    ).toBe(0);
+    await get(`/catalog/salons/${b.id}`).expect(200);
+    await write(
+      `/businesses/${b.id}/publication/requests`,
+      owner.session,
+      { consent: true },
+      Number(before.version),
+      key,
+    ).expect(200);
+    expect(
+      (
+        await pool.query(
+          "SELECT count(*)::int n FROM app.publication_events WHERE business_id=$1 AND action='publish'",
+          [b.id],
+        )
+      ).rows[0].n,
+    ).toBe(1);
+  });
+  it('lets the owner finish an existing pending request without waiting for a reviewer', async () => {
+    const owner = await actor(),
+      b = await ready(owner.session);
+    await legacyRequest(b.id, owner.session);
+    await get(`/catalog/salons/${b.id}`).expect(404);
+    expect((await publish(b.id, owner.session)).state).toBe('published');
+    await get(`/catalog/salons/${b.id}`).expect(200);
+  });
+  it('keeps valid edits public, returns final settings state and requires consent again after incomplete edits', async () => {
+    const owner = await actor(),
+      b = await ready(owner.session);
+    await publish(b.id, owner.session);
+    await write(
+      `/businesses/${b.id}/services/${b.sid}`,
+      owner.session,
+      { price_irr: 3100000 },
+      1,
+      randomUUID(),
+      'patch',
+    ).expect(200);
+    await write(
+      `/businesses/${b.id}/hours`,
+      owner.session,
+      { intervals: [{ weekday: 0, start_local: '10:00', end_local: '17:00' }] },
+      2,
+      randomUUID(),
+      'put',
+    ).expect(200);
+    expect((await get(`/catalog/salons/${b.id}`).expect(200)).body.data.services[0].price_irr).toBe(
+      3100000,
+    );
+    const settings = (await get(`/businesses/${b.id}/settings`, owner.session)).body.data;
+    const incomplete = await write(
+      `/businesses/${b.id}/settings`,
+      owner.session,
+      { public_phone: null },
+      settings.version,
+      randomUUID(),
+      'patch',
+    ).expect(200);
+    expect(incomplete.body.data.state).toBe('draft');
+    await get(`/catalog/salons/${b.id}`).expect(404);
+    await write(
+      `/businesses/${b.id}/publication/requests`,
+      owner.session,
+      { consent: true },
+      Number((await status(b.id, owner.session)).version),
+    ).expect(422);
+    await write(
+      `/businesses/${b.id}/settings`,
+      owner.session,
+      { public_phone: '09121234567' },
+      incomplete.body.data.version,
+      randomUUID(),
+      'patch',
+    ).expect(200);
+    expect((await status(b.id, owner.session)).state).toBe('draft');
+    expect((await publish(b.id, owner.session)).state).toBe('published');
+  });
+  it('serializes two owner publications and a withdrawal without duplicate publication events', async () => {
+    const owner = await actor(),
+      b = await ready(owner.session),
+      p = await status(b.id, owner.session);
+    const results = await Promise.all(
+      [1, 2].map(() =>
+        write(
+          `/businesses/${b.id}/publication/requests`,
+          owner.session,
+          { consent: true },
+          Number(p.version),
+        ),
+      ),
+    );
+    expect(results.map((r) => r.status).sort()).toEqual([200, 409]);
+    const current = await status(b.id, owner.session);
+    await write(
+      `/businesses/${b.id}/publication/withdrawals`,
+      owner.session,
+      {},
+      Number(current.version),
+    ).expect(200);
+    await get(`/catalog/salons/${b.id}`).expect(404);
+    expect(
+      (
+        await pool.query(
+          "SELECT count(*)::int n FROM app.publication_events WHERE business_id=$1 AND action='publish'",
+          [b.id],
+        )
+      ).rows[0].n,
+    ).toBe(1);
+  });
   it('keeps empty discovery honest and strictly bounds public filters', async () => {
     expect((await get('/catalog/salons').expect(200)).body.data).toEqual({
       items: [],
@@ -183,7 +350,7 @@ describe('reviewed catalog against real PostgreSQL', () => {
       { consent: false },
       Number((await status(b.id, owner.session)).version),
     ).expect(422);
-    const p = await submit(b.id, owner.session);
+    const p = await legacyRequest(b.id, owner.session);
     await pool.query('INSERT INTO app.reviewer_permissions(user_id,active) VALUES($1,true)', [
       owner.id,
     ]);
@@ -264,7 +431,7 @@ describe('reviewed catalog against real PostgreSQL', () => {
     await pool.query('UPDATE app.staff_hours SET end_minute=start_minute+46 WHERE staff_id=$1', [
       b.staffId,
     ]);
-    const p = await submit(b.id, owner.session);
+    const p = await legacyRequest(b.id, owner.session);
     await write(
       `/review/businesses/${b.id}/decisions`,
       review.session,
@@ -299,7 +466,7 @@ describe('reviewed catalog against real PostgreSQL', () => {
     const owner = await actor(),
       review = await reviewer(),
       b = await ready(owner.session);
-    const p = await submit(b.id, owner.session);
+    const p = await legacyRequest(b.id, owner.session);
     // now() records transaction start, so a later lock holder may have an earlier timestamp.
     await pool.query(
       "UPDATE app.publication_events SET created_at=now()+interval '1 hour' WHERE id=$1",
@@ -325,7 +492,7 @@ describe('reviewed catalog against real PostgreSQL', () => {
     ).expect(200);
     expect(
       (await status(b.id, owner.session)).history.map((event: { action: string }) => event.action),
-    ).toEqual(['content_changed', 'approve', 'request']);
+    ).toEqual(['content_updated', 'approve', 'request']);
   });
   it('publishes only allowlisted real fields and withdraws atomically without altering content revision', async () => {
     const owner = await actor(),
@@ -375,70 +542,83 @@ describe('reviewed catalog against real PostgreSQL', () => {
     await get(`/catalog/salons/${b.id}`).expect(404);
     expect((await get('/catalog/locations')).body.data.items).toEqual([]);
   });
-  it.each(['service', 'staff', 'business', 'hours', 'exception'] as const)(
-    'serializes approval against a simultaneous %s edit',
-    async (kind) => {
-      const owner = await actor(),
-        review = await reviewer(),
-        b = await ready(owner.session);
-      const p = await submit(b.id, owner.session);
-      const settings = (await get(`/businesses/${b.id}/settings`, owner.session)).body.data;
-      const paths = {
-        service: `/businesses/${b.id}/services/${b.sid}`,
-        staff: `/businesses/${b.id}/staff/${b.staffId}`,
-        business: `/businesses/${b.id}/settings`,
-        hours: `/businesses/${b.id}/hours`,
-        exception: `/businesses/${b.id}/schedule-exceptions`,
-      };
-      const bodies = {
-        service: { price_irr: 3500000 },
-        staff: { public_visible: false },
-        business: { name: 'نام جدید بررسی‌نشده' },
-        hours: { intervals: [] },
-        exception: { local_date: '2026-12-02', staff_id: null, closed: true, intervals: [] },
-      };
-      const version =
-        kind === 'business'
-          ? Number(settings.version)
-          : kind === 'hours'
-            ? 2
-            : kind === 'exception'
-              ? undefined
-              : 1;
-      const [decision, edit] = await Promise.all([
-        write(
-          `/review/businesses/${b.id}/decisions`,
-          review.session,
-          { decision: 'approve', request_id: p.request_id, content_revision: p.content_revision },
-          Number(p.version),
-        ),
-        write(
-          paths[kind],
-          owner.session,
-          bodies[kind],
-          version,
-          randomUUID(),
-          kind === 'hours' ? 'put' : kind === 'exception' ? 'post' : 'patch',
-        ),
-      ]);
-      expect([200, 409]).toContain(decision.status);
-      if (kind === 'business' && edit.status === 409) {
-        expect(decision.status).toBe(200);
-        expect((await get(`/catalog/salons/${b.id}`).expect(200)).body.data.name).toBe(
-          'سالن نیلوفر',
-        );
-      } else {
-        expect(edit.status).toBe(200 + (kind === 'exception' ? 1 : 0));
-        expect((await status(b.id, owner.session)).state).toBe('draft');
-        await get(`/catalog/salons/${b.id}`).expect(404);
-      }
-    },
-  );
+  it.each(
+    ['owner', 'legacy'].flatMap((mode) =>
+      (['service', 'staff', 'business', 'hours', 'exception'] as const).map((kind) => ({
+        mode,
+        kind,
+      })),
+    ),
+  )('serializes $mode publication against a simultaneous $kind edit', async ({ mode, kind }) => {
+    const owner = await actor(),
+      review = await reviewer(),
+      b = await ready(owner.session);
+    const p =
+      mode === 'owner'
+        ? await status(b.id, owner.session)
+        : await legacyRequest(b.id, owner.session);
+    const settings = (await get(`/businesses/${b.id}/settings`, owner.session)).body.data;
+    const paths = {
+      service: `/businesses/${b.id}/services/${b.sid}`,
+      staff: `/businesses/${b.id}/staff/${b.staffId}`,
+      business: `/businesses/${b.id}/settings`,
+      hours: `/businesses/${b.id}/hours`,
+      exception: `/businesses/${b.id}/schedule-exceptions`,
+    };
+    const bodies = {
+      service: { price_irr: 3500000 },
+      staff: { public_visible: false },
+      business: { name: 'نام جدید بررسی‌نشده' },
+      hours: { intervals: [] },
+      exception: { local_date: '2026-12-02', staff_id: null, closed: true, intervals: [] },
+    };
+    const version =
+      kind === 'business'
+        ? Number(settings.version)
+        : kind === 'hours'
+          ? 2
+          : kind === 'exception'
+            ? undefined
+            : 1;
+    const [decision, edit] = await Promise.all([
+      mode === 'owner'
+        ? write(
+            `/businesses/${b.id}/publication/requests`,
+            owner.session,
+            { consent: true },
+            Number(p.version),
+          )
+        : write(
+            `/review/businesses/${b.id}/decisions`,
+            review.session,
+            { decision: 'approve', request_id: p.request_id, content_revision: p.content_revision },
+            Number(p.version),
+          ),
+      write(
+        paths[kind],
+        owner.session,
+        bodies[kind],
+        version,
+        randomUUID(),
+        kind === 'hours' ? 'put' : kind === 'exception' ? 'post' : 'patch',
+      ),
+    ]);
+    expect([200, 409]).toContain(decision.status);
+    if (kind === 'business' && edit.status === 409) {
+      expect(decision.status).toBe(200);
+      expect((await get(`/catalog/salons/${b.id}`).expect(200)).body.data.name).toBe('سالن نیلوفر');
+    } else {
+      expect(edit.status).toBe(200 + (kind === 'exception' ? 1 : 0));
+      const staysPublic = decision.status === 200 && !['staff', 'hours'].includes(kind);
+      expect((await status(b.id, owner.session)).state).toBe(staysPublic ? 'published' : 'draft');
+      await get(`/catalog/salons/${b.id}`).expect(staysPublic ? 200 : 404);
+    }
+  });
   it('allows one competing decision, binds exact request and denies replay after permission revocation', async () => {
     const owner = await actor(),
       review = await reviewer(),
       b = await ready(owner.session),
-      p = await submit(b.id, owner.session),
+      p = await legacyRequest(b.id, owner.session),
       key = randomUUID();
     const body = {
       decision: 'approve',
@@ -542,7 +722,7 @@ describe('reviewed catalog against real PostgreSQL', () => {
     const owner = await actor(),
       review = await reviewer(),
       b = await ready(owner.session);
-    let p = await submit(b.id, owner.session);
+    let p = await legacyRequest(b.id, owner.session);
     await write(
       `/businesses/${b.id}/services/${b.sid}`,
       owner.session,
@@ -557,7 +737,7 @@ describe('reviewed catalog against real PostgreSQL', () => {
       { decision: 'approve', request_id: p.request_id, content_revision: p.content_revision },
       Number(p.version),
     ).expect(409);
-    p = await submit(b.id, owner.session);
+    p = await legacyRequest(b.id, owner.session);
     await write(
       `/review/businesses/${b.id}/decisions`,
       review.session,
@@ -600,7 +780,20 @@ describe('reviewed catalog against real PostgreSQL', () => {
       'patch',
     ).expect(200);
     expect((await status(b.id, owner.session)).state).toBe('suspended');
-    await submit(b.id, owner.session);
+    await write(
+      `/businesses/${b.id}/publication/requests`,
+      owner.session,
+      { consent: true },
+      Number((await status(b.id, owner.session)).version),
+    ).expect(409);
+    const suspended = await status(b.id, owner.session);
+    await write(
+      `/review/businesses/${b.id}/decisions`,
+      review.session,
+      { decision: 'approve', request_id: null, content_revision: suspended.content_revision },
+      Number(suspended.version),
+    ).expect(200);
+    await get(`/catalog/salons/${b.id}`).expect(200);
   });
   it('uses normalized filters, matched prices and precise scoped pagination without duplicate salons', async () => {
     const owner = await actor(),

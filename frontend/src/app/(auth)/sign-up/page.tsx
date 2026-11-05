@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { SignUpForm } from '../../../features/identity';
 export default function SignUpPage() {
   return (
@@ -6,7 +7,9 @@ export default function SignUpPage() {
       <p className="mb-6 mt-2 text-sm leading-7 text-ink-soft">
         فعلاً ورود با ایمیل و رمز است؛ پیامکی ارسال نمی‌شود.
       </p>
-      <SignUpForm />
+      <Suspense fallback={<p role="status">در حال آماده‌سازی فرم…</p>}>
+        <SignUpForm />
+      </Suspense>
     </>
   );
 }

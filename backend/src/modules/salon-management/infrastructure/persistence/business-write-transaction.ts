@@ -1,11 +1,19 @@
+import { Clock } from '../../application/ports/clock.js';
+import { assertBookingCompatibility } from '../../../bookings/persistence-contract.js';
 import { Injectable } from '@nestjs/common';
 import type { PoolClient } from 'pg';
 import { DatabaseProvider } from '../../../../database/database.provider.js';
 import { CapabilityError, conflict, notFound } from '../../../../common/domain/capability-error.js';
 import type { WriteCommand } from '../../domain/management.types.js';
+import { readPublication } from './publication-query.js';
+import type { PublicationState } from '../../domain/publication.types.js';
+import { stateAfterContentChange } from '../../domain/publication-policy.js';
 @Injectable()
 export class BusinessWriteTransaction {
-  constructor(readonly database: DatabaseProvider) {}
+  constructor(
+    readonly database: DatabaseProvider,
+    private readonly clock: Clock,
+  ) {}
   async owner(actor: string, business: string, tx?: PoolClient): Promise<void> {
     const r = await (tx ?? this.database.pool).query(
       "SELECT 1 FROM app.business_memberships WHERE business_id=$1 AND user_id=$2 AND active=true AND role='owner'",
@@ -92,18 +100,18 @@ export class BusinessWriteTransaction {
       }
       if (contentMutation && command.businessId) {
         await tx.query(
-          `INSERT INTO app.publication_events(business_id,actor_id,action,revision,publication_version,request_id)
-          SELECT id,$2,'content_changed',content_revision,publication_version+1,current_request_id FROM app.businesses WHERE id=$1 AND state IN ('published','pending_review')`,
-          [command.businessId, command.actorId],
-        );
-        await tx.query(
           `UPDATE app.businesses SET content_revision=content_revision+1,publication_version=publication_version+1,
-          version=version+CASE WHEN state IN ('published','pending_review') AND $2<>'business.update' THEN 1 ELSE 0 END,
-          state=CASE WHEN state IN ('published','pending_review') THEN 'draft' ELSE state END,current_request_id=NULL WHERE id=$1`,
+          version=version+CASE WHEN state IN ('published','pending_review') AND $2<>'business.update' THEN 1 ELSE 0 END WHERE id=$1`,
           [command.businessId, command.operation],
         );
       }
-      const result = await action(tx);
+      let result = await action(tx);
+      if (contentMutation && command.businessId) {
+        await assertBookingCompatibility(tx, command.businessId, this.clock.now());
+        const state = await this.finishContentMutation(tx, command);
+        // A settings response must describe the final committed visibility, not its pre-readiness state.
+        if ('state' in result) result = { ...result, state };
+      }
       const target =
         'id' in result && typeof result.id === 'string' ? result.id : command.businessId;
       const business = command.businessId ?? target;
@@ -146,6 +154,39 @@ export class BusinessWriteTransaction {
     } finally {
       tx.release();
     }
+  }
+  private async finishContentMutation(
+    tx: PoolClient,
+    command: WriteCommand,
+  ): Promise<PublicationState> {
+    const business = command.businessId;
+    if (!business) throw new Error('Missing content mutation target');
+    const publication = await readPublication(tx, business);
+    if (publication.state !== 'published' && publication.state !== 'pending_review')
+      return publication.state;
+    const next = stateAfterContentChange(publication.state, publication.issues);
+    const staysPublished = next === 'published';
+    await tx.query(
+      `INSERT INTO app.publication_events(business_id,actor_id,action,revision,publication_version,request_id)
+       VALUES($1,$2,$3,$4,$5,$6)`,
+      [
+        business,
+        command.actorId,
+        staysPublished
+          ? 'content_updated'
+          : publication.state === 'pending_review'
+            ? 'content_changed'
+            : 'publication_incomplete',
+        publication.content_revision,
+        publication.version,
+        publication.request_id,
+      ],
+    );
+    if (staysPublished) return 'published';
+    await tx.query("UPDATE app.businesses SET state='draft',current_request_id=NULL WHERE id=$1", [
+      business,
+    ]);
+    return 'draft';
   }
   version(actual: number, expected: number | undefined) {
     if (actual !== expected) conflict();

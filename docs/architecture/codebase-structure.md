@@ -79,3 +79,11 @@ modules/bookings/
 ## افزوده اجرایی اسپرینت۶
 
 [ساختار۶](sprint-06-structure.md) و [ADR-011](adr/ADR-011-schedule-only-availability.md) مرجع availability خواندنی در همان salon-management هستند. Domain موتور خالص، Application هماهنگ‌کننده، Reader یک snapshot PostgreSQL و Clock قابل جایگزینی دارد. feature فرانت availability و route عمومی times به transport/Design System جاری متصل‌اند؛ رزرو/دفتر اشغال و migration تازه ساخته نشده‌اند.
+
+## افزوده اجرایی اسپرینت۷
+
+bookings اکنون قابلیت واقعی مستقل است؛ مثال قدیمی «آینده» بالای سند، مرجع پوشه اجرایی نیست. [ساختار۷](sprint-07-structure.md)، [ADR-012](adr/ADR-012-booking-ledger.md) و [حالت‌های UI](sprint-07-ui.md) مرجع‌اند. ledger به availability و محافظ تنظیمات وصل است؛ domain خالص و Port واقعی، قفل/transaction در adapter و UI کوچک/feature-first باقی‌اند.
+
+## اصلاح انتشار مستقیم مالک
+
+طبق ADR-013، publication-policy قواعد انتشار فوری و وضعیت پس از ویرایش را دارد. reader مشترک `backend/src/modules/salon-management/infrastructure/persistence/publication-query.ts`، داده یک snapshot را به readiness دامنه می‌دهد؛ PostgresPublicationStore و BusinessWriteTransaction آن را مصرف می‌کنند. جهت وابستگی و مرز عمومی ماژول‌ها تغییر نکرده‌اند.

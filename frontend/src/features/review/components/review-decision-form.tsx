@@ -88,6 +88,14 @@ export function ReviewDecisionForm({
             تعلیق انتشار
           </Button>
         )}
+        {status.state === 'suspended' && (
+          <Button
+            disabled={frozen || status.issues.length > 0}
+            onClick={() => void submit('approve')}
+          >
+            رفع تعلیق و انتشار
+          </Button>
+        )}
       </div>
       <RequestFeedback mutation={mutation} />
       {Boolean(mutation.error) && (

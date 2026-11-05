@@ -1,3 +1,4 @@
+import { BookingsModule } from './modules/bookings/bookings.module.js';
 import { SalonManagementModule } from './modules/salon-management/salon-management.module.js';
 import { ConsoleLogger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -12,6 +13,7 @@ import { HealthModule } from './modules/health/health.module.js';
     HealthModule,
     IdentityModule,
     SalonManagementModule,
+    BookingsModule,
   ],
   providers: [
     {

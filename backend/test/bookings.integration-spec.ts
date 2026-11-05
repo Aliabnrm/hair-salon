@@ -7,6 +7,7 @@ import { runMigration } from './helpers/run-migration.js';
 import { createTestApplication } from './helpers/create-test-application.js';
 import { seedAvailability } from './helpers/availability-fixture.js';
 import { BookingStore } from '../src/modules/bookings/application/booking-store.js';
+import { DatabaseProvider } from '../src/database/database.provider.js';
 import { BusinessWriteTransaction } from '../src/modules/salon-management/infrastructure/persistence/business-write-transaction.js';
 import type {
   BookingCommand,
@@ -29,6 +30,8 @@ describe('atomic booking ledger on real PostgreSQL and Nest', () => {
     expect(m.status, m.output).toBe(0);
     pool = new Pool({ connectionString: target.url, max: 12 });
     fixture = await createTestApplication('test', [], target.url, { now: () => now });
+    // This suite tests 100 queued contenders, not the production pool's one-second load limit.
+    fixture.app.get(DatabaseProvider).pool.options.connectionTimeoutMillis = 10_000;
     store = fixture.app.get(BookingStore);
     write = fixture.app.get(BusinessWriteTransaction);
   });

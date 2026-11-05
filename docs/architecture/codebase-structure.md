@@ -87,3 +87,7 @@ bookings اکنون قابلیت واقعی مستقل است؛ مثال قدی�
 ## اصلاح انتشار مستقیم مالک
 
 طبق ADR-013، publication-policy قواعد انتشار فوری و وضعیت پس از ویرایش را دارد. reader مشترک `backend/src/modules/salon-management/infrastructure/persistence/publication-query.ts`، داده یک snapshot را به readiness دامنه می‌دهد؛ PostgresPublicationStore و BusinessWriteTransaction آن را مصرف می‌کنند. جهت وابستگی و مرز عمومی ماژول‌ها تغییر نکرده‌اند.
+
+## چیدمان مسیر عمومی رزرو
+
+`components/layout/app-shell.tsx` یک جایگاه مستقل از اسکرول برای اقدام صفحه دارد؛ `PageActionBar` با Portal محتوای خود را در آن، بالای ناوبری اصلی قرار می‌دهد. `PageHeader` هدر و مقصد برگشت صفحات سالن، زمان و رسید را یکدست می‌کند. این اجزای مشترک فقط نمایش‌اند و به API یا feature وابسته نیستند. فرم ثبت نوبت، حتی با دکمه بیرون از محفظه اسکرول، همان فرم و مسیر ارسال feature bookings را نگه می‌دارد. جزئیات طراحی، دامنه بازبینی و آزمون‌ها در [درس بازطراحی مسیر رزرو](../learning/booking-journey-ux.md) ثبت شده‌اند.

@@ -28,7 +28,7 @@ test('real public filters are shareable, normalize Persian and restore browser h
   await expect(card).toHaveAttribute('href', /\/salons\/[a-f0-9-]{36}$/);
   await card.click();
   await expect(page.getByRole('heading', { name: 'خدمات و قیمت‌ها' })).toBeVisible();
-  await expect(page.getByRole('link', { name: '+989121234567', exact: true })).toHaveAttribute(
+  await expect(page.getByRole('link', { name: /تماس با سالن/ })).toHaveAttribute(
     'href',
     'tel:+989121234567',
   );

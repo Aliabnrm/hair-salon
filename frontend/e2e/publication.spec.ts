@@ -71,11 +71,11 @@ test('owner publishes immediately, customer books the same salon and moderation 
   await page.getByLabel('شنبه شروع 1', { exact: true }).fill('09:00');
   await page.getByLabel('شنبه پایان 1', { exact: true }).fill('18:00');
   await page.getByRole('button', { name: 'ذخیره برنامه هفتگی' }).click();
-  await expect(page.getByText('با موفقیت ذخیره شد.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('status').getByText('برنامه هفتگی ذخیره شد')).toBeVisible();
   await page.getByLabel('برنامه چه کسی؟').selectOption({ label: 'متخصص قابل نمایش' });
   await page.getByRole('button', { name: 'افزودن بازه شنبه', exact: true }).click();
   await page.getByRole('button', { name: 'ذخیره برنامه هفتگی' }).click();
-  await expect(page.getByText('با موفقیت ذخیره شد.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('status').getByText('برنامه هفتگی ذخیره شد')).toBeVisible();
   await nav(page, 'انتشار');
   await expect(
     page.getByText('اطلاعات لازم تکمیل است؛ می‌توانید سالن را همین حالا منتشر کنید.'),
@@ -162,10 +162,15 @@ test('owner publishes immediately, customer books the same salon and moderation 
     await expect(
       customer.getByRole('heading', { name: 'سالن مسیر واقعی انتشار', exact: true }),
     ).toBeVisible();
-    await expect(customer.getByText('۲۵۰٬۰۰۰ تومان', { exact: true })).toBeVisible();
     await expect(
-      customer.getByRole('link', { name: '+989121234567', exact: true }),
-    ).toHaveAttribute('href', 'tel:+989121234567');
+      customer
+        .getByRole('region', { name: 'خدمات و قیمت‌ها' })
+        .getByText('۲۵۰٬۰۰۰ تومان', { exact: true }),
+    ).toBeVisible();
+    await expect(customer.getByRole('link', { name: /تماس با سالن/ })).toHaveAttribute(
+      'href',
+      'tel:+989121234567',
+    );
     for (const width of [320, 360, 390, 430, 1280]) {
       await customer.setViewportSize({ width, height: 900 });
       expect(
@@ -182,9 +187,9 @@ test('owner publishes immediately, customer books the same salon and moderation 
       main.scrollTop = 0;
       return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
     });
-    await expect(customer.getByRole('link', { name: 'بررسی زمان‌ها', exact: true })).toBeInViewport(
-      { ratio: 1 },
-    );
+    await expect(
+      customer.getByRole('link', { name: 'انتخاب زمان و رزرو', exact: true }),
+    ).toBeInViewport({ ratio: 1 });
     await expect(customer.getByRole('navigation', { name: 'ناوبری اصلی' })).toBeInViewport({
       ratio: 1,
     });
@@ -211,7 +216,7 @@ test('owner publishes immediately, customer books the same salon and moderation 
     });
     expect(enlargedLayout.fits, JSON.stringify(enlargedLayout.overflowing)).toBe(true);
     // Normal writes throughout: new salon -> owner publication -> discovery -> committed booking -> owner's diary.
-    await customer.getByRole('link', { name: 'بررسی زمان‌ها', exact: true }).click();
+    await customer.getByRole('link', { name: 'انتخاب زمان و رزرو', exact: true }).click();
     await customer.locator('[data-date="2026-11-07"]').click();
     await customer.locator('[data-slot]').first().click();
     await customer.getByRole('link', { name: 'ادامه رزرو' }).click();
@@ -286,7 +291,11 @@ test('owner publishes immediately, customer books the same salon and moderation 
       await page.unrouteAll({ behavior: 'wait' });
     }
     expect((await customer.reload())?.status()).toBe(200);
-    await expect(customer.getByText('۲۶۰٬۰۰۰ تومان', { exact: true })).toBeVisible();
+    await expect(
+      customer
+        .getByRole('region', { name: 'خدمات و قیمت‌ها' })
+        .getByText('۲۶۰٬۰۰۰ تومان', { exact: true }),
+    ).toBeVisible();
     await customer.goto(stack.origin + '/appointments/' + appointmentId);
     await expect(customer.getByText('۲۵۰٬۰۰۰ تومان', { exact: true })).toBeVisible();
     await page.goto(stack.origin + root + '/publication');

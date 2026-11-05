@@ -72,7 +72,9 @@ test('short form focuses errors, supports keyboard selection and saves real opti
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'بارگذاری نسخه تازه' })).toBeFocused();
   await page.getByRole('link', { name: 'سالن‌های من', exact: true }).click();
-  await expect(page.getByRole('link', { name: /سالن آزمایشی با نام بلند/ })).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: /سالن آزمایشی با نام بلند/ }).filter({ hasText: 'مدیریت' }),
+  ).toBeVisible();
   expect(await page.locator('main').evaluate((main) => main.scrollWidth <= main.clientWidth)).toBe(
     true,
   );

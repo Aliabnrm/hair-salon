@@ -7,3 +7,5 @@ export {
 } from '../modules/identity/infrastructure/persistence/identity.schema.js';
 
 export * from '../modules/salon-management/infrastructure/persistence/management.schema.js';
+
+export * from '../modules/bookings/infrastructure/persistence/bookings.schema.js';

@@ -42,7 +42,13 @@ export function SalonCard({ salon }: { salon: SalonSummary }) {
               خدمات از{' '}
               <strong className="text-base text-ink">{formatPrice(salon.min_price_irr)}</strong>
             </p>
-            <span className="text-sm font-bold text-petrol">مشاهده سالن ←</span>
+            <span className="inline-flex items-center gap-1 text-sm font-bold text-petrol">
+              خدمات و رزرو{' '}
+              <Icon
+                name="forward"
+                size={16}
+              />
+            </span>
           </div>
         </div>
       </Link>

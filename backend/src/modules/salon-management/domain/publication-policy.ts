@@ -10,10 +10,11 @@ export function transition(
   state: PublicationState,
   action: 'request' | 'withdraw' | Decision,
 ): PublicationState {
-  if (action === 'request' && (state === 'draft' || state === 'suspended')) return 'pending_review';
+  if (action === 'request' && (state === 'draft' || state === 'pending_review')) return 'published';
   if (action === 'withdraw' && (state === 'pending_review' || state === 'published'))
     return 'draft';
-  if (state === 'pending_review' && action === 'approve') return 'published';
+  if ((state === 'pending_review' || state === 'suspended') && action === 'approve')
+    return 'published';
   if (state === 'pending_review' && action === 'reject') return 'draft';
   if (state === 'published' && action === 'suspend') return 'suspended';
   return conflict('PUBLICATION_STATE_CONFLICT', 'وضعیت انتشار تغییر کرده یا این اقدام مجاز نیست.');
@@ -121,6 +122,13 @@ export function readiness(
 }
 export function assertReady(issues: ReadinessIssue[]) {
   if (issues.length) invalid('readiness', 'نقص‌های آمادگی انتشار را برطرف کنید.');
+}
+export function stateAfterContentChange(
+  state: PublicationState,
+  issues: ReadinessIssue[],
+): PublicationState {
+  if (state === 'pending_review' || (state === 'published' && issues.length > 0)) return 'draft';
+  return state;
 }
 export function normalizePersian(value: string): string {
   return value

@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import { Icon } from '../../../../components/ui/icon';
+import { buttonStyles } from '../../../../components/ui/button';
 import type { Business } from '../../model/management.types';
 import { DraftBadge } from './draft-badge';
 export function BusinessCard({ business }: { business: Business }) {
   return (
-    <li>
+    <li className="overflow-hidden rounded-3xl border border-line bg-surface">
       <Link
         href={`/manage/${business.id}`}
-        className="group block rounded-3xl border border-line bg-surface p-4 transition-colors hover:border-petrol sm:p-5"
+        className="group block p-4 transition-colors hover:bg-sand sm:p-5"
       >
         <div className="flex items-start gap-3">
           <span
@@ -48,6 +49,25 @@ export function BusinessCard({ business }: { business: Business }) {
           </span>
         </div>
       </Link>
+      <div className="space-y-3 border-t border-line p-4 sm:p-5">
+        <p className="text-sm leading-7 text-ink-soft">
+          {business.state === 'published'
+            ? 'قابل مشاهده در کاوش؛ دریافت رزرو آنلاین در زمان‌های آزاد.'
+            : 'در کاوش نمایش داده نمی‌شود؛ وضعیت و مراحل لازم را در انتشار ببینید.'}
+        </p>
+        <Link
+          href={`/manage/${business.id}/appointments`}
+          className={buttonStyles.primary + ' w-full'}
+        >
+          نوبت‌های مشتریان {business.name}
+        </Link>
+        <Link
+          href={`/manage/${business.id}/publication`}
+          className={buttonStyles.ghost + ' w-full'}
+        >
+          وضعیت انتشار {business.name}
+        </Link>
+      </div>
     </li>
   );
 }

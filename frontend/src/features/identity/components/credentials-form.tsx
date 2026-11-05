@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { safeReturnTo } from '../model/return-to';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useRef, useState, type FormEvent } from 'react';
 import { Button, buttonStyles } from '../../../components/ui/button';
 import { TextField } from '../../../components/ui/text-field';
@@ -10,6 +11,9 @@ import { register } from '../api/identity.api';
 import { authFormError, passwordError } from '../model/auth-form-errors';
 
 export function CredentialsForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
+  const returnTo = safeReturnTo(useSearchParams().get('returnTo'));
+  const authLink = (path: string) =>
+    returnTo === '/account' ? path : path + '?' + new URLSearchParams({ returnTo });
   const signingUp = mode === 'sign-up';
   const router = useRouter();
   const session = useSession();
@@ -39,7 +43,7 @@ export function CredentialsForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
         setReceived(true);
       } else {
         await session.signIn({ email, password });
-        router.replace('/account');
+        router.replace(returnTo);
       }
     } catch (failure) {
       setError(authFormError(failure));
@@ -58,7 +62,7 @@ export function CredentialsForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
         description="اگر این ایمیل قابل ثبت باشد، حساب ساخته شده است. برای ادامه با ایمیل و رمز خود وارد شوید. مالکیت ایمیل هنوز تأیید نمی‌شود."
       >
         <Link
-          href="/sign-in"
+          href={authLink('/sign-in')}
           className={buttonStyles.primary}
         >
           رفتن به ورود
@@ -128,7 +132,7 @@ export function CredentialsForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
         {signingUp ? 'حساب دارید؟' : 'حساب ندارید؟'}{' '}
         <Link
           className={buttonStyles.ghost}
-          href={signingUp ? '/sign-in' : '/sign-up'}
+          href={authLink(signingUp ? '/sign-in' : '/sign-up')}
         >
           {signingUp ? 'ورود' : 'ثبت‌نام'}
         </Link>

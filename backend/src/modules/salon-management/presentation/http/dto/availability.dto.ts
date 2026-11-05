@@ -13,8 +13,8 @@ export const availabilityExample = {
   staff_id: 'any',
   timezone: 'Asia/Tehran',
   checked_at: '2026-11-03T06:00:00.000Z',
-  availability_basis: 'schedule_only',
-  booking_enabled: false,
+  availability_basis: 'live_occupancy',
+  booking_enabled: true,
   policy: {
     slot_step_minutes: 15,
     minimum_notice_minutes: 60,
@@ -73,8 +73,8 @@ export class AvailabilityDto {
   @ApiProperty({ description: 'any or an eligible public staff UUID' }) staff_id!: string;
   @ApiProperty({ enum: ['Asia/Tehran'] }) timezone!: string;
   @ApiProperty({ format: 'date-time' }) checked_at!: string;
-  @ApiProperty({ enum: ['schedule_only'] }) availability_basis!: string;
-  @ApiProperty({ enum: [false], description: 'This response does not reserve or hold capacity.' })
+  @ApiProperty({ enum: ['live_occupancy'] }) availability_basis!: string;
+  @ApiProperty({ enum: [true], description: 'This response does not reserve or hold capacity.' })
   booking_enabled!: boolean;
   @ApiProperty({ type: AvailabilityPolicyDto }) policy!: AvailabilityPolicyDto;
   @ApiProperty({ format: 'date' }) from!: string;

@@ -9,6 +9,7 @@ import { LoadState, RequestFeedback } from '../request-feedback';
 import { ManagementFrame } from '../management-frame';
 import { DraftBadge } from '../businesses/draft-badge';
 import { PublicationHistory } from './publication-history';
+import { PublicationIssues } from './publication-issues';
 export function PublicationScreen({ businessId }: { businessId: string }) {
   const query = useRemote(businessId, (s) => getPublication(businessId, s));
   const mutation = useManagedMutation();
@@ -38,13 +39,14 @@ export function PublicationScreen({ businessId }: { businessId: string }) {
             <DraftBadge state={status.state} />
             {status.state === 'suspended' && (
               <p className="rounded-2xl bg-clay-soft p-3 leading-8 text-clay">
-                ابتدا دلیل تعلیق را در سابقه بخوانید، اطلاعات را اصلاح کنید و درخواست تازه بفرستید.
-                ذخیره اطلاعات به‌تنهایی تعلیق را برنمی‌دارد.
+                دلیل تعلیق را در سابقه بخوانید و اطلاعات را اصلاح کنید. رفع تعلیق توسط مسئول سامانه
+                انجام می‌شود؛ ویرایش یا انتشار دوباره توسط مالک، تعلیق را برنمی‌دارد.
               </p>
             )}
             <p className="leading-8 text-ink-soft">
-              نشانی، موبایل، قیمت خدمات و نام متخصصان انتخاب‌شده پس از بررسی مستقل برای همه نمایش
-              داده می‌شوند. هر ویرایش تازه، انتشار یا درخواست در انتظار را متوقف می‌کند.
+              با تأیید شما، نشانی، موبایل، قیمت خدمات و نام متخصصان انتخاب‌شده بلافاصله برای همه
+              نمایش داده می‌شوند و رزرو آنلاین فعال می‌شود. اطلاعات کامل نیازی به تأیید شخص دیگری
+              ندارد.
             </p>
             <Link
               href={`/manage/${businessId}/preview`}
@@ -64,26 +66,20 @@ export function PublicationScreen({ businessId }: { businessId: string }) {
           <section className="rounded-3xl border border-line bg-surface p-5">
             <h2 className="mb-3 text-lg font-bold">آمادگی انتشار</h2>
             {status.issues.length ? (
-              <ul className="space-y-3">
-                {status.issues.map((i, n) => (
-                  <li key={`${i.code}-${i.resource_id}-${n}`}>
-                    <Link
-                      className="inline-flex min-h-11 items-center gap-2 text-petrol underline underline-offset-4"
-                      href={`/manage/${businessId}${i.section === 'settings' ? '' : '/' + i.section}`}
-                    >
-                      {i.message}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <PublicationIssues
+                businessId={businessId}
+                issues={status.issues}
+              />
             ) : (
               <p className="leading-8 text-petrol-deep">
-                اطلاعات لازم تکمیل است؛ می‌توانید درخواست بررسی بفرستید.
+                {status.state === 'draft' || status.state === 'pending_review'
+                  ? 'اطلاعات لازم تکمیل است؛ می‌توانید سالن را همین حالا منتشر کنید.'
+                  : 'اطلاعات لازم برای انتشار تکمیل است.'}
               </p>
             )}
           </section>
           <section className="space-y-4 rounded-3xl border border-line bg-surface p-5">
-            {status.state === 'draft' || status.state === 'suspended' ? (
+            {status.state === 'draft' || status.state === 'pending_review' ? (
               <>
                 <label className="flex min-h-11 items-start gap-3 leading-8">
                   <input
@@ -104,25 +100,23 @@ export function PublicationScreen({ businessId }: { businessId: string }) {
                   }
                   onClick={() => void act('requests')}
                 >
-                  ارسال درخواست انتشار
+                  انتشار سالن
                 </Button>
               </>
-            ) : (
+            ) : status.state === 'published' ? (
               <>
                 <p className="leading-8">
-                  {status.state === 'pending_review'
-                    ? 'درخواست شما در انتظار بررسی است.'
-                    : 'سالن شما در فهرست عمومی دیده می‌شود.'}
+                  سالن شما در فهرست عمومی دیده می‌شود و در زمان‌های آزاد قابل رزرو است.
                 </p>
                 <Button
                   variant="secondary"
                   disabled={mutation.pending || mutation.uncertain}
                   onClick={() => void act('withdrawals')}
                 >
-                  {status.state === 'published' ? 'توقف انتشار' : 'انصراف از درخواست'}
+                  توقف انتشار
                 </Button>
               </>
-            )}
+            ) : null}
             <RequestFeedback mutation={mutation} />
             {Boolean(mutation.error) && (
               <Button

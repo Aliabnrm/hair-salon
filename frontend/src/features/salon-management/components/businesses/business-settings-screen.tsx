@@ -7,6 +7,7 @@ import { FailureNotice, LoadState } from '../request-feedback';
 import { ManagementNavigation } from '../management-navigation';
 import { BusinessForm } from './business-form';
 import { DraftBadge } from './draft-badge';
+import { BookingReadiness } from '../publication/booking-readiness';
 
 export function NewBusinessScreen() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export function NewBusinessScreen() {
     <div>
       <PrivatePageHeader
         title="سالن خودت را اضافه کن"
-        description="از اطلاعات اصلی شروع کنید؛ سالن فعلاً خصوصی می‌ماند."
+        description="ابتدا مشخصات، خدمات، متخصص و ساعات کاری را تکمیل کنید؛ سپس با تأیید اطلاعات، سالن را مستقیم در کاوش منتشر کنید."
         back={{ href: '/manage', label: 'سالن‌های من' }}
       />
       <div className="px-4 py-6 sm:px-6">
@@ -48,11 +49,18 @@ export function BusinessSettingsScreen({ businessId }: { businessId: string }) {
         embedded
       />
       <section className="space-y-6 px-4 py-6 sm:px-6">
+        {query.data && (
+          <BookingReadiness
+            businessId={businessId}
+            revision={query.data.version}
+          />
+        )}
         <div>
           <h2 className="text-xl font-bold">مشخصات سالن</h2>
           <p className="mt-2 text-sm leading-7 text-muted">
-            وضعیت واقعی انتشار بالا نمایش داده می‌شود. هر ویرایش تازه به بررسی مجدد نیاز دارد؛ رزرو
-            هنوز فعال نیست.
+            تغییر معتبر قیمت یا برنامه کاری، انتشار را متوقف نمی‌کند. اگر اطلاعات ضروری ناقص شوند،
+            سالن تا تکمیل و انتشار دوباره از کاوش خارج می‌شود. نوبت‌های قبلی در دفتر سالن باقی
+            می‌مانند.
           </p>
         </div>
         <LoadState

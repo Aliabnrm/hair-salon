@@ -27,7 +27,7 @@ export class AvailabilityController {
   ) {}
   @Get(':businessId/availability')
   @ApiOperation({
-    summary: 'Schedule-only suggested times; never reserves capacity',
+    summary: 'Live schedule and occupancy suggestions; creation rechecks atomically',
     description:
       'Public, no-store. 180 catalog requests and 60 availability requests per IP/minute. No session required.',
   })

@@ -46,8 +46,8 @@ describe('availability through real Nest and PostgreSQL', () => {
     expect(r.headers['cache-control']).toBe('no-store');
     expect(r.body.meta.request_id).toBeTruthy();
     expect(r.body.data).toMatchObject({
-      availability_basis: 'schedule_only',
-      booking_enabled: false,
+      availability_basis: 'live_occupancy',
+      booking_enabled: true,
       timezone: 'Asia/Tehran',
       checked_at: now.toISOString(),
       from: '2026-11-03',
@@ -233,7 +233,7 @@ describe('availability through real Nest and PostgreSQL', () => {
   });
   it('retains catalog quota and enforces the dedicated availability quota with Retry-After', async () => {
     const r = await get().expect(200);
-    expect(r.body.data.booking_enabled).toBe(false);
+    expect(r.body.data.booking_enabled).toBe(true);
     await pool.query(
       "UPDATE app.auth_attempt_buckets SET attempts=60 WHERE operation='public-availability'",
     );
@@ -275,7 +275,7 @@ describe('availability through real Nest and PostgreSQL', () => {
       expect(spy.mock.calls).toHaveLength(5); // 2 bounded limiter calls each, 1 snapshot.
       const plan = await pool.query(
         'EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ' + availabilitySnapshotSql,
-        [data.business, data.service, null, '2026-11-03', '2026-11-09'],
+        [data.business, data.service, null, '2026-11-03', '2026-11-09', 'public'],
       );
       await mkdir('../work', { recursive: true });
       await writeFile(

@@ -28,7 +28,7 @@ test('real public filters are shareable, normalize Persian and restore browser h
   await expect(card).toHaveAttribute('href', /\/salons\/[a-f0-9-]{36}$/);
   await card.click();
   await expect(page.getByRole('heading', { name: 'خدمات و قیمت‌ها' })).toBeVisible();
-  await expect(page.getByRole('link', { name: '+989121234567', exact: true })).toHaveAttribute(
+  await expect(page.getByRole('link', { name: /تماس با سالن/ })).toHaveAttribute(
     'href',
     'tel:+989121234567',
   );
@@ -118,8 +118,9 @@ test('cursor navigation stays in the URL and filter changes reset the page', asy
   await page.getByRole('button', { name: 'صفحه بعد', exact: true }).click();
   await expect(page).toHaveURL(/cursor=/);
   await expect(page.getByText('۱ سالن در این صفحه', { exact: true })).toBeVisible();
-  expect(await page.getByRole('region').getByRole('link').first().getAttribute('href')).not.toBe(
-    first,
+  await expect(page.getByRole('region').getByRole('link').first()).not.toHaveAttribute(
+    'href',
+    first ?? '',
   );
   await page.goBack();
   await expect(page.getByRole('region').getByRole('link').first()).toHaveAttribute(

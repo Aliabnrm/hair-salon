@@ -4,7 +4,7 @@ import { AvailabilityScreen } from '../../../../features/availability';
 import { loadPublicProfile } from '../../../../features/public-catalog/api/profile.server';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
-  title: 'بررسی زمان‌های سالن | آراسته',
+  title: 'انتخاب روز و ساعت | آراسته',
   robots: { index: false, follow: false },
 };
 export default async function Page({ params }: { params: Promise<{ businessId: string }> }) {

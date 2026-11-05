@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, HttpCode, Req, Res } from '@nestjs/common';
-import { ApiBody, ApiHeader, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiHeader, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { requireCurrentUser, type AuthenticatedRequest } from '../../../identity/public.js';
 import { PublicationService } from '../../application/publication.service.js';
@@ -46,6 +46,10 @@ export class PublicationController {
     );
   }
   @Post('businesses/:businessId/publication/requests')
+  @ApiOperation({
+    summary:
+      'Publish a complete salon immediately with owner consent; also completes legacy pending requests',
+  })
   @HttpCode(200)
   @versionHeaders()
   @keyHeaders()

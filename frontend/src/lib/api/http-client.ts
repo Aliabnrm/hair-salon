@@ -24,6 +24,12 @@ function allowedPath(path: string): boolean {
   if (!path.startsWith('/api/v1/') || path.includes('\\') || path.includes('#')) return false;
   const url = new URL(path, 'http://internal.invalid'),
     id = '[a-fA-F0-9-]{36}';
+  if (
+    new RegExp(
+      `^/api/v1/(?:appointments(?:/${id})?|me/(?:appointments|booking-intents/[-A-Za-z0-9_]{1,64})|businesses/${id}/(?:booking-options|appointments(?:/${id}(?:/cancellation)?)?))$`,
+    ).test(url.pathname)
+  )
+    return url.origin === 'http://internal.invalid';
   const pattern = new RegExp(
     `^/api/v1/(?:catalog/(?:categories|locations|salons(?:/${id}(?:/availability)?)?)|review/(?:access|businesses(?:/${id}(?:/decisions)?)?)|auth/(?:register|login|logout)|me(?:/businesses)?|businesses(?:/${id}/(?:settings|publication(?:/(?:requests|withdrawals))?|preview|catalog/services(?:/${id})?|services(?:/${id})?|staff(?:/${id}(?:/hours)?)?|hours|schedule-exceptions(?:/${id})?))?)$`,
   );

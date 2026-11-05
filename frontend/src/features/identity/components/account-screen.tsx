@@ -112,7 +112,7 @@ export function AccountScreen({ workspaceTools }: { workspaceTools?: ReactNode }
                     مدیریت سالن‌های من
                   </strong>
                   <span className="mt-1 block text-sm leading-7 text-ink-soft">
-                    مشخصات، خدمات، تیم و برنامه کاری سالن‌هایتان.
+                    نوبت‌های مشتریان، انتشار، خدمات و برنامه کاری هر سالن.
                   </span>
                 </span>
                 <Icon
@@ -171,7 +171,8 @@ export function AccountScreen({ workspaceTools }: { workspaceTools?: ReactNode }
           </StatePanel>
         )}
         <p className="text-sm leading-7 text-muted">
-          انتشار سالن پس از بررسی انجام می‌شود؛ رزرو و بازیابی رمز هنوز فعال نیستند.
+          سالن پس از تکمیل اطلاعات و تأیید مالک، فوری منتشر می‌شود؛ نوبت‌ها در حساب و دفتر سالن قابل
+          پیگیری‌اند.
         </p>
       </div>
     </div>

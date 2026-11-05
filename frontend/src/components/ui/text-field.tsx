@@ -1,11 +1,11 @@
-import { useId, type InputHTMLAttributes } from 'react';
+import { useId, type ComponentPropsWithRef } from 'react';
 export function TextField({
   label,
   hint,
   error,
   comfortable = false,
   ...props
-}: InputHTMLAttributes<HTMLInputElement> & {
+}: ComponentPropsWithRef<'input'> & {
   label: string;
   comfortable?: boolean;
   hint?: string;

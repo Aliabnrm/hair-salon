@@ -47,6 +47,7 @@ import { ScheduleExceptionsController } from './presentation/http/schedule-excep
     HoursController,
     ScheduleExceptionsController,
   ],
+  exports: [Clock],
   providers: [
     {
       provide: ConsoleLogger,

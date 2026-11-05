@@ -36,6 +36,13 @@
       "when": 1793641093859,
       "tag": "0004_reviewed_public_catalog",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793776408653,
+      "tag": "0005_booking-ledger",
+      "breakpoints": true
     }
   ]
 }

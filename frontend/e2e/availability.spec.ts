@@ -1,6 +1,7 @@
 import { test, expect } from './fixtures/test-stack';
 import { seedAvailability } from '../../backend/test/helpers/availability-fixture';
 import type { Page } from '@playwright/test';
+import { mkdir } from 'node:fs/promises';
 
 test.use({ availabilityNow: '2026-11-03T06:00:00Z' });
 let data: Awaited<ReturnType<typeof seedAvailability>>;
@@ -13,12 +14,98 @@ async function ready(page: Page) {
   await expect(page.locator('[data-slot]').first()).toBeVisible();
   await expect(page.getByRole('button', { name: 'تازه‌سازی زمان‌ها', exact: true })).toBeEnabled();
 }
+test('salon booking action stays visible and contextual back links preserve the booking journey', async ({
+  page,
+  stack,
+}) => {
+  test.setTimeout(60_000);
+  await mkdir('../work/booking-journey-ux', { recursive: true });
+  await page.goto(`${stack.origin}/salons/${data.business}`);
+  const action = page.getByRole('region', { name: 'رزرو نوبت سالن' });
+  const reserve = action.getByRole('link', { name: 'انتخاب زمان و رزرو', exact: true });
+  for (const width of [320, 360, 390, 430, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.locator('main').evaluate((element) => {
+      element.scrollTop = 0;
+    });
+    await expect(reserve).toBeInViewport();
+    expect(
+      await page.locator('main').evaluate((element) => element.scrollWidth <= element.clientWidth),
+    ).toBe(true);
+    await page.screenshot({
+      path: `../work/booking-journey-ux/profile-${width}.png`,
+      animations: 'disabled',
+    });
+    await page.locator('main').evaluate((element) => {
+      element.scrollTop = element.scrollHeight;
+    });
+    await expect(reserve).toBeInViewport();
+    const footerBox = await action.boundingBox();
+    const navBox = await page.getByRole('navigation', { name: 'ناوبری اصلی' }).boundingBox();
+    if (!footerBox || !navBox)
+      throw new Error('Booking action and main navigation must be visible.');
+    expect(footerBox.y + footerBox.height).toBeLessThanOrEqual(navBox.y + 1);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('link', { name: 'انتخاب زمان برای کوتاهی دقیق', exact: true }).click();
+  await ready(page);
+  await expect(page.getByLabel('خدمت', { exact: true })).toHaveValue(data.service);
+  await expect(action).toHaveCount(0);
+  await expect(
+    page.getByRole('link', { name: 'بازگشت به صفحه سالن', exact: true }),
+  ).toBeInViewport();
+  await page.screenshot({
+    path: '../work/booking-journey-ux/times-390.png',
+    animations: 'disabled',
+  });
+  await page.locator('[data-slot]').first().click();
+  const next = page.getByRole('link', { name: 'ادامه رزرو', exact: true });
+  await expect(next).toBeInViewport();
+  await page.screenshot({
+    path: '../work/booking-journey-ux/selected-390.png',
+    animations: 'disabled',
+  });
+  await next.click();
+  await expect(page.getByRole('heading', { name: 'تأیید و ثبت نوبت', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'ورود با ایمیل', exact: true })).toBeInViewport();
+  await expect(page.getByRole('region', { name: 'خلاصه انتخاب' })).toHaveCount(0);
+  const selectedUrl = new URL(page.url());
+  await page.screenshot({
+    path: '../work/booking-journey-ux/guest-checkout-390.png',
+    animations: 'disabled',
+  });
+  await page.getByRole('link', { name: 'ورود با ایمیل', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'بازگشت به رزرو', exact: true })).toHaveAttribute(
+    'href',
+    selectedUrl.pathname + selectedUrl.search,
+  );
+  await page.screenshot({
+    path: '../work/booking-journey-ux/sign-in-390.png',
+    animations: 'disabled',
+  });
+  await page.getByRole('link', { name: 'ثبت‌نام', exact: true }).click();
+  await page.getByRole('link', { name: 'بازگشت به ورود', exact: true }).click();
+  await page.getByRole('link', { name: 'بازگشت به رزرو', exact: true }).click();
+  await page.getByRole('link', { name: 'بازگشت به انتخاب زمان', exact: true }).click();
+  await ready(page);
+  await expect(page.getByLabel('خدمت', { exact: true })).toHaveValue(data.service);
+  expect((await stack.pool.query('SELECT count(*)::int n FROM app.appointments')).rows[0].n).toBe(
+    0,
+  );
+  await page.getByRole('link', { name: 'بازگشت به صفحه سالن', exact: true }).click();
+  await expect(reserve).toBeInViewport();
+  await page.goto(stack.origin + '/sign-in?returnTo=/appointments');
+  await expect(page.getByRole('link', { name: 'بازگشت به نوبت‌ها', exact: true })).toHaveAttribute(
+    'href',
+    '/appointments',
+  );
+});
 test('anonymous real public flow, accurate buffers, any/specific, summary and URL history', async ({
   page,
   stack,
 }) => {
   await page.goto(`${stack.origin}/salons/${data.business}`);
-  await page.getByRole('link', { name: 'بررسی زمان‌ها', exact: true }).click();
+  await page.getByRole('link', { name: 'انتخاب زمان و رزرو', exact: true }).click();
   await ready(page);
   await expect(page.getByText('خدمت، روز و ساعت مناسب خود را انتخاب کنید.')).toBeVisible();
   await page.getByLabel('خدمت', { exact: true }).selectOption(data.service);

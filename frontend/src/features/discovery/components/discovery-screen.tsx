@@ -39,12 +39,12 @@ export function DiscoveryScreen() {
           </button>
         </div>
         <h1 className="mt-7 text-[1.75rem] font-extrabold leading-relaxed">
-          سالن مناسب شما،
+          سالن دلخواهتان،
           <br />
-          <span className="text-petrol">با انتخابی آگاهانه</span>
+          <span className="text-petrol">نوبت در چند قدم</span>
         </h1>
         <p className="mt-2 text-sm leading-7 text-ink-soft">
-          خدمات، قیمت‌ها و متخصصان سالن‌های تأییدشده را ببینید؛ رزرو آنلاین هنوز فعال نیست.
+          خدمات و قیمت‌ها را ببینید، زمان مناسب را انتخاب کنید و نوبت بگیرید.
         </p>
         <DiscoverySearch
           query={f.search}
@@ -81,7 +81,7 @@ export function DiscoveryScreen() {
           id="results-title"
           className="text-lg font-extrabold"
         >
-          سالن‌های منتشرشده
+          سالن‌ها
         </h2>
         {f.results.loading ? (
           <p

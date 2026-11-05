@@ -29,8 +29,175 @@ async function navigation(page: Page, name: string) {
     .click();
 }
 
+function hoursToast(page: Page) {
+  return page.getByRole('alert').filter({ has: page.getByRole('button', { name: 'بستن پیام' }) });
+}
+
 test.beforeEach(async ({ stack }) => {
   await stack.pool.query('TRUNCATE app.auth_attempt_buckets');
+});
+
+test('weekly hours show validation, server error, and saved result in toasts', async ({
+  page,
+  stack,
+}) => {
+  await enterManagement(page, stack.origin);
+  await createSalon(page, 'سالن پیام ساعت‌ها');
+  await navigation(page, 'ساعات کاری');
+  await page.getByRole('button', { name: 'افزودن بازه شنبه', exact: true }).click();
+  await page.getByLabel('شنبه شروع 1', { exact: true }).fill('25:00');
+  await page.getByRole('button', { name: 'ذخیره برنامه هفتگی' }).click();
+  await expect(hoursToast(page)).toContainText('زمان شروع را به شکل 09:00 وارد کنید.');
+  await expect(page.getByLabel('شنبه شروع 1', { exact: true })).toBeFocused();
+  await mkdir('../work/hours-feedback', { recursive: true });
+  for (const width of [320, 360, 390, 430]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    const toast = hoursToast(page);
+    await expect(toast.getByRole('button', { name: 'بستن پیام' })).toBeInViewport();
+    await page.screenshot({
+      path: `../work/hours-feedback/validation-${width}.png`,
+      animations: 'disabled',
+    });
+  }
+  await page.getByLabel('شنبه شروع 1', { exact: true }).fill('09:00');
+  await page.route('**/api/v1/businesses/*/hours', async (route) => {
+    if (route.request().method() !== 'PUT') return route.continue();
+    await route.fulfill({
+      status: 422,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        error: {
+          code: 'INVALID_INPUT',
+          message: 'برنامه معتبر نیست.',
+          fields: { intervals: 'بازه‌ها هم‌پوشانی دارند.' },
+        },
+      }),
+    });
+  });
+  await page.getByRole('button', { name: 'ذخیره برنامه هفتگی' }).click();
+  await expect(hoursToast(page)).toContainText('بازه‌ها هم‌پوشانی دارند.');
+  await page.screenshot({
+    path: '../work/hours-feedback/server-error-430.png',
+    animations: 'disabled',
+  });
+  await page.getByRole('button', { name: 'بستن پیام' }).click();
+  await expect(hoursToast(page)).toHaveCount(0);
+  await page.unroute('**/api/v1/businesses/*/hours');
+  await page.getByLabel('شنبه شروع 1', { exact: true }).fill('۰۹:۰۰');
+  await page.getByLabel('شنبه پایان 1', { exact: true }).fill('۲۴:۰۰');
+  await page.getByRole('button', { name: 'ذخیره برنامه هفتگی' }).click();
+  await expect(page.getByRole('status').getByText('برنامه هفتگی ذخیره شد')).toBeVisible();
+  await page.screenshot({ path: '../work/hours-feedback/success-430.png', animations: 'disabled' });
+  await expect(page.getByLabel('شنبه شروع 1', { exact: true })).toHaveValue('09:00');
+  await expect(page.getByLabel('شنبه پایان 1', { exact: true })).toHaveValue('24:00');
+  await expect(page.getByText('برنامه هفتگی ذخیره شد', { exact: true })).toBeHidden({
+    timeout: 8000,
+  });
+  await page.reload();
+  await expect(page.getByLabel('شنبه پایان 1', { exact: true })).toHaveValue('24:00');
+});
+
+test('weekly hours revalidate related fields and keep rows attached to the right day', async ({
+  page,
+  stack,
+}) => {
+  await enterManagement(page, stack.origin);
+  await createSalon(page, 'سالن اعتبارسنجی ساعت‌ها');
+  await navigation(page, 'ساعات کاری');
+  await page.getByRole('button', { name: 'افزودن بازه شنبه', exact: true }).click();
+  await page.getByRole('button', { name: 'افزودن بازه یکشنبه', exact: true }).click();
+  await page.getByRole('button', { name: 'افزودن بازه شنبه', exact: true }).click();
+  const secondStart = page.getByLabel('شنبه شروع 2', { exact: true });
+  await secondStart.fill('10:00');
+  await expect(secondStart).toHaveAttribute('aria-invalid', 'true');
+  await page.getByLabel('شنبه پایان 1', { exact: true }).fill('10:00');
+  await expect(secondStart).not.toHaveAttribute('aria-invalid', 'true');
+  await page.getByLabel('شنبه پایان 2', { exact: true }).fill('09:00');
+  await expect(secondStart).toHaveAttribute('aria-invalid', 'true');
+  await page.getByLabel('شنبه پایان 2', { exact: true }).fill('20:00');
+  await expect(secondStart).not.toHaveAttribute('aria-invalid', 'true');
+  await page.getByRole('button', { name: 'حذف بازه 1 شنبه', exact: true }).click();
+  await expect(page.getByLabel('شنبه شروع 1', { exact: true })).toHaveValue('10:00');
+  await expect(page.getByLabel('یکشنبه شروع 1', { exact: true })).toHaveValue('09:00');
+  await page.getByRole('button', { name: 'ذخیره برنامه هفتگی' }).click();
+  await expect(page.getByText('برنامه هفتگی ذخیره شد', { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel('شنبه پایان 1', { exact: true })).toHaveValue('20:00');
+  await expect(page.getByLabel('یکشنبه شروع 1', { exact: true })).toHaveValue('09:00');
+});
+
+for (const failure of ['network', 'server'] as const) {
+  test(`weekly hours preserve the same request after ${failure} failure and toast dismissal`, async ({
+    page,
+    stack,
+  }) => {
+    await enterManagement(page, stack.origin);
+    await createSalon(page, 'سالن تلاش دوباره');
+    await navigation(page, 'ساعات کاری');
+    await page.getByRole('button', { name: 'افزودن بازه شنبه', exact: true }).click();
+    const attempts: {
+      key: string | undefined;
+      body: string | null;
+      version: string | undefined;
+    }[] = [];
+    await page.route('**/api/v1/businesses/*/hours', async (route) => {
+      const request = route.request();
+      if (request.method() !== 'PUT') return route.continue();
+      attempts.push({
+        key: request.headers()['idempotency-key'],
+        body: request.postData(),
+        version: request.headers()['if-match'],
+      });
+      if (attempts.length > 1) return route.continue();
+      if (failure === 'network') return route.abort('failed');
+      return route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          error: { code: 'SERVICE_UNAVAILABLE', message: 'سرویس موقتاً در دسترس نیست.' },
+        }),
+      });
+    });
+    await page.getByRole('button', { name: 'ذخیره برنامه هفتگی' }).click();
+    await expect(hoursToast(page)).toContainText(
+      failure === 'network' ? 'ممکن است برنامه ذخیره شده باشد' : 'سرویس موقتاً در دسترس نیست',
+    );
+    await expect(page.getByLabel('شنبه شروع 1', { exact: true })).toBeDisabled();
+    await page.getByRole('button', { name: 'بستن پیام' }).click();
+    await page.getByRole('button', { name: 'تلاش دوباره با همان درخواست' }).click();
+    await expect(page.getByText('برنامه هفتگی ذخیره شد', { exact: true })).toBeVisible();
+    expect(attempts).toHaveLength(2);
+    expect(attempts[0]?.key).toBeTruthy();
+    expect(attempts[1]).toEqual(attempts[0]);
+  });
+}
+
+test('weekly hours show a conflict toast and load the current server version', async ({
+  page,
+  stack,
+}) => {
+  await enterManagement(page, stack.origin);
+  await createSalon(page, 'سالن نسخه ساعت‌ها');
+  await navigation(page, 'ساعات کاری');
+  await page.getByRole('button', { name: 'افزودن بازه شنبه', exact: true }).click();
+  await page.route('**/api/v1/businesses/*/hours', async (route) => {
+    if (route.request().method() !== 'PUT') return route.continue();
+    await route.fulfill({
+      status: 409,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        error: { code: 'VERSION_CONFLICT', message: 'اطلاعات تغییر کرده است.' },
+      }),
+    });
+  });
+  await page.getByRole('button', { name: 'ذخیره برنامه هفتگی' }).click();
+  await expect(hoursToast(page)).toContainText('برنامه در جای دیگری تغییر کرده است');
+  await expect(page.getByLabel('شنبه شروع 1', { exact: true })).toHaveValue('09:00');
+  await hoursToast(page).getByRole('button', { name: 'بارگذاری نسخه تازه', exact: true }).click();
+  await expect(page.getByLabel('شنبه شروع 1', { exact: true })).toHaveCount(0);
 });
 
 test('owner configures a private salon, service, staff, weekly hours and a dated holiday through real UI', async ({
@@ -61,7 +228,7 @@ test('owner configures a private salon, service, staff, weekly hours and a dated
   await page.getByLabel('شنبه شروع 1', { exact: true }).fill('09:00');
   await page.getByLabel('شنبه پایان 1', { exact: true }).fill('18:00');
   await page.getByRole('button', { name: 'ذخیره برنامه هفتگی' }).click();
-  await expect(page.getByText('با موفقیت ذخیره شد.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('status').getByText('برنامه هفتگی ذخیره شد')).toBeVisible();
   await page.reload();
   await expect(page.getByLabel('شنبه شروع 1', { exact: true })).toHaveValue('09:00');
   await page.getByLabel('برنامه چه کسی؟').selectOption({ label: 'متخصص آزمون' });
@@ -69,7 +236,7 @@ test('owner configures a private salon, service, staff, weekly hours and a dated
   await page.getByRole('button', { name: 'افزودن بازه شنبه', exact: true }).click();
   await page.getByLabel('شنبه شروع 1', { exact: true }).fill('10:00');
   await page.getByRole('button', { name: 'ذخیره برنامه هفتگی' }).click();
-  await expect(page.getByText('با موفقیت ذخیره شد.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('status').getByText('برنامه هفتگی ذخیره شد')).toBeVisible();
   await navigation(page, 'تعطیلی‌ها');
   await page.getByRole('button', { name: 'روز خاص جدید' }).click();
   await page.getByRole('button', { name: 'ذخیره روز خاص' }).click();

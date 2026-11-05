@@ -6,7 +6,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'آراسته',
-  description: 'کشف سالن‌های نمونه و حساب کاربری آراسته',
+  description: 'پیدا کردن سالن، انتخاب زمان و رزرو آنلاین نوبت',
   icons: { icon: '/assets/brand-mark.svg' },
 };
 

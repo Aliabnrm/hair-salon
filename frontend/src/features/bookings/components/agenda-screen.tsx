@@ -1,4 +1,5 @@
 'use client';
+import { SelectControl } from '../../../components/ui/select-control';
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button, buttonStyles } from '../../../components/ui/button';
@@ -86,8 +87,9 @@ function DailyAgenda({ business }: { business: string }) {
         </div>
         <label className="block text-sm font-bold">
           متخصص
-          <select
-            className="mt-2 h-14 w-full min-w-0 rounded-2xl border border-line-strong bg-surface px-3 text-base"
+          <SelectControl
+            containerClassName="mt-2"
+            className="h-14 rounded-2xl border border-line-strong bg-surface text-base"
             value={staff}
             onChange={(e) => {
               setStaff(e.target.value);
@@ -104,7 +106,7 @@ function DailyAgenda({ business }: { business: string }) {
                 {s.active ? '' : ' (غیرفعال)'}
               </option>
             ))}
-          </select>
+          </SelectControl>
         </label>
         {remote.updatedAt && (
           <p className="text-xs leading-7 text-muted">

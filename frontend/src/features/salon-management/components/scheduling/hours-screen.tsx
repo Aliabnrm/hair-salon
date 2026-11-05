@@ -1,4 +1,5 @@
 'use client';
+import { SelectControl } from '../../../../components/ui/select-control';
 import { useState } from 'react';
 import { ActionToast } from '../../../../components/ui/action-toast';
 import { Button } from '../../../../components/ui/button';
@@ -69,8 +70,9 @@ export function HoursScreen({ businessId }: { businessId: string }) {
       </p>
       <label className="block text-sm font-bold">
         برنامه چه کسی؟
-        <select
-          className="mt-2 h-14 w-full rounded-2xl border border-line-strong bg-surface px-4"
+        <SelectControl
+          containerClassName="mt-2"
+          className="h-14 rounded-2xl border border-line-strong bg-surface"
           value={selected}
           onChange={(e) => setSelected(e.target.value)}
         >
@@ -84,7 +86,7 @@ export function HoursScreen({ businessId }: { businessId: string }) {
               {s.active ? '' : ' (غیرفعال)'}
             </option>
           ))}
-        </select>
+        </SelectControl>
       </label>
       <LoadState
         loading={staff.loading}

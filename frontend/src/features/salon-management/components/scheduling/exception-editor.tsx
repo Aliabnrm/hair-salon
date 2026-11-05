@@ -1,3 +1,4 @@
+import { SelectControl } from '../../../../components/ui/select-control';
 import { useState, type FormEvent } from 'react';
 import { Button } from '../../../../components/ui/button';
 import { TextField } from '../../../../components/ui/text-field';
@@ -88,8 +89,9 @@ export function ExceptionEditor({
         />
         <label className="block text-sm font-bold">
           محدوده برنامه
-          <select
-            className="mt-2 h-14 w-full rounded-2xl border border-line-strong bg-surface px-4"
+          <SelectControl
+            containerClassName="mt-2"
+            className="h-14 rounded-2xl border border-line-strong bg-surface"
             value={staffId}
             onChange={(e) => setStaffId(e.target.value)}
             disabled={Boolean(exception)}
@@ -103,7 +105,7 @@ export function ExceptionEditor({
                 {s.display_name}
               </option>
             ))}
-          </select>
+          </SelectControl>
         </label>
         <LoadState
           loading={staff.loading}

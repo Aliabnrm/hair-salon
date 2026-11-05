@@ -1,3 +1,4 @@
+import { SelectControl } from '../../../../components/ui/select-control';
 import { useId, useState, type FormEvent } from 'react';
 import { TextField } from '../../../../components/ui/text-field';
 import { Button } from '../../../../components/ui/button';
@@ -79,10 +80,10 @@ export function ServiceEditor({
           >
             دسته خدمت
           </label>
-          <select
+          <SelectControl
             id={categoryFieldId}
             required
-            className="block min-h-11 w-full rounded-xl border border-line bg-surface p-3 text-base"
+            className="min-h-11 rounded-xl border border-line bg-surface py-3 text-base"
             value={form.category_id}
             onChange={(e) => change('category_id', e.target.value)}
           >
@@ -95,7 +96,7 @@ export function ServiceEditor({
                 {c.label}
               </option>
             ))}
-          </select>
+          </SelectControl>
         </div>
         {mutation.fields.category_id && (
           <p

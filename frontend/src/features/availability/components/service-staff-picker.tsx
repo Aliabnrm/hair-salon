@@ -1,3 +1,4 @@
+import { SelectControl } from '../../../components/ui/select-control';
 import type { PublicProfileData } from '../../public-catalog';
 import { formatPrice } from '../../public-catalog';
 import type { TimeSelection } from '../model/availability.types';
@@ -16,8 +17,7 @@ export function ServiceStaffPicker({
   const staff = profile.staff.filter((member) =>
     member.service_ids.includes(selection.service_id ?? ''),
   );
-  const control =
-    'mt-2 min-h-13 w-full min-w-0 rounded-2xl border border-line-strong bg-surface px-3 py-3 text-base';
+  const control = 'min-h-13 rounded-2xl border border-line-strong bg-surface py-3 text-base';
   return (
     <section className="space-y-4 rounded-3xl border border-line bg-surface p-4">
       <h2 className="text-lg font-extrabold">خدمت و متخصص</h2>
@@ -29,9 +29,10 @@ export function ServiceStaffPicker({
           >
             خدمت
           </label>
-          <select
+          <SelectControl
             id="availability-service"
             className={control}
+            containerClassName="mt-2"
             value={selection.service_id ?? ''}
             onChange={(event) => change({ service_id: event.target.value })}
           >
@@ -44,7 +45,7 @@ export function ServiceStaffPicker({
                 {service.name}
               </option>
             ))}
-          </select>
+          </SelectControl>
         </div>
         <div className="min-w-0">
           <label
@@ -53,9 +54,10 @@ export function ServiceStaffPicker({
           >
             متخصص
           </label>
-          <select
+          <SelectControl
             id="availability-staff"
             className={control}
+            containerClassName="mt-2"
             value={selection.staff_id ?? 'any'}
             onChange={(event) => change({ staff_id: event.target.value })}
           >
@@ -73,7 +75,7 @@ export function ServiceStaffPicker({
                 {member.display_name}
               </option>
             ))}
-          </select>
+          </SelectControl>
         </div>
       </div>
       {selectedService && (

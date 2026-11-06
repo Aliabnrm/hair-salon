@@ -43,6 +43,13 @@
       "when": 1793776408653,
       "tag": "0005_booking-ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793960897004,
+      "tag": "0006_customer-booking-changes",
+      "breakpoints": true
     }
   ]
 }

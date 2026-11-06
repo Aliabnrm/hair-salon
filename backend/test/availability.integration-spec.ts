@@ -275,7 +275,7 @@ describe('availability through real Nest and PostgreSQL', () => {
       expect(spy.mock.calls).toHaveLength(5); // 2 bounded limiter calls each, 1 snapshot.
       const plan = await pool.query(
         'EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ' + availabilitySnapshotSql,
-        [data.business, data.service, null, '2026-11-03', '2026-11-09', 'public'],
+        [data.business, data.service, null, '2026-11-03', '2026-11-09', 'public', null],
       );
       await mkdir('../work', { recursive: true });
       await writeFile(

@@ -31,7 +31,30 @@ it('documents protected booking contracts, frozen snapshots, headers and contact
     expect(cancel.parameters).toEqual(
       expect.arrayContaining([expect.objectContaining({ name: 'If-Match', required: true })]),
     );
+    const change = body.paths['/api/v1/appointments/{id}/rescheduling'].post;
+    expect(change.parameters).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'If-Match', required: true }),
+        expect.objectContaining({ name: 'Idempotency-Key', required: true }),
+      ]),
+    );
+    expect(
+      change.requestBody.content['application/json'].schema.properties.price_irr,
+    ).toBeUndefined();
+    const changes =
+      body.paths['/api/v1/appointments/{id}/changes'].get.responses['200'].content[
+        'application/json'
+      ].schema.properties.data;
+    expect(changes.properties.items.maxItems).toBe(50);
+    expect(changes.properties.items.items.properties.actor_id).toBeUndefined();
+    const options =
+      body.paths['/api/v1/appointments/{id}/rescheduling-options'].get.responses['200'].content[
+        'application/json'
+      ].schema.properties.data;
+    expect(options.properties.policy.properties.minimum_notice_minutes.enum).toEqual([120]);
     for (const route of [
+      '/api/v1/appointments/3e70e632-9975-4371-9022-9bfbc5c698c5/changes',
+      '/api/v1/appointments/3e70e632-9975-4371-9022-9bfbc5c698c5/rescheduling-options',
       '/api/v1/appointments/3e70e632-9975-4371-9022-9bfbc5c698c5',
       '/api/v1/me/appointments',
       '/api/v1/me/booking-intents/example?operation=online',

@@ -62,3 +62,7 @@
 | حفاظت برنامه / S7-AC-05         | schedule compatibility و race تغییر برنامه                                                | rollback ناسازگار، حفظ snapshot پس از آرشیو                          |
 | NFR-PERF-001 / S7-AC-09         | bookings-performance.integration-spec.ts و گزارش۷                                         | ۱۰سالن/۵متخصص/۱۰هزار سابقه،۲۰کلاینت محلی؛ معیار انتشار اینترنتی نیست |
 | S7-AC-07..10                    | check تازه، migration upgrade، browser واقعی و درس۷                                       | نتیجه نهایی در گزارش۷؛ CI تغییرهای محلی پس از push قابل بررسی است    |
+
+## معیارهای افزوده اسپرینت۸
+
+FR-BOOK-006 بخش مشتری و FR-BOOK-007 با طرح۸ مصوب شدند. تست‌های booking-changes.spec.ts دامنه مرز دو ساعت/ورودی، bookings.integration-spec.ts هم‌زمانی/tenant/rollback/upgrade و booking-changes.spec.ts مرورگر مسیر مشترک دو پنل را پوشش می‌دهند. FR-BOOK-005 با تاریخچه نقش‌محور تکمیل می‌شود. شاهد نتیجه و تعداد اجرا در گزارش۸ ثبت می‌شود؛ این ردیف به معنی اجرای SMS/تقویم پیشرفته یا آمادگی production نیست.

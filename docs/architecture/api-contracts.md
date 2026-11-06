@@ -218,3 +218,21 @@ mutationها Idempotency-Key دارند؛ لغو If-Match لازم دارد (ن�
 POST publication/requests دیگر pending تازه تولید نمی‌کند؛ پاسخ موفق state=published و رویداد publish دارد. نسخه قبل و رضایت معتبر، همچنان الزامی‌اند. ویرایش معتبر سالن منتشرشده، آن را عمومی نگه می‌دارد؛ ویرایش ناقص در همان transaction آن را draft می‌کند و settings همان وضعیت نهایی را برمی‌گرداند. داده قدیمی pending در UI با رضایت مالک به انتشار فوری می‌رسد.
 
 تعلیق مدیریتی پابرجاست؛ owner publication برای suspended خطای409 دارد. approve مسئول مستقل برای suspended، پس از readiness و با request_id=null جاری، content_revision و If-Match دقیق و سابقه رضایت، رفع تعلیق می‌کند. approve/reject برای pending تاریخی نیز باقی است. مجوز، rate، CSRF و allowlistهای خصوصی/عمومی تغییر نکرده‌اند.
+
+## اسپرینت۸ — مدیریت نوبت مشتری
+
+همه مسیرها session و Cache-Control:no-store دارند. mutationها JSON/Origin معتبر، Idempotency-Key و If-Match نسخه نوبت می‌خواهند؛ ۳۰تغییر/actor/minute. هویت مشتری فقط booking_user_id نوبت آنلاین است.
+
+| روش/مسیر                                               | قرارداد                                                                                                                                                                                 |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET /appointments/{id}/changes                         | همان appointment و نسخه، checked_at، change_deadline، customer_can_change و items تاریخچه تا۵۰، has_more؛ قبل/بعد قدیمی می‌تواند null باشد؛ actor فقط customer/owner                    |
+| GET /businesses/{businessId}/appointments/{id}/changes | همان پاسخ با مجوز مالک فعال همان سالن                                                                                                                                                   |
+| GET /appointments/{id}/rescheduling-options            | query فقط staff_id=any/UUID و from/to جفت؛ حداکثر۷روز در افق۳۰روز؛ service از نوبت؛ شکل availability با policy.minimum_notice_minutes=120، appointment_version و staff عمومی؛ بدون hold |
+| POST /appointments/{id}/cancellation                   | reason رشته۳تا۳۰۰؛ همان Appointment لغوشده؛ آزادسازی ظرفیت در همان commit                                                                                                               |
+| POST /appointments/{id}/rescheduling                   | فقط staff_id و starts_at UTC روی گام۱۵دقیقه؛ همان Appointment/id/code با نسخه بعد، قیمت/مدت/بافر توافقی؛ متخصص جدید باید مجاز باشد                                                      |
+
+مهلت تا دو ساعت قبل از زمان فعلی نوبت شامل مرز دقیق است؛ مقصد هم حداقل دو ساعت آینده. درخواست مقصد دورتر مهلت گذشته را دور نمی‌زند. لغو با توقف انتشار همچنان ممکن است؛ گزینه/تغییر زمان به سالن published و خدمت فعال نیاز دارد.
+
+خطاها:401نشست،403Origin،404عدم دسترسی/خدمت یا متخصص عمومی ناموجود،422ورودی،428نسخه غایب،429نرخ با Retry-After و503اختلال.409شامل CHANGE_DEADLINE_PASSED،REPLACEMENT_TOO_SOON،VERSION_CONFLICT،UNCHANGED_APPOINTMENT،SLOT_UNAVAILABLE وIDEMPOTENCY_CONFLICT است. اطلاعات حساس در error/log نمی‌روند.
+
+resolve در /me/booking-intents/{key} اکنون operation=customer-cancel/reschedule را نیز می‌پذیرد؛ مجوز فعلی حفظ و وضعیت فعلی نوبت بازگردانده می‌شود. خطای مقصد یا rollback به لغو جداگانه نوبت قبلی منجر نمی‌شود. OpenAPI schema ورودی،history و policy120 را مستند می‌کند.

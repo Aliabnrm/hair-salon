@@ -70,7 +70,10 @@ export class BookingsController {
   @Get('me/booking-intents/:key')
   @Header('Cache-Control', 'no-store')
   @ApiParam({ name: 'key', type: String })
-  @ApiQuery({ name: 'operation', enum: ['online', 'manual', 'cancel'] })
+  @ApiQuery({
+    name: 'operation',
+    enum: ['online', 'manual', 'cancel', 'customer-cancel', 'reschedule'],
+  })
   @BookingResult()
   async resolve(@Req() r: AuthenticatedRequest) {
     return this.http.response(

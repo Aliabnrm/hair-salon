@@ -43,7 +43,7 @@ function slot(v: unknown): AvailabilitySlot {
     available_staff_count: positive(p.available_staff_count, 50),
   };
 }
-export function decodeAvailability(v: unknown): Availability {
+export function decodeAvailability(v: unknown, minimumNotice: 60 | 120 = 60): Availability {
   const p = record(v),
     s = record(p.service),
     policy = record(p.policy);
@@ -52,7 +52,7 @@ export function decodeAvailability(v: unknown): Availability {
     p.availability_basis !== 'live_occupancy' ||
     p.booking_enabled !== true ||
     policy.slot_step_minutes !== 15 ||
-    policy.minimum_notice_minutes !== 60
+    policy.minimum_notice_minutes !== minimumNotice
   )
     fail();
   const price_irr = number(s.price_irr);
@@ -104,7 +104,7 @@ export function decodeAvailability(v: unknown): Availability {
     booking_enabled: p.booking_enabled,
     policy: {
       slot_step_minutes: 15,
-      minimum_notice_minutes: 60,
+      minimum_notice_minutes: minimumNotice,
       first_allowed_date: first,
       last_allowed_date: last,
     },

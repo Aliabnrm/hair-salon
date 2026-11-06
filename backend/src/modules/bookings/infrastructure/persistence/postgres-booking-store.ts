@@ -1,3 +1,4 @@
+import { cancelLockedBooking } from './cancel-booking.js';
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { DatabaseProvider } from '../../../../database/database.provider.js';
@@ -53,7 +54,9 @@ export class PostgresBookingStore extends BookingStore {
       return this.get(
         actor,
         found.appointment_id,
-        operation === 'online' ? undefined : found.business_id,
+        operation === 'online' || operation === 'customer-cancel' || operation === 'reschedule'
+          ? undefined
+          : found.business_id,
       );
     } catch (error) {
       await tx.query('ROLLBACK');
@@ -132,8 +135,20 @@ export class PostgresBookingStore extends BookingStore {
         ],
       );
       await tx.query(
-        "INSERT INTO app.booking_events(appointment_id,version,actor_id,action,reason) VALUES($1,1,$2,'created',$3)",
-        [id, command.actor, input.notice_override_reason],
+        "INSERT INTO app.booking_events(appointment_id,version,actor_id,action,reason,details) VALUES($1,1,$2,'created',$3,$4::jsonb)",
+        [
+          id,
+          command.actor,
+          input.notice_override_reason,
+          JSON.stringify({
+            after: {
+              starts_at: start.toISOString(),
+              ends_at: end.toISOString(),
+              staff_id: staffId,
+              staff_name: staff.name,
+            },
+          }),
+        ],
       );
       return id;
     });
@@ -155,18 +170,7 @@ export class PostgresBookingStore extends BookingStore {
       );
       const a = r.rows[0] ?? notFound();
       ensureCancellable(a.status, a.starts_at, checkedAt, a.version, version);
-      await tx.query(
-        "UPDATE app.appointments SET status='cancelled',version=version+1,cancelled_at=$3,cancellation_reason=$4 WHERE id=$1 AND business_id=$2",
-        [id, business, checkedAt, reason],
-      );
-      await tx.query('UPDATE app.schedule_allocations SET released_at=$2 WHERE appointment_id=$1', [
-        id,
-        checkedAt,
-      ]);
-      await tx.query(
-        "INSERT INTO app.booking_events(appointment_id,version,actor_id,action,reason) VALUES($1,$2,$3,'cancelled',$4)",
-        [id, a.version + 1, command.actor, reason],
-      );
+      await cancelLockedBooking(tx, a, command.actor, reason, checkedAt);
       return id;
     });
     return this.get(command.actor, target, business);

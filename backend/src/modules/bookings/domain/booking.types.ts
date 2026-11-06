@@ -44,7 +44,7 @@ export interface BookingCommand {
   actor: string;
   key: string;
   fingerprint: string;
-  operation: 'online' | 'manual' | 'cancel';
+  operation: 'online' | 'manual' | 'cancel' | 'customer-cancel' | 'reschedule';
 }
 export interface BookingPage {
   items: Appointment[];

@@ -1,16 +1,20 @@
 'use client';
 import { AccountGate } from '../../../components/layout/account-gate';
 import { PageHeader } from '../../../components/layout/page-header';
-import { getAppointment } from '../api/bookings.api';
+import { getBookingChanges } from '../api/booking-changes.api';
+import { AppointmentHistory } from './appointment-history';
+import { CustomerAppointmentActions } from './customer-appointment-actions';
+import { useChangeDeadline } from '../hooks/use-change-deadline';
 import { useBookingResource } from '../hooks/use-booking-resource';
 import { AppointmentSummary } from './appointment-summary';
 import { BookingFeedback } from './booking-feedback';
 import { CancellationForm } from './cancellation-form';
 function Detail({ id, business }: { id: string; business?: string }) {
   const remote = useBookingResource(`detail:${business ?? 'mine'}:${id}`, (signal) =>
-      getAppointment(id, signal, business),
+      getBookingChanges(id, signal, business),
     ),
-    a = remote.data;
+    a = remote.data?.appointment;
+  useChangeDeadline(remote.data, remote.reload);
   return (
     <>
       <PageHeader
@@ -43,6 +47,13 @@ function Detail({ id, business }: { id: string; business?: string }) {
               )}
             </header>
             <AppointmentSummary item={a} />
+            {!business && remote.data && !remote.error && !remote.loading && (
+              <CustomerAppointmentActions
+                changes={remote.data}
+                refresh={remote.reload}
+              />
+            )}
+            {remote.data && <AppointmentHistory changes={remote.data} />}
             {business && a.status === 'confirmed' && !remote.error && !remote.loading && (
               <CancellationForm
                 key={a.id + ':' + a.version}

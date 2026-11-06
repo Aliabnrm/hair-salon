@@ -14,6 +14,11 @@ describe('OpenAPI availability and schema', () => {
           [
             '/api/v1/appointments',
             '/api/v1/appointments/{id}',
+            '/api/v1/appointments/{id}/changes',
+            '/api/v1/appointments/{id}/rescheduling-options',
+            '/api/v1/appointments/{id}/rescheduling',
+            '/api/v1/appointments/{id}/cancellation',
+            '/api/v1/businesses/{businessId}/appointments/{id}/changes',
             '/api/v1/me/appointments',
             '/api/v1/me/booking-intents/{key}',
             '/api/v1/businesses/{businessId}/appointments',

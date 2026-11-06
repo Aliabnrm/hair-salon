@@ -1,5 +1,7 @@
 # ADR-012 — چرخه نوبت و دفتر اشغال
 
+به‌روزرسانی اسپرینت۸: محدودیت تغییر زمان/متخصص و actionهای اولیه در [ADR-014](ADR-014-customer-booking-changes.md) برای جابه‌جایی مشتری گسترش یافته‌اند؛ snapshot تجاری و تاریخچه همچنان حفاظت می‌شوند.
+
 وضعیت: پذیرفته‌شده در محدوده اسپرینت۷، ۲۰۲۶-۱۱-۰۴.
 
 bookings مالک Appointment، allocation، event و idempotency است. salon-management مالک کاتالوگ/برنامه است. مرز public.ts صرفاً دامنه و Clock و persistence-contract.ts صرفاً قرارداد خواندن برنامه در transaction موجود است؛ چرخه Nest module نداریم. Clock از SalonManagementModule صادر می‌شود.

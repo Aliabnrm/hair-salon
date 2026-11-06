@@ -26,7 +26,7 @@ function allowedPath(path: string): boolean {
     id = '[a-fA-F0-9-]{36}';
   if (
     new RegExp(
-      `^/api/v1/(?:appointments(?:/${id})?|me/(?:appointments|booking-intents/[-A-Za-z0-9_]{1,64})|businesses/${id}/(?:booking-options|appointments(?:/${id}(?:/cancellation)?)?))$`,
+      `^/api/v1/(?:appointments(?:/${id}(?:/(?:changes|cancellation|rescheduling|rescheduling-options))?)?|me/(?:appointments|booking-intents/[-A-Za-z0-9_]{1,64})|businesses/${id}/(?:booking-options|appointments(?:/${id}(?:/(?:cancellation|changes))?)?))$`,
     ).test(url.pathname)
   )
     return url.origin === 'http://internal.invalid';

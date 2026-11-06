@@ -11,7 +11,8 @@ export function safeReturnTo(value: string | null): string {
     return '/account';
   const u = new URL(value, 'https://internal.invalid');
   if (u.origin !== 'https://internal.invalid') return '/account';
-  if (/^\/appointments(?:\/[a-f0-9-]{36})?$/.test(u.pathname) && !u.search) return u.pathname;
+  if (/^\/appointments(?:\/[a-f0-9-]{36}(?:\/reschedule)?)?$/.test(u.pathname) && !u.search)
+    return u.pathname;
   if (/^\/manage(?:\/[a-f0-9-]{36}(?:\/appointments)?)?$/.test(u.pathname) && !u.search)
     return u.pathname;
   const m = /^\/salons\/([a-f0-9-]{36})\/book$/.exec(u.pathname);

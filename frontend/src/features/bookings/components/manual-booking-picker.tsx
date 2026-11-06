@@ -1,3 +1,4 @@
+import { SelectControl } from '../../../components/ui/select-control';
 import { Button } from '../../../components/ui/button';
 import { DayPicker } from '../../availability';
 import type { useManualBooking } from '../hooks/use-manual-booking';
@@ -16,8 +17,9 @@ export function ManualBookingPicker({
       <legend className="mb-3 text-lg font-bold">خدمت و زمان مراجعه</legend>
       <label className="block text-sm font-bold">
         خدمت
-        <select
-          className="mt-2 h-14 w-full min-w-0 rounded-2xl border border-line-strong bg-surface px-3 text-base"
+        <SelectControl
+          containerClassName="mt-2"
+          className="h-14 rounded-2xl border border-line-strong bg-surface text-base"
           value={state.service}
           onChange={(e) => state.change({ service: e.target.value })}
         >
@@ -35,12 +37,13 @@ export function ManualBookingPicker({
               {s.name}
             </option>
           ))}
-        </select>
+        </SelectControl>
       </label>
       <label className="block text-sm font-bold">
         متخصص
-        <select
-          className="mt-2 h-14 w-full min-w-0 rounded-2xl border border-line-strong bg-surface px-3 text-base"
+        <SelectControl
+          containerClassName="mt-2"
+          className="h-14 rounded-2xl border border-line-strong bg-surface text-base"
           value={state.staff}
           onChange={(e) => state.change({ staff: e.target.value })}
         >
@@ -55,7 +58,7 @@ export function ManualBookingPicker({
                 {s.display_name}
               </option>
             ))}
-        </select>
+        </SelectControl>
       </label>
       {state.times.data && (
         <DayPicker

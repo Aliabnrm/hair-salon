@@ -28,7 +28,7 @@ export function DayPicker({
       aria-label="انتخاب روز"
       className="min-w-0 space-y-4"
     >
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-extrabold">روز مراجعه</h2>
         <div className="flex gap-1">
           <button

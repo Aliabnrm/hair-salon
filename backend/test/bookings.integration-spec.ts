@@ -1,3 +1,9 @@
+import { mkdtemp, mkdir, readFile, writeFile, copyFile, rm } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { createHash, randomUUID, randomBytes } from 'node:crypto';
 import { Pool } from 'pg';
 import request from 'supertest';
@@ -6,6 +12,7 @@ import { createTestDatabase } from './helpers/test-database.js';
 import { runMigration } from './helpers/run-migration.js';
 import { createTestApplication } from './helpers/create-test-application.js';
 import { seedAvailability } from './helpers/availability-fixture.js';
+import { BookingChangesStore } from '../src/modules/bookings/application/booking-changes-store.js';
 import { BookingStore } from '../src/modules/bookings/application/booking-store.js';
 import { DatabaseProvider } from '../src/database/database.provider.js';
 import { BusinessWriteTransaction } from '../src/modules/salon-management/infrastructure/persistence/business-write-transaction.js';
@@ -21,6 +28,7 @@ describe('atomic booking ledger on real PostgreSQL and Nest', () => {
     fixture: Awaited<ReturnType<typeof createTestApplication>>,
     data: Awaited<ReturnType<typeof seedAvailability>>,
     store: BookingStore,
+    changes: BookingChangesStore,
     write: BusinessWriteTransaction,
     actor: string,
     now = initial;
@@ -33,6 +41,7 @@ describe('atomic booking ledger on real PostgreSQL and Nest', () => {
     // This suite tests 100 queued contenders, not the production pool's one-second load limit.
     fixture.app.get(DatabaseProvider).pool.options.connectionTimeoutMillis = 10_000;
     store = fixture.app.get(BookingStore);
+    changes = fixture.app.get(BookingChangesStore);
     write = fixture.app.get(BusinessWriteTransaction);
   });
   beforeEach(async () => {
@@ -433,5 +442,460 @@ describe('atomic booking ledger on real PostgreSQL and Nest', () => {
     const limited = await post(c, online).expect(429);
     expect(Number(limited.headers['retry-after'])).toBeGreaterThan(0);
     expect(JSON.stringify(fixture.logger.entries)).not.toContain('09123456789');
+  });
+  it('moves the same receipt with agreed commercial snapshot and shared customer/owner history', async () => {
+    const a = await store.create(command(), input({ starts_at: '2026-11-05T07:00:00.000Z' }), now);
+    await pool.query(
+      'UPDATE app.services SET price_irr=9900000,duration_minutes=180,buffer_before_minutes=60,version=version+1 WHERE id=$1',
+      [data.service],
+    );
+    const b = await changes.reschedule(
+      command(actor, 'reschedule'),
+      a.id,
+      { staff_id: data.second, starts_at: '2026-11-06T07:00:00.000Z' },
+      1,
+      now,
+    );
+    expect(b).toMatchObject({
+      id: a.id,
+      code: a.code,
+      version: 2,
+      staff_id: data.second,
+      starts_at: '2026-11-06T07:00:00.000Z',
+      snapshot: { ...a.snapshot, staff_name: 'متخصص دوم' },
+    });
+    const history = await changes.changes(actor, a.id, now);
+    expect(history).toEqual(await changes.changes(data.owner, a.id, now, data.business));
+    expect(history.items[0]).toMatchObject({
+      version: 2,
+      action: 'rescheduled',
+      actor: 'customer',
+      before: { starts_at: a.starts_at, staff_id: data.staff },
+      after: { starts_at: b.starts_at, staff_id: data.second },
+    });
+    expect(JSON.stringify(history)).not.toContain('actor_id');
+    expect(await counts()).toEqual({ appointments: 1, allocations: 1, events: 2, writes: 2 });
+    const allocation = (
+      await pool.query(
+        'SELECT staff_id,occupied_start,occupied_end FROM app.schedule_allocations WHERE appointment_id=$1',
+        [a.id],
+      )
+    ).rows[0];
+    expect(allocation.staff_id).toBe(data.second);
+    expect(allocation.occupied_start.toISOString()).toBe('2026-11-06T06:50:00.000Z');
+    expect(allocation.occupied_end.toISOString()).toBe('2026-11-06T07:35:00.000Z');
+  });
+  it('replacement options exclude exactly the current allocation and use the original duration/buffers', async () => {
+    const a = await store.create(command(), input({ starts_at: '2026-11-05T07:00:00.000Z' }), now);
+    const options = await changes.options(
+      actor,
+      a.id,
+      { staff_id: data.staff, from: '2026-11-05', to: '2026-11-05' },
+      now,
+    );
+    expect(options.policy.minimum_notice_minutes).toBe(120);
+    expect(options.staff.map((s) => s.id)).not.toContain(data.hidden);
+    expect(options.days[0]?.slots.some((s) => s.starts_at === '2026-11-05T07:15:00.000Z')).toBe(
+      true,
+    );
+    const b = await changes.reschedule(
+      command(actor, 'reschedule'),
+      a.id,
+      { staff_id: data.staff, starts_at: '2026-11-05T07:15:00.000Z' },
+      1,
+      now,
+    );
+    expect(b.starts_at).toBe('2026-11-05T07:15:00.000Z');
+  });
+  it('rejects occupied, hidden, closed, off-grid and unchanged replacements without losing the original', async () => {
+    const a = await store.create(command(), input({ starts_at: '2026-11-05T07:00:00.000Z' }), now);
+    await store.create(
+      command(await user()),
+      input({ starts_at: '2026-11-06T07:00:00.000Z' }),
+      now,
+    );
+    for (const replacement of [
+      { staff_id: data.staff, starts_at: '2026-11-06T07:00:00.000Z' },
+      { staff_id: data.hidden, starts_at: '2026-11-07T07:00:00.000Z' },
+      { staff_id: data.staff, starts_at: '2026-11-04T07:00:00.000Z' },
+      { staff_id: data.staff, starts_at: '2026-11-07T07:01:00.000Z' },
+      { staff_id: data.staff, starts_at: a.starts_at },
+    ])
+      await expect(
+        changes.reschedule(command(actor, 'reschedule'), a.id, replacement, 1, now),
+      ).rejects.toMatchObject({ status: expect.any(Number) });
+    expect(await store.get(actor, a.id)).toEqual(a);
+    expect(await counts()).toEqual({ appointments: 2, allocations: 2, events: 2, writes: 2 });
+  });
+  it('customer cancellation is allowed at the exact deadline even on an unpublished salon and releases capacity', async () => {
+    const a = await store.create(command(), input({ starts_at: '2026-11-05T07:00:00.000Z' }), now);
+    await pool.query(
+      "UPDATE app.businesses SET state='draft',current_request_id=NULL WHERE id=$1",
+      [data.business],
+    );
+    now = new Date('2026-11-05T05:00:00Z');
+    const cmd = command(actor, 'customer-cancel');
+    expect((await changes.changes(actor, a.id, now)).customer_can_change).toBe(true);
+    const cancelled = await changes.cancel(cmd, a.id, 'تغییر برنامه شخصی', 1, now);
+    expect(cancelled.status).toBe('cancelled');
+    expect(await changes.cancel(cmd, a.id, 'تغییر برنامه شخصی', 1, now)).toEqual(cancelled);
+    expect(await counts()).toEqual({ appointments: 1, allocations: 0, events: 2, writes: 2 });
+  });
+  it('checks current deadline, version and replacement notice; rejects late changes without altering the receipt', async () => {
+    const a = await store.create(command(), input({ starts_at: '2026-11-05T07:00:00.000Z' }), now);
+    await expect(
+      changes.cancel(command(actor, 'customer-cancel'), a.id, 'تغییر برنامه', 2, now),
+    ).rejects.toMatchObject({ code: 'VERSION_CONFLICT' });
+    now = new Date('2026-11-05T05:00:00.001Z');
+    expect((await changes.changes(actor, a.id, now)).customer_can_change).toBe(false);
+    await expect(
+      changes.cancel(command(actor, 'customer-cancel'), a.id, 'تغییر برنامه', 1, now),
+    ).rejects.toMatchObject({ code: 'CHANGE_DEADLINE_PASSED' });
+    await expect(
+      changes.reschedule(
+        command(actor, 'reschedule'),
+        a.id,
+        { staff_id: data.staff, starts_at: '2026-11-06T07:00:00.000Z' },
+        1,
+        now,
+      ),
+    ).rejects.toMatchObject({ code: 'CHANGE_DEADLINE_PASSED' });
+    expect(await store.get(actor, a.id)).toEqual(a);
+    now = new Date('2026-11-03T06:00:00Z');
+    await expect(
+      changes.reschedule(
+        command(actor, 'reschedule'),
+        a.id,
+        { staff_id: data.second, starts_at: '2026-11-03T07:45:00.000Z' },
+        1,
+        now,
+      ),
+    ).rejects.toMatchObject({ code: 'REPLACEMENT_TOO_SOON' });
+  });
+  it('serializes two appointments moving to one replacement and preserves the loser', async () => {
+    const other = await user();
+    const a = await store.create(command(), input({ starts_at: '2026-11-05T07:00:00.000Z' }), now);
+    const b = await store.create(
+      command(other),
+      input({ starts_at: '2026-11-07T07:00:00.000Z' }),
+      now,
+    );
+    const destination = { staff_id: data.staff, starts_at: '2026-11-06T07:00:00.000Z' };
+    const results = await Promise.allSettled([
+      changes.reschedule(command(actor, 'reschedule'), a.id, destination, 1, now),
+      changes.reschedule(command(other, 'reschedule'), b.id, destination, 1, now),
+    ]);
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    const receipts = [await store.get(actor, a.id), await store.get(other, b.id)];
+    expect(receipts.filter((r) => r.starts_at === destination.starts_at)).toHaveLength(1);
+    expect(receipts.filter((r) => r.version === 1)).toHaveLength(1);
+    expect(await counts()).toEqual({ appointments: 2, allocations: 2, events: 3, writes: 3 });
+  });
+  it('serializes cancellation versus rescheduling and rescheduling versus a new booking', async () => {
+    const a = await store.create(command(), input({ starts_at: '2026-11-05T07:00:00.000Z' }), now);
+    const destination = { staff_id: data.staff, starts_at: '2026-11-06T07:00:00.000Z' };
+    const pair = await Promise.allSettled([
+      changes.reschedule(command(actor, 'reschedule'), a.id, destination, 1, now),
+      changes.cancel(command(actor, 'customer-cancel'), a.id, 'تغییر برنامه', 1, now),
+    ]);
+    expect(pair.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    expect((await store.get(actor, a.id)).version).toBe(2);
+    const b = await store.create(command(), input({ starts_at: '2026-11-08T07:00:00.000Z' }), now);
+    const pair2 = await Promise.allSettled([
+      changes.reschedule(
+        command(actor, 'reschedule'),
+        b.id,
+        { ...destination, starts_at: '2026-11-09T07:00:00.000Z' },
+        1,
+        now,
+      ),
+      store.create(command(await user()), input({ starts_at: '2026-11-09T07:00:00.000Z' }), now),
+    ]);
+    expect(pair2.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+  });
+  it('replays one reschedule intent, recovers its latest state and never exposes another actor intent', async () => {
+    const a = await store.create(command(), input({ starts_at: '2026-11-05T07:00:00.000Z' }), now),
+      cmd = command(actor, 'reschedule');
+    const replacement = { staff_id: data.second, starts_at: '2026-11-06T07:00:00.000Z' };
+    const copies = await Promise.all(
+      Array.from({ length: 8 }, () => changes.reschedule(cmd, a.id, replacement, 1, now)),
+    );
+    expect(copies.every((b) => b.id === a.id && b.version === 2)).toBe(true);
+    await expect(
+      changes.reschedule({ ...cmd, fingerprint: 'different' }, a.id, replacement, 1, now),
+    ).rejects.toMatchObject({ code: 'IDEMPOTENCY_CONFLICT' });
+    await changes.cancel(command(actor, 'customer-cancel'), a.id, 'تغییر برنامه', 2, now);
+    expect((await store.resolve(actor, cmd.key, 'reschedule')).status).toBe('cancelled');
+    await expect(store.resolve(await user(), cmd.key, 'reschedule')).rejects.toMatchObject({
+      status: 404,
+    });
+    expect(await counts()).toEqual({ appointments: 1, allocations: 0, events: 3, writes: 3 });
+  });
+  it('rechecks the two-hour deadline after waiting for the shared salon lock', async () => {
+    const a = await store.create(command(), input({ starts_at: '2026-11-05T07:00:00.000Z' }), now);
+    const blocker = await pool.connect();
+    await blocker.query('BEGIN');
+    await blocker.query('SELECT id FROM app.businesses WHERE id=$1 FOR UPDATE', [data.business]);
+    const pending = changes.reschedule(
+      command(actor, 'reschedule'),
+      a.id,
+      { staff_id: data.staff, starts_at: '2026-11-06T07:00:00.000Z' },
+      1,
+      now,
+    );
+    const settled = pending.then(
+      (value) => ({ value }),
+      (error) => ({ error }),
+    );
+    try {
+      let locked = false;
+      for (let i = 0; i < 50; i++) {
+        const r = await pool.query(
+          "SELECT 1 FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock' AND query LIKE 'SELECT id FROM app.businesses%'",
+        );
+        if (r.rowCount) {
+          locked = true;
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      expect(locked).toBe(true);
+      now = new Date('2026-11-05T05:00:00.001Z');
+      await blocker.query('COMMIT');
+      expect(await settled).toMatchObject({ error: { code: 'CHANGE_DEADLINE_PASSED' } });
+    } finally {
+      await blocker.query('ROLLBACK');
+      blocker.release();
+    }
+    expect(await store.get(actor, a.id)).toEqual(a);
+  });
+  it('HTTP protects customer changes, history, snapshots and manual/unowned appointments', async () => {
+    const a = await store.create(command(), input({ starts_at: '2026-11-05T07:00:00.000Z' }), now);
+    const c = await cookie(actor),
+      other = await cookie(await user());
+    const url = `/api/v1/appointments/${a.id}/rescheduling`;
+    const body = { staff_id: data.second, starts_at: '2026-11-06T07:00:00.000Z' };
+    const post = (
+      who = c,
+      value: object = body,
+      origin = 'http://localhost:3000',
+      version = '"1"',
+    ) =>
+      request(fixture.app.getHttpServer())
+        .post(url)
+        .set('Cookie', who)
+        .set('Origin', origin)
+        .set('Idempotency-Key', randomUUID())
+        .set('If-Match', version)
+        .send(value);
+    await request(fixture.app.getHttpServer()).post(url).send(body).expect(401);
+    await post(c, body, 'https://evil.invalid').expect(403);
+    await post(other).expect(404);
+    await post(c, { ...body, price_irr: 0 }).expect(422);
+    await post(c, body, 'http://localhost:3000', '"2"').expect(409);
+    await request(fixture.app.getHttpServer())
+      .post(url)
+      .set('Cookie', c)
+      .set('Origin', 'http://localhost:3000')
+      .set('Idempotency-Key', randomUUID())
+      .send(body)
+      .expect(428);
+    await get(`appointments/${a.id}/changes`, other).expect(404);
+    const response = await get(
+      `appointments/${a.id}/rescheduling-options?staff_id=${data.staff}&from=2026-11-05&to=2026-11-05`,
+      c,
+    ).expect(200);
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(JSON.stringify(response.body)).not.toMatch(
+      /customer_name|customer_mobile|نام خصوصی آزمون/,
+    );
+    await post().expect(200);
+    const history = await get(`appointments/${a.id}/changes`, c).expect(200);
+    expect(history.body.data.appointment.version).toBe(2);
+    const manual = await store.create(
+      command(data.owner, 'manual'),
+      input({ starts_at: '2026-11-07T07:00:00.000Z' }),
+      now,
+    );
+    await get(`appointments/${manual.id}/changes`, c).expect(404);
+    await expect(
+      changes.cancel(command(actor, 'customer-cancel'), manual.id, 'تغییر برنامه', 1, now),
+    ).rejects.toMatchObject({ status: 404 });
+    expect(JSON.stringify(fixture.logger.entries)).not.toContain('09123456789');
+  });
+  it('database rejects an unrecorded move, commercial snapshot changes and incomplete allocation moves', async () => {
+    const a = await store.create(command(), input({ starts_at: '2026-11-05T07:00:00.000Z' }), now);
+    await expect(
+      pool.query(
+        "UPDATE app.appointments SET starts_at=starts_at+interval '1 day',ends_at=ends_at+interval '1 day',version=2 WHERE id=$1",
+        [a.id],
+      ),
+    ).rejects.toMatchObject({ code: '23514' });
+    const tx = await pool.connect();
+    const details = {
+      before: {
+        starts_at: a.starts_at,
+        ends_at: a.ends_at,
+        staff_id: a.staff_id,
+        staff_name: a.snapshot.staff_name,
+      },
+      after: {
+        starts_at: '2026-11-06T07:00:00.000Z',
+        ends_at: '2026-11-06T07:30:00.000Z',
+        staff_id: a.staff_id,
+        staff_name: a.snapshot.staff_name,
+      },
+    };
+    try {
+      await tx.query('BEGIN');
+      await tx.query(
+        "INSERT INTO app.booking_events(appointment_id,version,actor_id,action,details) VALUES($1,2,$2,'rescheduled',$3::jsonb)",
+        [a.id, actor, JSON.stringify(details)],
+      );
+      await expect(
+        tx.query(
+          "UPDATE app.appointments SET starts_at=$2,ends_at=$3,snapshot=jsonb_set(snapshot,'{price_irr}','0'),version=2 WHERE id=$1",
+          [a.id, details.after.starts_at, details.after.ends_at],
+        ),
+      ).rejects.toMatchObject({ code: '23514' });
+      await tx.query('ROLLBACK');
+      await tx.query('BEGIN');
+      await tx.query(
+        "INSERT INTO app.booking_events(appointment_id,version,actor_id,action,details) VALUES($1,2,$2,'rescheduled',$3::jsonb)",
+        [a.id, actor, JSON.stringify(details)],
+      );
+      await tx.query('UPDATE app.appointments SET starts_at=$2,ends_at=$3,version=2 WHERE id=$1', [
+        a.id,
+        details.after.starts_at,
+        details.after.ends_at,
+      ]);
+      await expect(tx.query('COMMIT')).rejects.toMatchObject({ code: '23514' });
+    } finally {
+      await tx.query('ROLLBACK');
+      tx.release();
+    }
+    expect(await store.get(actor, a.id)).toEqual(a);
+    const b = await changes.reschedule(
+      command(actor, 'reschedule'),
+      a.id,
+      { staff_id: data.second, starts_at: details.after.starts_at },
+      1,
+      now,
+    );
+    await expect(
+      pool.query(
+        "UPDATE app.booking_events SET details='{}'::jsonb WHERE appointment_id=$1 AND version=2",
+        [b.id],
+      ),
+    ).rejects.toMatchObject({ code: '23514' });
+  });
+  it('upgrades the exact Sprint 7 ledger without rewriting existing receipts, events, allocations or intents', async () => {
+    const upgrade = await createTestDatabase();
+    const oldPool = new Pool({ connectionString: upgrade.url, max: 2 });
+    const folder = await mkdtemp(join(tmpdir(), 'hair-salon-s8-upgrade-'));
+    let app: Awaited<ReturnType<typeof createTestApplication>> | undefined;
+    try {
+      await mkdir(join(folder, 'meta'));
+      const source = fileURLToPath(new URL('../drizzle/', import.meta.url));
+      const journal = JSON.parse(await readFile(join(source, 'meta/_journal.json'), 'utf8'));
+      journal.entries = journal.entries.filter((e: { idx: number }) => e.idx <= 5);
+      await writeFile(join(folder, 'meta/_journal.json'), JSON.stringify(journal));
+      for (const entry of journal.entries)
+        await copyFile(join(source, entry.tag + '.sql'), join(folder, entry.tag + '.sql'));
+      await migrate(drizzle(oldPool), { migrationsFolder: folder });
+      const legacy = await seedAvailability(oldPool, '2026-11-03'),
+        id = randomUUID(),
+        owner = legacy.owner;
+      const snapshot = {
+        business_name: 'سالن قبلی',
+        business_address: 'نشانی عمومی آزمون',
+        business_phone: '+989121234567',
+        service_name: 'کوتاهی دقیق',
+        staff_name: 'متخصص اول',
+        price_irr: 2500000,
+        duration_minutes: 30,
+        buffer_before_minutes: 10,
+        buffer_after_minutes: 5,
+        service_version: 1,
+        customer_name: 'مشتری قدیمی آزمون',
+        customer_mobile: '09123456789',
+        timezone: 'Asia/Tehran',
+        policy: 'سیاست ثبت قبلی',
+      };
+      const tx = await oldPool.connect();
+      try {
+        await tx.query('BEGIN');
+        await tx.query(
+          "INSERT INTO app.appointments(id,business_id,service_id,staff_id,booking_user_id,created_by,code,source,starts_at,ends_at,snapshot) VALUES($1,$2,$3,$4,$5,$5,($1::uuid)::text,'online','2026-11-05T07:00:00Z','2026-11-05T07:30:00Z',$6::jsonb)",
+          [id, legacy.business, legacy.service, legacy.staff, owner, JSON.stringify(snapshot)],
+        );
+        await tx.query(
+          "INSERT INTO app.schedule_allocations(appointment_id,business_id,staff_id,occupied_start,occupied_end) VALUES($1,$2,$3,'2026-11-05T06:50:00Z','2026-11-05T07:35:00Z')",
+          [id, legacy.business, legacy.staff],
+        );
+        await tx.query(
+          "INSERT INTO app.booking_events(appointment_id,version,actor_id,action) VALUES($1,1,$2,'created')",
+          [id, owner],
+        );
+        await tx.query(
+          "INSERT INTO app.booking_writes(actor_id,operation,key,fingerprint,appointment_id) VALUES($1,'online','legacy-key','legacy-fingerprint',$2)",
+          [owner, id],
+        );
+        await tx.query('COMMIT');
+      } finally {
+        await tx.query('ROLLBACK');
+        tx.release();
+      }
+      const receiptsBefore = (await oldPool.query('SELECT * FROM app.appointments')).rows;
+      const allocationsBefore = (await oldPool.query('SELECT * FROM app.schedule_allocations'))
+        .rows;
+      const eventsBefore = (
+        await oldPool.query(
+          'SELECT appointment_id,version,actor_id,action,reason,occurred_at FROM app.booking_events',
+        )
+      ).rows;
+      const writesBefore = (await oldPool.query('SELECT * FROM app.booking_writes')).rows;
+      const journalBefore = (
+        await oldPool.query('SELECT * FROM drizzle.__drizzle_migrations ORDER BY id')
+      ).rows;
+      const migrated = await runMigration(upgrade.url);
+      expect(migrated.status, migrated.output).toBe(0);
+      expect((await oldPool.query('SELECT * FROM app.appointments')).rows).toEqual(receiptsBefore);
+      expect((await oldPool.query('SELECT * FROM app.schedule_allocations')).rows).toEqual(
+        allocationsBefore,
+      );
+      expect(
+        (
+          await oldPool.query(
+            'SELECT appointment_id,version,actor_id,action,reason,occurred_at FROM app.booking_events',
+          )
+        ).rows,
+      ).toEqual(eventsBefore);
+      expect((await oldPool.query('SELECT * FROM app.booking_writes')).rows).toEqual(writesBefore);
+      expect(
+        (await oldPool.query('SELECT * FROM drizzle.__drizzle_migrations ORDER BY id')).rows.slice(
+          0,
+          6,
+        ),
+      ).toEqual(journalBefore);
+      app = await createTestApplication('test', [], upgrade.url, { now: () => initial });
+      const upgraded = app.app.get(BookingChangesStore);
+      expect((await upgraded.changes(owner, id, initial)).items[0]?.after).toBeNull();
+      const moved = await upgraded.reschedule(
+        { actor: owner, operation: 'reschedule', key: randomUUID(), fingerprint: 'upgrade' },
+        id,
+        { staff_id: legacy.second, starts_at: '2026-11-06T07:00:00.000Z' },
+        1,
+        initial,
+      );
+      expect(moved.id).toBe(id);
+      expect(moved.snapshot.price_irr).toBe(snapshot.price_irr);
+      expect(moved.code).toBe(id);
+    } finally {
+      await app?.app.close();
+      await oldPool.end();
+      await upgrade.close();
+      await rm(folder, { recursive: true, force: true });
+    }
   });
 });

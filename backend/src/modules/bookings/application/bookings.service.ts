@@ -12,7 +12,13 @@ export class BookingsService {
   ) {}
   resolve(actor: string, key: unknown, operation: unknown) {
     if (typeof key !== 'string' || !/^[-A-Za-z0-9_]{1,64}$/.test(key)) invalid('key');
-    if (operation !== 'online' && operation !== 'manual' && operation !== 'cancel')
+    if (
+      operation !== 'online' &&
+      operation !== 'manual' &&
+      operation !== 'cancel' &&
+      operation !== 'customer-cancel' &&
+      operation !== 'reschedule'
+    )
       invalid('operation');
     return this.store.resolve(actor, key, operation);
   }

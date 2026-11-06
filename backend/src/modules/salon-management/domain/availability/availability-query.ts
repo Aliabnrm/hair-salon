@@ -16,6 +16,16 @@ export function availabilityPolicy(now: Date): AvailabilityPolicy {
 export function availabilityQuery(value: unknown, policy: AvailabilityPolicy): AvailabilityQuery {
   const q = object(value, ['service_id', 'staff_id', 'from', 'to']);
   const service_id = uuid(q.service_id, 'service_id').toLowerCase();
+  return {
+    service_id,
+    ...availabilityWindow({ staff_id: q.staff_id, from: q.from, to: q.to }, policy),
+  };
+}
+export function availabilityWindow(
+  value: unknown,
+  policy: AvailabilityPolicy,
+): Omit<AvailabilityQuery, 'service_id'> {
+  const q = object(value, ['staff_id', 'from', 'to']);
   const staff_id =
     q.staff_id === undefined || q.staff_id === 'any'
       ? 'any'
@@ -32,5 +42,5 @@ export function availabilityQuery(value: unknown, policy: AvailabilityPolicy): A
     to > addDays(from, availabilityLimits.queryDays - 1)
   )
     invalid('from', 'بازه باید حداکثر هفت روز و در سی روز مجاز باشد.');
-  return { service_id, staff_id, from, to };
+  return { staff_id, from, to };
 }

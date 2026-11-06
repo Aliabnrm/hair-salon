@@ -16,7 +16,7 @@ export interface Availability {
   booking_enabled: true;
   policy: {
     slot_step_minutes: 15;
-    minimum_notice_minutes: 60;
+    minimum_notice_minutes: 60 | 120;
     first_allowed_date: string;
     last_allowed_date: string;
   };

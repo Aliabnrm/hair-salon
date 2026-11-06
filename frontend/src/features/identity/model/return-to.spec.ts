@@ -7,6 +7,7 @@ it('preserves a complete booking selection and rejects external or malformed ret
     new URLSearchParams({ service_id: id, staff_id: 'any', starts_at: '2026-11-03T07:00:00.000Z' });
   expect(safeReturnTo(path)).toBe(path);
   expect(safeReturnTo('/appointments')).toBe('/appointments');
+  expect(safeReturnTo(`/appointments/${id}/reschedule`)).toBe(`/appointments/${id}/reschedule`);
   for (const bad of [
     '//evil.com',
     'https://evil.com',

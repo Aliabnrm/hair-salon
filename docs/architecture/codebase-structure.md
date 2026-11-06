@@ -91,3 +91,9 @@ bookings اکنون قابلیت واقعی مستقل است؛ مثال قدی�
 ## چیدمان مسیر عمومی رزرو
 
 `components/layout/app-shell.tsx` یک جایگاه مستقل از اسکرول برای اقدام صفحه دارد؛ `PageActionBar` با Portal محتوای خود را در آن، بالای ناوبری اصلی قرار می‌دهد. `PageHeader` هدر و مقصد برگشت صفحات سالن، زمان و رسید را یکدست می‌کند. این اجزای مشترک فقط نمایش‌اند و به API یا feature وابسته نیستند. فرم ثبت نوبت، حتی با دکمه بیرون از محفظه اسکرول، همان فرم و مسیر ارسال feature bookings را نگه می‌دارد. جزئیات طراحی، دامنه بازبینی و آزمون‌ها در [درس بازطراحی مسیر رزرو](../learning/booking-journey-ux.md) ثبت شده‌اند.
+
+## افزوده اسپرینت۸
+
+تغییرات مشتری داخل feature bookings با BookingChangesService/BookingChangesStore و adapter PostgresBookingChanges است؛ ماژول یا سرویس مستقل شبکه‌ای ساخته نشد. booking-changes دامنه خالص است؛ readChangeAppointment/readChanges، لغو مشترک و ترکیب snapshot با برنامه زنده در فایل‌های محدود persistence قرار دارند. BookingTransaction، chooseSlot و calculateAvailability بازاستفاده می‌شوند.
+
+salon-management فقط availabilityWindow و قرارداد persistence مربوط به حذف دقیق تخصیص خود نوبت را گسترش می‌دهد؛ هیچ import به DTO/adapter خصوصی آن در bookings اضافه نشده است. فرانت api/hooks/components در feature bookings و صفحه ترکیب‌کننده تازه دارد؛ [موجودی UI](sprint-08-ui.md).

@@ -65,7 +65,7 @@ export async function cancelAppointment(
 }
 export async function resolveIntent(
   key: string,
-  operation: 'online' | 'manual' | 'cancel',
+  operation: 'online' | 'manual' | 'cancel' | 'customer-cancel' | 'reschedule',
   signal: AbortSignal,
 ) {
   return decodeAppointment(

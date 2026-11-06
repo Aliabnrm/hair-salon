@@ -137,3 +137,9 @@ idempotency روی actor/operation/key یکتا و به fingerprint و resource 
 ## معنای جاری انتشار — ADR-013
 
 بدون تغییر schema، pending_review فقط وضعیت تاریخی است و رویداد publish با consent=true مرجع current_request_id می‌شود. content_updated برای ویرایش معتبر و publication_incomplete برای توقف انتشار در اثر نقص ثبت می‌شوند. نسخه و FK مرکب موجود، ترتیب و اتصال به همان سالن را حفظ می‌کنند؛ migrationهای قبلی دست‌نخورده‌اند.
+
+## تغییرات داده اسپرینت۸ — ADR-014
+
+`booking_events.details` افزوده شد؛ برای رویدادهای قبلی پیش‌فرض `{}` و برای جابه‌جایی، before/after زمان شروع/پایان و شناسه/نام متخصص را نگه می‌دارد. action=rescheduled در همان نسخه بعدی Appointment ثبت می‌شود. همان id/code و snapshot تجاری باقی می‌مانند؛ فقط staff_name همراه تغییر متخصص مجاز است.
+
+تخصیص فعال همان یک سطر به محدوده تازه منتقل می‌شود؛ freeze trigger رویداد متناظر و محدوده قبلی را می‌سنجد و check_booking_ledger در commit، محدوده نهایی/رویداد/وضعیت را تطبیق می‌دهد. FK سه‌ستونی تخصیص deferred و exclusion فعال قبلی فوری است. رویداد/کلیدهای قدیمی بازنویسی نمی‌شوند؛ details تاریخچه قدیمی عمداً اطلاعات زمانی ساختگی نمی‌گیرد. schema Drizzle فیلد و action را دارد؛ SQL سفارشی trigger/FK در0006 است.

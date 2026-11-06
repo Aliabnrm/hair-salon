@@ -3,7 +3,7 @@ import { invalid, conflict } from '../../../common/domain/capability-error.js';
 import { object, uuid, text, integer, isoDate } from '../../../common/domain/input.js';
 import type { CreateBooking, BookingListQuery } from './booking.types.js';
 export const BOOKING_POLICY =
-  'نوبت قطعی؛ پرداخت در سالن. برای لغو یا تغییر با سالن تماس بگیرید. موبایل تماس بدون تأیید پیامکی است.';
+  'نوبت قطعی؛ پرداخت در سالن. لغو و تغییر آنلاین تا دو ساعت پیش از شروع؛ پس از آن با سالن تماس بگیرید. موبایل تماس بدون تأیید پیامکی است.';
 export function contactMobile(value: unknown, required: boolean): string | null {
   if (!required && (value === undefined || value === null || value === '')) return null;
   let mobile = text(value, 'customer_mobile', 11, 20)

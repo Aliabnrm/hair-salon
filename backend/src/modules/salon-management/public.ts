@@ -3,7 +3,11 @@ export {
   calculateAvailability,
   fitsWorkingHours,
 } from './domain/availability/availability-policy.js';
-export { availabilityPolicy, availabilityQuery } from './domain/availability/availability-query.js';
+export {
+  availabilityPolicy,
+  availabilityQuery,
+  availabilityWindow,
+} from './domain/availability/availability-query.js';
 export {
   localDate,
   localClock,
@@ -15,5 +19,6 @@ export type {
   AvailabilitySnapshot,
   AvailabilityQuery,
   AvailabilityResult,
+  AvailabilityPolicy,
   TimeRange,
 } from './domain/availability/availability.types.js';

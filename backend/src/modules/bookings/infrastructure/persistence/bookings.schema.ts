@@ -104,11 +104,12 @@ export const bookingEvents = appSchema.table(
       .references(() => users.id),
     action: text('action').notNull(),
     reason: text('reason'),
+    details: jsonb('details').$type<Record<string, unknown>>().notNull().default({}),
     occurredAt: instant('occurred_at').notNull().defaultNow(),
   },
   (t) => [
     primaryKey({ columns: [t.appointmentId, t.version] }),
-    check('booking_event_action', sql`${t.action} IN ('created','cancelled')`),
+    check('booking_event_action', sql`${t.action} IN ('created','cancelled','rescheduled')`),
   ],
 );
 export const bookingWrites = appSchema.table(

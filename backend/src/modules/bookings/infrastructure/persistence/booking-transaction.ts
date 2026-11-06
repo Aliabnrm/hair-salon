@@ -17,6 +17,7 @@ export class BookingTransaction {
     command: BookingCommand,
     business: string,
     action: (tx: PoolClient) => Promise<string>,
+    customerAppointment?: string,
   ): Promise<string> {
     const tx = await this.database.pool.connect();
     try {
@@ -24,10 +25,19 @@ export class BookingTransaction {
       await tx.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
         JSON.stringify(['booking', command.actor, command.operation, command.key]),
       ]);
-      if (command.operation !== 'online') await requireOwner(tx, command.actor, business);
+      const authorize = async () => {
+        if (command.operation === 'customer-cancel' || command.operation === 'reschedule') {
+          const r = await tx.query(
+            "SELECT 1 FROM app.appointments WHERE id=$1 AND business_id=$2 AND booking_user_id=$3 AND source='online'",
+            [customerAppointment, business, command.actor],
+          );
+          if (!r.rowCount) notFound();
+        } else if (command.operation !== 'online') await requireOwner(tx, command.actor, business);
+      };
+      await authorize();
       const b = await tx.query('SELECT id FROM app.businesses WHERE id=$1 FOR UPDATE', [business]);
       if (!b.rowCount) notFound();
-      if (command.operation !== 'online') await requireOwner(tx, command.actor, business);
+      await authorize();
       const old = await tx.query<{ fingerprint: string; appointment_id: string }>(
         'SELECT fingerprint,appointment_id FROM app.booking_writes WHERE actor_id=$1 AND operation=$2 AND key=$3',
         [command.actor, command.operation, command.key],

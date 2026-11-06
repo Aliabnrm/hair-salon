@@ -3,7 +3,10 @@ import { HttpFailure } from '../../../lib/api/http-client';
 import { resolveIntent } from '../api/bookings.api';
 import type { Appointment } from '../model/booking.types';
 /** Only the random intent key is persisted. Names, phones and form bodies stay in memory. */
-export function useBookingMutation(scope: string, operation: 'online' | 'manual' | 'cancel') {
+export function useBookingMutation(
+  scope: string,
+  operation: 'online' | 'manual' | 'cancel' | 'customer-cancel' | 'reschedule',
+) {
   const [pending, setPending] = useState(false),
     [waiting, setWaiting] = useState(false),
     [error, setError] = useState<unknown>(null),
@@ -43,6 +46,13 @@ export function useBookingMutation(scope: string, operation: 'online' | 'manual'
           }
         })
         .catch((e) => {
+          if (
+            alive.current &&
+            !abort.signal.aborted &&
+            e instanceof HttpFailure &&
+            e.status === 404
+          )
+            setUncertain(false);
           if (
             alive.current &&
             !abort.signal.aborted &&
@@ -119,17 +129,19 @@ export function useBookingMutation(scope: string, operation: 'online' | 'manual'
         setError(null);
       }
     } catch (e) {
-      if (alive.current)
+      if (alive.current) {
+        if (e instanceof HttpFailure && e.status === 404) setUncertain(false);
         setError(
           e instanceof HttpFailure && e.status === 404
             ? new HttpFailure(
                 404,
                 'INTENT_PENDING',
                 undefined,
-                'هنوز نتیجه ثبت‌شده‌ای پیدا نشد. با همین اطلاعات دوباره تلاش کنید؛ کلید درخواست حفظ شده است.',
+                'نتیجه ثبت‌شده‌ای پیدا نشد. اطلاعات را بررسی و دوباره تلاش کنید؛ همان کلید برای جلوگیری از تکرار حفظ شده است.',
               )
             : e,
         );
+      }
     } finally {
       busy.current = false;
       if (alive.current) setPending(false);

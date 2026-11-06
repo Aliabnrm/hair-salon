@@ -29,9 +29,9 @@ export class BookingHttp {
   ): Promise<BookingCommand> {
     const actor = requireCurrentUser(r).id;
     await this.rate.consume(
-      operation === 'cancel' ? 'booking-cancel' : 'booking-create',
+      operation === 'online' || operation === 'manual' ? 'booking-create' : 'booking-change',
       actor,
-      operation === 'cancel' ? 30 : 10,
+      operation === 'online' || operation === 'manual' ? 10 : 30,
       60,
     );
     const key = r.headers['idempotency-key'];
@@ -48,7 +48,7 @@ export class BookingHttp {
   version(r: AuthenticatedRequest): number {
     const v = r.headers['if-match'];
     if (v === undefined)
-      throw new CapabilityError(428, 'PRECONDITION_REQUIRED', 'نسخه نوبت برای لغو لازم است.');
+      throw new CapabilityError(428, 'PRECONDITION_REQUIRED', 'نسخه نوبت برای تغییر لازم است.');
     if (typeof v !== 'string' || !/^"[1-9]\d*"$/.test(v))
       invalid('If-Match', 'نسخه نوبت لازم است؛ دوباره صفحه را دریافت کنید.');
     return integer(Number(v.slice(1, -1)), 'If-Match', 1, 2147483647);

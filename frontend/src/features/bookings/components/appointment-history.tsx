@@ -1,3 +1,4 @@
+import { statusLabels } from '../model/appointment-status';
 import { persianDate } from '../../../lib/format/local-date';
 import { appointmentTime, tehranDate } from '../model/booking-values';
 import type { BookingChanges, BookingMoment } from '../model/booking-changes';
@@ -26,11 +27,15 @@ export function AppointmentHistory({ changes }: { changes: BookingChanges }) {
             className="border-s-2 border-petrol/20 ps-4 text-sm leading-8"
           >
             <p className="font-bold">
-              {e.action === 'created'
-                ? 'ثبت نوبت'
-                : e.action === 'cancelled'
-                  ? 'لغو نوبت'
-                  : 'تغییر زمان یا متخصص'}{' '}
+              {e.action === 'outcome'
+                ? 'ثبت نتیجه مراجعه'
+                : e.action === 'corrected'
+                  ? 'اصلاح نتیجه مراجعه'
+                  : e.action === 'created'
+                    ? 'ثبت نوبت'
+                    : e.action === 'cancelled'
+                      ? 'لغو نوبت'
+                      : 'تغییر زمان یا متخصص'}{' '}
               · {e.actor === 'customer' ? 'توسط مشتری' : 'توسط سالن'}
             </p>
             <p className="text-xs text-muted">
@@ -41,6 +46,9 @@ export function AppointmentHistory({ changes }: { changes: BookingChanges }) {
               <p className="font-semibold">
                 {e.action === 'created' ? 'زمان ثبت‌شده' : 'بعد'}: {momentLabel(e.after)}
               </p>
+            )}
+            {e.result_status && (
+              <p className="font-semibold">نتیجه: {statusLabels[e.result_status]}</p>
             )}
             {e.reason && <p className="mt-2 break-words">دلیل: {e.reason}</p>}
           </li>

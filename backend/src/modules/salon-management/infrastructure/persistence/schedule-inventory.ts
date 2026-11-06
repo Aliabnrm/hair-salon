@@ -27,7 +27,7 @@ SELECT jsonb_build_object(
    AND e.local_date BETWEEN $4::date AND $5::date AND (e.staff_id IS NULL OR e.staff_id IN (SELECT id FROM eligible))),'[]'::jsonb)
 ,
  'busy',COALESCE((SELECT jsonb_agg(jsonb_build_object('staff_id',a.staff_id,'start',a.occupied_start,'end',a.occupied_end))
- FROM app.schedule_allocations a WHERE a.business_id=b.id AND a.released_at IS NULL AND ($7::uuid IS NULL OR a.appointment_id<>$7)
+ FROM app.schedule_allocations a WHERE a.business_id=b.id AND a.released_at IS NULL AND ($7::uuid IS NULL OR a.appointment_id IS DISTINCT FROM $7)
  AND a.occupied_start < (($5::date+1)::timestamp AT TIME ZONE 'Asia/Tehran')
  AND a.occupied_end > ($4::date::timestamp AT TIME ZONE 'Asia/Tehran')),'[]'::jsonb)
 ) AS snapshot

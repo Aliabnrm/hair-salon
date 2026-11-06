@@ -12,7 +12,7 @@ export function CustomerAppointmentActions({
   refresh: () => Promise<void>;
 }) {
   const a = changes.appointment;
-  if (a.status === 'cancelled') return null;
+  if (a.status !== 'confirmed') return null;
   return (
     <section
       aria-label="مدیریت نوبت من"

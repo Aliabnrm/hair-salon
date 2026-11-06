@@ -57,7 +57,7 @@ export const appointmentSchema = {
     staff_id: uuid,
     code: str,
     source: { type: 'string' as const, enum: ['online', 'manual'] },
-    status: { type: 'string' as const, enum: ['confirmed', 'cancelled'] },
+    status: { type: 'string' as const, enum: ['confirmed', 'cancelled', 'completed', 'no_show'] },
     version: { type: 'integer' as const, minimum: 1 },
     starts_at: instant,
     ends_at: instant,
@@ -143,6 +143,17 @@ export function BookingList(owner = false) {
             description: 'Tehran calendar day',
           }),
           ApiQuery({ name: 'staff_id', required: false, type: String }),
+          ApiQuery({
+            name: 'to',
+            required: false,
+            format: 'date',
+            description: 'Inclusive end, at most seven days',
+          }),
+          ApiQuery({
+            name: 'status',
+            required: false,
+            enum: ['any', 'confirmed', 'cancelled', 'completed', 'no_show'],
+          }),
         ]
       : [ApiQuery({ name: 'period', required: false, enum: ['upcoming', 'past'] })]),
   );

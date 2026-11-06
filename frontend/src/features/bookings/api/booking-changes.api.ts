@@ -28,7 +28,7 @@ export function decodeBookingChanges(v: unknown): BookingChanges {
     const e = record(v),
       version = number(e.version);
     if (
-      !['created', 'cancelled', 'rescheduled'].includes(string(e.action)) ||
+      !['created', 'cancelled', 'rescheduled', 'outcome', 'corrected'].includes(string(e.action)) ||
       !['customer', 'owner'].includes(string(e.actor)) ||
       version < 1 ||
       version > a.version
@@ -37,16 +37,33 @@ export function decodeBookingChanges(v: unknown): BookingChanges {
     const before = moment(e.before),
       after = moment(e.after);
     if (e.action === 'rescheduled' && (!before || !after)) fail();
+    if (
+      (e.action === 'outcome' || e.action === 'corrected') &&
+      !['confirmed', 'completed', 'no_show'].includes(string(e.result_status))
+    )
+      fail();
     return {
       version,
       action:
-        e.action === 'rescheduled'
-          ? 'rescheduled'
-          : e.action === 'created'
-            ? 'created'
-            : 'cancelled',
+        e.action === 'outcome'
+          ? 'outcome'
+          : e.action === 'corrected'
+            ? 'corrected'
+            : e.action === 'rescheduled'
+              ? 'rescheduled'
+              : e.action === 'created'
+                ? 'created'
+                : 'cancelled',
       actor: e.actor === 'customer' ? 'customer' : 'owner',
       reason: e.reason === null ? null : string(e.reason),
+      result_status:
+        e.result_status === 'completed'
+          ? 'completed'
+          : e.result_status === 'no_show'
+            ? 'no_show'
+            : e.result_status === 'confirmed'
+              ? 'confirmed'
+              : null,
       occurred_at: instant(e.occurred_at),
       before,
       after,

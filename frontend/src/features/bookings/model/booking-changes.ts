@@ -7,9 +7,10 @@ export interface BookingMoment {
 }
 export interface BookingChangeEvent {
   version: number;
-  action: 'created' | 'cancelled' | 'rescheduled';
+  action: 'created' | 'cancelled' | 'rescheduled' | 'outcome' | 'corrected';
   actor: 'customer' | 'owner';
   reason: string | null;
+  result_status?: 'confirmed' | 'completed' | 'no_show' | null;
   occurred_at: string;
   before: BookingMoment | null;
   after: BookingMoment | null;

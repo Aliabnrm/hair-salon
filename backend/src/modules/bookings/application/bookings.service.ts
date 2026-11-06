@@ -17,7 +17,8 @@ export class BookingsService {
       operation !== 'manual' &&
       operation !== 'cancel' &&
       operation !== 'customer-cancel' &&
-      operation !== 'reschedule'
+      operation !== 'reschedule' &&
+      operation !== 'outcome'
     )
       invalid('operation');
     return this.store.resolve(actor, key, operation);

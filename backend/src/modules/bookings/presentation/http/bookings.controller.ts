@@ -72,7 +72,7 @@ export class BookingsController {
   @ApiParam({ name: 'key', type: String })
   @ApiQuery({
     name: 'operation',
-    enum: ['online', 'manual', 'cancel', 'customer-cancel', 'reschedule'],
+    enum: ['online', 'manual', 'cancel', 'customer-cancel', 'reschedule', 'outcome'],
   })
   @BookingResult()
   async resolve(@Req() r: AuthenticatedRequest) {

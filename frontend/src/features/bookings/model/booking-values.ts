@@ -22,7 +22,7 @@ export function decodeAppointment(v: unknown): Appointment {
   const a = record(v),
     s = record(a.snapshot);
   if (
-    (a.status !== 'confirmed' && a.status !== 'cancelled') ||
+    !['confirmed', 'cancelled', 'completed', 'no_show'].includes(string(a.status)) ||
     (a.source !== 'online' && a.source !== 'manual') ||
     s.timezone !== 'Asia/Tehran'
   )
@@ -36,7 +36,14 @@ export function decodeAppointment(v: unknown): Appointment {
     staff_id: id(a.staff_id),
     code: string(a.code),
     source: a.source === 'online' ? 'online' : 'manual',
-    status: a.status === 'confirmed' ? 'confirmed' : 'cancelled',
+    status:
+      a.status === 'completed'
+        ? 'completed'
+        : a.status === 'no_show'
+          ? 'no_show'
+          : a.status === 'confirmed'
+            ? 'confirmed'
+            : 'cancelled',
     version: positive(a.version),
     starts_at: instant(a.starts_at),
     ends_at: instant(a.ends_at),

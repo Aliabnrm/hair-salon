@@ -66,3 +66,7 @@
 ## معیارهای افزوده اسپرینت۸
 
 FR-BOOK-006 بخش مشتری و FR-BOOK-007 با طرح۸ مصوب شدند. تست‌های booking-changes.spec.ts دامنه مرز دو ساعت/ورودی، bookings.integration-spec.ts هم‌زمانی/tenant/rollback/upgrade و booking-changes.spec.ts مرورگر مسیر مشترک دو پنل را پوشش می‌دهند. FR-BOOK-005 با تاریخچه نقش‌محور تکمیل می‌شود. شاهد نتیجه و تعداد اجرا در گزارش۸ ثبت می‌شود؛ این ردیف به معنی اجرای SMS/تقویم پیشرفته یا آمادگی production نیست.
+
+## برش اسپرینت۹
+
+FR-BOOK-008: completed/no_show، مرز زمان، اصلاح با دلیل، history مشترک و مجوز مالک. FR-CAL-003: block/release در همان allocation، رد overlap و حفظ رزرو؛ FR-CAL-004: روز/فهرست۷روز، فیلتر و summary قبل pagination. FR-CAL-002 ثبت دستی موجود reuse می‌شود. شواهد اجرای تازه و محدودیت‌ها در گزارش۹ ثبت می‌شوند؛ آزمون گذشته جای بررسی این تغییر نیست.

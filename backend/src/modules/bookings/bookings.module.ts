@@ -1,3 +1,7 @@
+import { SalonOperationsService } from './application/salon-operations.service.js';
+import { SalonOperationsStore } from './application/salon-operations-store.js';
+import { PostgresSalonOperations } from './infrastructure/persistence/postgres-salon-operations.js';
+import { SalonOperationsController } from './presentation/http/salon-operations.controller.js';
 import { BookingChangesStore } from './application/booking-changes-store.js';
 import { BookingChangesService } from './application/booking-changes.service.js';
 import { PostgresBookingChanges } from './infrastructure/persistence/postgres-booking-changes.js';
@@ -14,9 +18,11 @@ import { BookingsController } from './presentation/http/bookings.controller.js';
 import { BookingHttp } from './presentation/http/booking-http.js';
 @Module({
   imports: [DatabaseModule, IdentityModule, SalonManagementModule],
-  controllers: [BookingsController, BookingChangesController],
+  controllers: [BookingsController, BookingChangesController, SalonOperationsController],
   providers: [
     BookingsService,
+    SalonOperationsService,
+    { provide: SalonOperationsStore, useClass: PostgresSalonOperations },
     BookingChangesService,
     { provide: BookingChangesStore, useClass: PostgresBookingChanges },
     BookingTransaction,

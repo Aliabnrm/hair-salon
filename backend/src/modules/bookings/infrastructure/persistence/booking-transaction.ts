@@ -39,7 +39,7 @@ export class BookingTransaction {
       if (!b.rowCount) notFound();
       await authorize();
       const old = await tx.query<{ fingerprint: string; appointment_id: string }>(
-        'SELECT fingerprint,appointment_id FROM app.booking_writes WHERE actor_id=$1 AND operation=$2 AND key=$3',
+        'SELECT fingerprint,COALESCE(appointment_id,block_id) AS appointment_id FROM app.booking_writes WHERE actor_id=$1 AND operation=$2 AND key=$3',
         [command.actor, command.operation, command.key],
       );
       const previous = old.rows[0];
@@ -51,7 +51,7 @@ export class BookingTransaction {
       }
       const id = await action(tx);
       await tx.query(
-        'INSERT INTO app.booking_writes(actor_id,operation,key,fingerprint,appointment_id) VALUES($1,$2,$3,$4,$5)',
+        `INSERT INTO app.booking_writes(actor_id,operation,key,fingerprint,${command.operation.startsWith('block-') ? 'block_id' : 'appointment_id'}) VALUES($1,$2,$3,$4,$5)`,
         [command.actor, command.operation, command.key, command.fingerprint, id],
       );
       await tx.query('COMMIT');

@@ -8,11 +8,13 @@ export function DayPicker({
   last,
   selected,
   choose,
+  today = first,
 }: {
   first: string;
   last: string;
   selected: string;
   choose: (date: string) => void;
+  today?: string;
 }) {
   const strip = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -69,13 +71,13 @@ export function DayPicker({
                 key={day.iso}
                 type="button"
                 data-date={day.iso}
-                aria-label={`${day.full}${day.iso === first ? '، امروز' : ''}`}
+                aria-label={`${day.full}${day.iso === today ? '، امروز' : ''}`}
                 aria-pressed={active}
                 onClick={() => choose(day.iso)}
                 className={`flex min-h-24 w-17 shrink-0 flex-col items-center justify-center gap-1 rounded-2xl border p-2 transition-colors ${active ? 'border-petrol bg-petrol text-white shadow-card' : 'border-line bg-surface text-ink hover:border-petrol'}`}
               >
                 <span className={`text-xs ${active ? 'text-white/90' : 'text-muted'}`}>
-                  {day.iso === first
+                  {day.iso === today
                     ? 'امروز'
                     : new Intl.DateTimeFormat('fa-IR', {
                         weekday: 'short',

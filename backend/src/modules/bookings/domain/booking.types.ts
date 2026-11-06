@@ -21,7 +21,7 @@ export interface Appointment {
   staff_id: string;
   code: string;
   source: 'online' | 'manual';
-  status: 'confirmed' | 'cancelled';
+  status: 'confirmed' | 'cancelled' | 'completed' | 'no_show';
   version: number;
   starts_at: string;
   ends_at: string;
@@ -44,7 +44,15 @@ export interface BookingCommand {
   actor: string;
   key: string;
   fingerprint: string;
-  operation: 'online' | 'manual' | 'cancel' | 'customer-cancel' | 'reschedule';
+  operation:
+    | 'online'
+    | 'manual'
+    | 'cancel'
+    | 'customer-cancel'
+    | 'reschedule'
+    | 'outcome'
+    | 'block-create'
+    | 'block-release';
 }
 export interface BookingPage {
   items: Appointment[];
@@ -52,6 +60,8 @@ export interface BookingPage {
 }
 export interface BookingListQuery {
   date?: string;
+  to?: string;
+  status?: Appointment['status'];
   staff_id?: string;
   period?: 'upcoming' | 'past';
   cursor?: string;

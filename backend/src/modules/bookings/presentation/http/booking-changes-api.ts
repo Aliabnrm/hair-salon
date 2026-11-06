@@ -56,9 +56,17 @@ export function BookingChangesResult() {
                 ],
                 properties: {
                   version: { type: 'integer', minimum: 1 },
-                  action: { type: 'string', enum: ['created', 'cancelled', 'rescheduled'] },
+                  action: {
+                    type: 'string',
+                    enum: ['created', 'cancelled', 'rescheduled', 'outcome', 'corrected'],
+                  },
                   actor: { type: 'string', enum: ['customer', 'owner'] },
                   reason: { type: 'string', nullable: true },
+                  result_status: {
+                    type: 'string',
+                    nullable: true,
+                    enum: ['confirmed', 'completed', 'no_show'],
+                  },
                   occurred_at: instant,
                   before: moment,
                   after: moment,

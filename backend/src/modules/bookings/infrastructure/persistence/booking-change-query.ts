@@ -24,7 +24,7 @@ export async function readChanges(
   now: Date,
 ): Promise<BookingChanges> {
   const r = await db.query<BookingChangeEvent>(
-    `SELECT e.version,e.action,CASE WHEN e.actor_id=a.booking_user_id THEN 'customer' ELSE 'owner' END AS actor,e.reason,
+    `SELECT e.version,e.action,CASE WHEN e.actor_id=a.booking_user_id THEN 'customer' ELSE 'owner' END AS actor,e.reason,e.details->>'status_after' AS result_status,
     e.occurred_at::text AS occurred_at,e.details->'before' AS before,e.details->'after' AS after
     FROM app.booking_events e JOIN app.appointments a ON a.id=e.appointment_id WHERE e.appointment_id=$1 ORDER BY e.version DESC LIMIT 51`,
     [row.id],

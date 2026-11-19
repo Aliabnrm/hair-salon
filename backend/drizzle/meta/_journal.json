@@ -50,6 +50,13 @@
       "when": 1793960897004,
       "tag": "0006_customer-booking-changes",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793980864117,
+      "tag": "0007_salon-operations",
+      "breakpoints": true
     }
   ]
 }

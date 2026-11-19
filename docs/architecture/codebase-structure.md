@@ -97,3 +97,9 @@ bookings اکنون قابلیت واقعی مستقل است؛ مثال قدی�
 تغییرات مشتری داخل feature bookings با BookingChangesService/BookingChangesStore و adapter PostgresBookingChanges است؛ ماژول یا سرویس مستقل شبکه‌ای ساخته نشد. booking-changes دامنه خالص است؛ readChangeAppointment/readChanges، لغو مشترک و ترکیب snapshot با برنامه زنده در فایل‌های محدود persistence قرار دارند. BookingTransaction، chooseSlot و calculateAvailability بازاستفاده می‌شوند.
 
 salon-management فقط availabilityWindow و قرارداد persistence مربوط به حذف دقیق تخصیص خود نوبت را گسترش می‌دهد؛ هیچ import به DTO/adapter خصوصی آن در bookings اضافه نشده است. فرانت api/hooks/components در feature bookings و صفحه ترکیب‌کننده تازه دارد؛ [موجودی UI](sprint-08-ui.md).
+
+## اسپرینت۹
+
+bookings/domain/salon-operations: validation و زمان/transition نتیجه و مسدودی. application/SalonOperationsService/Store: سناریو و مرز I/O؛ infrastructure/PostgresSalonOperations: تراکنش/خواندن خصوصی، با BookingTransaction و ledger مشترک. presentation/salon-operations-controller/api: ورودی HTTP و OpenAPI. ماژول جدید یا موتور availability دوم اضافه نشده است.
+
+فرانت useAgenda برای داده دفتر، OutcomeForm برای نتیجه، ScheduleBlocks/Form/Card برای ظرفیت؛ api/salon-operations و modelهای مرتبط قرارداد را نگه می‌دارند. useResourceMutation از hook قبلی برای دو resource واقعی استخراج و useBookingMutation wrapper سازگار مانده است. statusLabels/Titles مرجع نمایش همه وضعیت‌ها هستند.

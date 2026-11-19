@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { statusTitles } from '../model/appointment-status';
 import { AccountGate } from '../../../components/layout/account-gate';
 import { PageHeader } from '../../../components/layout/page-header';
 import { Button, buttonStyles } from '../../../components/ui/button';
@@ -27,8 +28,10 @@ function Content({ id }: { id: string }) {
               className="rounded-3xl bg-petrol-soft p-5"
             >
               <h1 className="text-2xl font-extrabold">
-                {result.status === 'cancelled'
-                  ? 'آخرین وضعیت نوبت: لغوشده'
+                {result.status !== 'confirmed'
+                  ? result.status === 'cancelled'
+                    ? 'آخرین وضعیت نوبت: لغوشده'
+                    : statusTitles[result.status]
                   : 'زمان جدید نوبت ثبت شد'}
               </h1>
               <p className="mt-3 text-sm leading-8">

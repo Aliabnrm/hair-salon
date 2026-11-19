@@ -143,3 +143,9 @@ idempotency روی actor/operation/key یکتا و به fingerprint و resource 
 `booking_events.details` افزوده شد؛ برای رویدادهای قبلی پیش‌فرض `{}` و برای جابه‌جایی، before/after زمان شروع/پایان و شناسه/نام متخصص را نگه می‌دارد. action=rescheduled در همان نسخه بعدی Appointment ثبت می‌شود. همان id/code و snapshot تجاری باقی می‌مانند؛ فقط staff_name همراه تغییر متخصص مجاز است.
 
 تخصیص فعال همان یک سطر به محدوده تازه منتقل می‌شود؛ freeze trigger رویداد متناظر و محدوده قبلی را می‌سنجد و check_booking_ledger در commit، محدوده نهایی/رویداد/وضعیت را تطبیق می‌دهد. FK سه‌ستونی تخصیص deferred و exclusion فعال قبلی فوری است. رویداد/کلیدهای قدیمی بازنویسی نمی‌شوند؛ details تاریخچه قدیمی عمداً اطلاعات زمانی ساختگی نمی‌گیرد. schema Drizzle فیلد و action را دارد؛ SQL سفارشی trigger/FK در0006 است.
+
+## مدل اجرایی اسپرینت۹
+
+migration0007_salon-operations: Appointment وضعیت completed/no_show و booking_events عمل outcome/corrected با status_before/status_after می‌گیرند. فیلدهای توافق/تماس تغییرناپذیرند؛ وضعیت و رویداد در یک commit. اصلاح بدون حذف تاریخچه انجام می‌شود. outcome allocation را تغییر نمی‌دهد.
+
+schedule_blocks بازه/متخصص/نام snapshot، علت خصوصی، ایجادکننده، version و داده رفع با علت/عامل را نگه می‌دارد. حذف/ویرایش تاریخی ممنوع است. schedule_allocations اکنون id مستقل و appointment_id/block_id nullable unique دارد؛ XOR دقیقاً یک منبع و FK مرکب tenant لازم‌اند. همان exclusion قبلی روی همه allocationهای فعال اعمال می‌شود. check_block_ledger هنگام commit تطابق بازه/tenant/release و وجود دقیقاً یک تخصیص را enforce می‌کند. booking_writes نیز یک منبع appointment یا block با check XOR و FK دارد. جزئیات و هزینه این تصمیم در ADR-015 ثبت‌اند.

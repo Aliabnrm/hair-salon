@@ -789,113 +789,134 @@ describe('atomic booking ledger on real PostgreSQL and Nest', () => {
       ),
     ).rejects.toMatchObject({ code: '23514' });
   });
-  it('upgrades the exact Sprint 7 ledger without rewriting existing receipts, events, allocations or intents', async () => {
-    const upgrade = await createTestDatabase();
-    const oldPool = new Pool({ connectionString: upgrade.url, max: 2 });
-    const folder = await mkdtemp(join(tmpdir(), 'hair-salon-s8-upgrade-'));
-    let app: Awaited<ReturnType<typeof createTestApplication>> | undefined;
-    try {
-      await mkdir(join(folder, 'meta'));
-      const source = fileURLToPath(new URL('../drizzle/', import.meta.url));
-      const journal = JSON.parse(await readFile(join(source, 'meta/_journal.json'), 'utf8'));
-      journal.entries = journal.entries.filter((e: { idx: number }) => e.idx <= 5);
-      await writeFile(join(folder, 'meta/_journal.json'), JSON.stringify(journal));
-      for (const entry of journal.entries)
-        await copyFile(join(source, entry.tag + '.sql'), join(folder, entry.tag + '.sql'));
-      await migrate(drizzle(oldPool), { migrationsFolder: folder });
-      const legacy = await seedAvailability(oldPool, '2026-11-03'),
-        id = randomUUID(),
-        owner = legacy.owner;
-      const snapshot = {
-        business_name: 'سالن قبلی',
-        business_address: 'نشانی عمومی آزمون',
-        business_phone: '+989121234567',
-        service_name: 'کوتاهی دقیق',
-        staff_name: 'متخصص اول',
-        price_irr: 2500000,
-        duration_minutes: 30,
-        buffer_before_minutes: 10,
-        buffer_after_minutes: 5,
-        service_version: 1,
-        customer_name: 'مشتری قدیمی آزمون',
-        customer_mobile: '09123456789',
-        timezone: 'Asia/Tehran',
-        policy: 'سیاست ثبت قبلی',
-      };
-      const tx = await oldPool.connect();
+  it.each([5, 6])(
+    'upgrades the exact ledger through migration %i without rewriting existing receipts, events, allocations or intents',
+    async (lastMigration) => {
+      const upgrade = await createTestDatabase();
+      const oldPool = new Pool({ connectionString: upgrade.url, max: 2 });
+      const folder = await mkdtemp(join(tmpdir(), 'hair-salon-s8-upgrade-'));
+      let app: Awaited<ReturnType<typeof createTestApplication>> | undefined;
       try {
-        await tx.query('BEGIN');
-        await tx.query(
-          "INSERT INTO app.appointments(id,business_id,service_id,staff_id,booking_user_id,created_by,code,source,starts_at,ends_at,snapshot) VALUES($1,$2,$3,$4,$5,$5,($1::uuid)::text,'online','2026-11-05T07:00:00Z','2026-11-05T07:30:00Z',$6::jsonb)",
-          [id, legacy.business, legacy.service, legacy.staff, owner, JSON.stringify(snapshot)],
-        );
-        await tx.query(
-          "INSERT INTO app.schedule_allocations(appointment_id,business_id,staff_id,occupied_start,occupied_end) VALUES($1,$2,$3,'2026-11-05T06:50:00Z','2026-11-05T07:35:00Z')",
-          [id, legacy.business, legacy.staff],
-        );
-        await tx.query(
-          "INSERT INTO app.booking_events(appointment_id,version,actor_id,action) VALUES($1,1,$2,'created')",
-          [id, owner],
-        );
-        await tx.query(
-          "INSERT INTO app.booking_writes(actor_id,operation,key,fingerprint,appointment_id) VALUES($1,'online','legacy-key','legacy-fingerprint',$2)",
-          [owner, id],
-        );
-        await tx.query('COMMIT');
-      } finally {
-        await tx.query('ROLLBACK');
-        tx.release();
-      }
-      const receiptsBefore = (await oldPool.query('SELECT * FROM app.appointments')).rows;
-      const allocationsBefore = (await oldPool.query('SELECT * FROM app.schedule_allocations'))
-        .rows;
-      const eventsBefore = (
-        await oldPool.query(
-          'SELECT appointment_id,version,actor_id,action,reason,occurred_at FROM app.booking_events',
-        )
-      ).rows;
-      const writesBefore = (await oldPool.query('SELECT * FROM app.booking_writes')).rows;
-      const journalBefore = (
-        await oldPool.query('SELECT * FROM drizzle.__drizzle_migrations ORDER BY id')
-      ).rows;
-      const migrated = await runMigration(upgrade.url);
-      expect(migrated.status, migrated.output).toBe(0);
-      expect((await oldPool.query('SELECT * FROM app.appointments')).rows).toEqual(receiptsBefore);
-      expect((await oldPool.query('SELECT * FROM app.schedule_allocations')).rows).toEqual(
-        allocationsBefore,
-      );
-      expect(
-        (
+        await mkdir(join(folder, 'meta'));
+        const source = fileURLToPath(new URL('../drizzle/', import.meta.url));
+        const journal = JSON.parse(await readFile(join(source, 'meta/_journal.json'), 'utf8'));
+        journal.entries = journal.entries.filter((e: { idx: number }) => e.idx <= lastMigration);
+        await writeFile(join(folder, 'meta/_journal.json'), JSON.stringify(journal));
+        for (const entry of journal.entries)
+          await copyFile(join(source, entry.tag + '.sql'), join(folder, entry.tag + '.sql'));
+        await migrate(drizzle(oldPool), { migrationsFolder: folder });
+        const legacy = await seedAvailability(oldPool, '2026-11-03'),
+          id = randomUUID(),
+          owner = legacy.owner;
+        const snapshot = {
+          business_name: 'سالن قبلی',
+          business_address: 'نشانی عمومی آزمون',
+          business_phone: '+989121234567',
+          service_name: 'کوتاهی دقیق',
+          staff_name: 'متخصص اول',
+          price_irr: 2500000,
+          duration_minutes: 30,
+          buffer_before_minutes: 10,
+          buffer_after_minutes: 5,
+          service_version: 1,
+          customer_name: 'مشتری قدیمی آزمون',
+          customer_mobile: '09123456789',
+          timezone: 'Asia/Tehran',
+          policy: 'سیاست ثبت قبلی',
+        };
+        const tx = await oldPool.connect();
+        try {
+          await tx.query('BEGIN');
+          await tx.query(
+            "INSERT INTO app.appointments(id,business_id,service_id,staff_id,booking_user_id,created_by,code,source,starts_at,ends_at,snapshot) VALUES($1,$2,$3,$4,$5,$5,($1::uuid)::text,'online','2026-11-05T07:00:00Z','2026-11-05T07:30:00Z',$6::jsonb)",
+            [id, legacy.business, legacy.service, legacy.staff, owner, JSON.stringify(snapshot)],
+          );
+          await tx.query(
+            "INSERT INTO app.schedule_allocations(appointment_id,business_id,staff_id,occupied_start,occupied_end) VALUES($1,$2,$3,'2026-11-05T06:50:00Z','2026-11-05T07:35:00Z')",
+            [id, legacy.business, legacy.staff],
+          );
+          await tx.query(
+            "INSERT INTO app.booking_events(appointment_id,version,actor_id,action) VALUES($1,1,$2,'created')",
+            [id, owner],
+          );
+          await tx.query(
+            "INSERT INTO app.booking_writes(actor_id,operation,key,fingerprint,appointment_id) VALUES($1,'online','legacy-key','legacy-fingerprint',$2)",
+            [owner, id],
+          );
+          await tx.query('COMMIT');
+        } finally {
+          await tx.query('ROLLBACK');
+          tx.release();
+        }
+        const receiptsBefore = (await oldPool.query('SELECT * FROM app.appointments')).rows;
+        const allocationsBefore = (
+          await oldPool.query(
+            'SELECT appointment_id,business_id,staff_id,occupied_start,occupied_end,released_at,occupied_range FROM app.schedule_allocations',
+          )
+        ).rows;
+        const eventsBefore = (
           await oldPool.query(
             'SELECT appointment_id,version,actor_id,action,reason,occurred_at FROM app.booking_events',
           )
-        ).rows,
-      ).toEqual(eventsBefore);
-      expect((await oldPool.query('SELECT * FROM app.booking_writes')).rows).toEqual(writesBefore);
-      expect(
-        (await oldPool.query('SELECT * FROM drizzle.__drizzle_migrations ORDER BY id')).rows.slice(
-          0,
-          6,
-        ),
-      ).toEqual(journalBefore);
-      app = await createTestApplication('test', [], upgrade.url, { now: () => initial });
-      const upgraded = app.app.get(BookingChangesStore);
-      expect((await upgraded.changes(owner, id, initial)).items[0]?.after).toBeNull();
-      const moved = await upgraded.reschedule(
-        { actor: owner, operation: 'reschedule', key: randomUUID(), fingerprint: 'upgrade' },
-        id,
-        { staff_id: legacy.second, starts_at: '2026-11-06T07:00:00.000Z' },
-        1,
-        initial,
-      );
-      expect(moved.id).toBe(id);
-      expect(moved.snapshot.price_irr).toBe(snapshot.price_irr);
-      expect(moved.code).toBe(id);
-    } finally {
-      await app?.app.close();
-      await oldPool.end();
-      await upgrade.close();
-      await rm(folder, { recursive: true, force: true });
-    }
-  });
+        ).rows;
+        const writesBefore = (
+          await oldPool.query(
+            'SELECT actor_id,operation,key,fingerprint,appointment_id,created_at FROM app.booking_writes',
+          )
+        ).rows;
+        const journalBefore = (
+          await oldPool.query('SELECT * FROM drizzle.__drizzle_migrations ORDER BY id')
+        ).rows;
+        const migrated = await runMigration(upgrade.url);
+        expect(migrated.status, migrated.output).toBe(0);
+        expect((await oldPool.query('SELECT * FROM app.appointments')).rows).toEqual(
+          receiptsBefore,
+        );
+        expect(
+          (
+            await oldPool.query(
+              'SELECT appointment_id,business_id,staff_id,occupied_start,occupied_end,released_at,occupied_range FROM app.schedule_allocations',
+            )
+          ).rows,
+        ).toEqual(allocationsBefore);
+        expect(
+          (
+            await oldPool.query(
+              'SELECT appointment_id,version,actor_id,action,reason,occurred_at FROM app.booking_events',
+            )
+          ).rows,
+        ).toEqual(eventsBefore);
+        expect(
+          (
+            await oldPool.query(
+              'SELECT actor_id,operation,key,fingerprint,appointment_id,created_at FROM app.booking_writes',
+            )
+          ).rows,
+        ).toEqual(writesBefore);
+        expect(
+          (
+            await oldPool.query('SELECT * FROM drizzle.__drizzle_migrations ORDER BY id')
+          ).rows.slice(0, lastMigration + 1),
+        ).toEqual(journalBefore);
+        app = await createTestApplication('test', [], upgrade.url, { now: () => initial });
+        const upgraded = app.app.get(BookingChangesStore);
+        expect((await upgraded.changes(owner, id, initial)).items[0]?.after).toBeNull();
+        const moved = await upgraded.reschedule(
+          { actor: owner, operation: 'reschedule', key: randomUUID(), fingerprint: 'upgrade' },
+          id,
+          { staff_id: legacy.second, starts_at: '2026-11-06T07:00:00.000Z' },
+          1,
+          initial,
+        );
+        expect(moved.id).toBe(id);
+        expect(moved.snapshot.price_irr).toBe(snapshot.price_irr);
+        expect(moved.code).toBe(id);
+      } finally {
+        await app?.app.close();
+        await oldPool.end();
+        await upgrade.close();
+        await rm(folder, { recursive: true, force: true });
+      }
+    },
+  );
 });

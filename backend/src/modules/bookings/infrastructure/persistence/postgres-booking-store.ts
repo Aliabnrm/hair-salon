@@ -192,15 +192,16 @@ export class PostgresBookingStore extends BookingStore {
       return '$' + params.length;
     };
     if (business && q.date) {
-      where += ` AND a.starts_at>=${add(new Date(dayBoundary(q.date, 0)))} AND a.starts_at<${add(new Date(dayBoundary(q.date, 1440, true)))}`;
+      where += ` AND a.starts_at>=${add(new Date(dayBoundary(q.date, 0)))} AND a.starts_at<${add(new Date(dayBoundary(q.to ?? q.date, 1440, true)))}`;
       if (q.staff_id) where += ` AND a.staff_id=${add(q.staff_id)}`;
+      if (q.status) where += ` AND a.status=${add(q.status)}`;
     } else where += ` AND a.ends_at${q.period === 'past' ? '<=' : '>'}${add(now)}`;
     const direction = !business && q.period === 'past' ? 'DESC' : 'ASC',
       comparison = direction === 'ASC' ? '>' : '<';
     if (q.cursor) {
       // Cursor must belong to the same authorized, filtered result set.
       const c = add(q.cursor);
-      where += ` AND (a.starts_at,a.id) ${comparison} (SELECT z.starts_at,z.id FROM app.appointments z WHERE z.id=${c} AND ${business ? 'z.business_id' : 'z.booking_user_id'}=$1)`;
+      where += ` AND (a.starts_at,a.id) ${comparison} (SELECT z.starts_at,z.id FROM app.appointments z WHERE z.id=${c} AND ${where.replaceAll('a.', 'z.')})`;
     }
     const r = await this.database.pool.query<AppointmentRow>(
       `SELECT ${appointmentColumns} FROM app.appointments a WHERE ${where} ORDER BY a.starts_at ${direction},a.id ${direction} LIMIT ${add(q.limit + 1)}`,

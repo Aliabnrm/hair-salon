@@ -62,7 +62,7 @@ export const appointments = appSchema.table(
       .where(sql`${t.status}='confirmed'`),
     check(
       'appointment_state',
-      sql`${t.status} IN ('confirmed','cancelled') AND ${t.source} IN ('online','manual') AND ${t.version}>0 AND ${t.endsAt}>${t.startsAt}`,
+      sql`${t.status} IN ('confirmed','cancelled','completed','no_show') AND ${t.source} IN ('online','manual') AND ${t.version}>0 AND ${t.endsAt}>${t.startsAt}`,
     ),
     check(
       'appointment_customer',
@@ -70,14 +70,54 @@ export const appointments = appSchema.table(
     ),
     check(
       'appointment_cancellation',
-      sql`(${t.status}='cancelled' AND ${t.cancelledAt} IS NOT NULL AND char_length(trim(${t.cancellationReason})) BETWEEN 3 AND 300) OR (${t.status}='confirmed' AND ${t.cancelledAt} IS NULL AND ${t.cancellationReason} IS NULL)`,
+      sql`(${t.status}='cancelled' AND ${t.cancelledAt} IS NOT NULL AND char_length(trim(${t.cancellationReason})) BETWEEN 3 AND 300) OR (${t.status}<>'cancelled' AND ${t.cancelledAt} IS NULL AND ${t.cancellationReason} IS NULL)`,
     ),
+  ],
+);
+export const scheduleBlocks = appSchema.table(
+  'schedule_blocks',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    businessId: uuid('business_id')
+      .notNull()
+      .references(() => businesses.id),
+    staffId: uuid('staff_id').notNull(),
+    staffName: text('staff_name').notNull(),
+    startsAt: instant('starts_at').notNull(),
+    endsAt: instant('ends_at').notNull(),
+    reason: text('reason').notNull(),
+    version: integer('version').notNull().default(1),
+    releasedAt: instant('released_at'),
+    releaseReason: text('release_reason'),
+    createdBy: uuid('created_by')
+      .notNull()
+      .references(() => users.id),
+    releasedBy: uuid('released_by').references(() => users.id),
+    createdAt: instant('created_at').notNull().defaultNow(),
+  },
+  (t) => [
+    unique('block_tenant_id').on(t.businessId, t.staffId, t.id),
+    foreignKey({
+      columns: [t.businessId, t.staffId],
+      foreignColumns: [staffProfiles.businessId, staffProfiles.id],
+    }),
+    check(
+      'block_valid',
+      sql`${t.endsAt}>${t.startsAt} AND ${t.endsAt}<=${t.startsAt}+interval '24 hours' AND char_length(trim(${t.reason})) BETWEEN 3 AND 300 AND ${t.version}>0`,
+    ),
+    check(
+      'block_release',
+      sql`(${t.releasedAt} IS NULL AND ${t.releaseReason} IS NULL AND ${t.releasedBy} IS NULL AND ${t.version}=1) OR (${t.releasedAt} IS NOT NULL AND ${t.releaseReason} IS NOT NULL AND char_length(trim(${t.releaseReason})) BETWEEN 3 AND 300 AND ${t.releasedBy} IS NOT NULL AND ${t.version}=2)`,
+    ),
+    index('blocks_agenda_idx').on(t.businessId, t.startsAt, t.id),
   ],
 );
 export const scheduleAllocations = appSchema.table(
   'schedule_allocations',
   {
-    appointmentId: uuid('appointment_id').primaryKey(),
+    id: uuid('id').defaultRandom().primaryKey(),
+    appointmentId: uuid('appointment_id').unique(),
+    blockId: uuid('block_id').unique(),
     businessId: uuid('business_id').notNull(),
     staffId: uuid('staff_id').notNull(),
     occupiedStart: instant('occupied_start').notNull(),
@@ -89,6 +129,14 @@ export const scheduleAllocations = appSchema.table(
       columns: [t.businessId, t.staffId, t.appointmentId],
       foreignColumns: [appointments.businessId, appointments.staffId, appointments.id],
     }),
+    foreignKey({
+      columns: [t.businessId, t.staffId, t.blockId],
+      foreignColumns: [scheduleBlocks.businessId, scheduleBlocks.staffId, scheduleBlocks.id],
+    }),
+    check(
+      'allocation_source',
+      sql`(${t.appointmentId} IS NOT NULL)::integer+(${t.blockId} IS NOT NULL)::integer=1`,
+    ),
     check('allocation_range', sql`${t.occupiedStart}<${t.occupiedEnd}`),
   ],
 );
@@ -109,7 +157,10 @@ export const bookingEvents = appSchema.table(
   },
   (t) => [
     primaryKey({ columns: [t.appointmentId, t.version] }),
-    check('booking_event_action', sql`${t.action} IN ('created','cancelled','rescheduled')`),
+    check(
+      'booking_event_action',
+      sql`${t.action} IN ('created','cancelled','rescheduled','outcome','corrected')`,
+    ),
   ],
 );
 export const bookingWrites = appSchema.table(
@@ -121,10 +172,15 @@ export const bookingWrites = appSchema.table(
     operation: text('operation').notNull(),
     key: text('key').notNull(),
     fingerprint: text('fingerprint').notNull(),
-    appointmentId: uuid('appointment_id')
-      .notNull()
-      .references(() => appointments.id),
+    appointmentId: uuid('appointment_id').references(() => appointments.id),
+    blockId: uuid('block_id').references(() => scheduleBlocks.id),
     createdAt: instant('created_at').notNull().defaultNow(),
   },
-  (t) => [primaryKey({ columns: [t.actorId, t.operation, t.key] })],
+  (t) => [
+    primaryKey({ columns: [t.actorId, t.operation, t.key] }),
+    check(
+      'booking_write_source',
+      sql`(${t.appointmentId} IS NOT NULL)::integer+(${t.blockId} IS NOT NULL)::integer=1`,
+    ),
+  ],
 );

@@ -61,7 +61,7 @@ export function cancellation(value: unknown): string {
 export function bookingListQuery(value: unknown, owner: boolean): BookingListQuery {
   const v = object(
     value,
-    owner ? ['date', 'staff_id', 'limit', 'cursor'] : ['period', 'limit', 'cursor'],
+    owner ? ['date', 'to', 'staff_id', 'status', 'limit', 'cursor'] : ['period', 'limit', 'cursor'],
   );
   const q: BookingListQuery = {
     limit:
@@ -76,6 +76,19 @@ export function bookingListQuery(value: unknown, owner: boolean): BookingListQue
   };
   if (owner) {
     q.date = isoDate(v.date, 'date');
+    q.to = v.to === undefined ? q.date : isoDate(v.to, 'to');
+    if (q.to < q.date || Date.parse(q.to) - Date.parse(q.date) > 6 * 86400000)
+      invalid('to', 'بازه حداکثر هفت روز است.');
+    if (v.status !== undefined && v.status !== 'any') {
+      if (
+        v.status !== 'confirmed' &&
+        v.status !== 'cancelled' &&
+        v.status !== 'completed' &&
+        v.status !== 'no_show'
+      )
+        invalid('status');
+      q.status = v.status;
+    }
     if (v.staff_id !== undefined && v.staff_id !== 'any') q.staff_id = uuid(v.staff_id, 'staff_id');
   } else {
     if (v.period !== undefined && v.period !== 'past' && v.period !== 'upcoming') invalid('period');
@@ -91,7 +104,13 @@ export function ensureCancellable(
   version: number,
   expected: number,
 ) {
-  if (status !== 'confirmed') conflict('ALREADY_CANCELLED', 'این نوبت قبلاً لغو شده است.');
+  if (status !== 'confirmed')
+    conflict(
+      status === 'cancelled' ? 'ALREADY_CANCELLED' : 'INVALID_TRANSITION',
+      status === 'cancelled'
+        ? 'این نوبت قبلاً لغو شده است.'
+        : 'برای این نوبت نتیجه مراجعه ثبت شده است.',
+    );
   if (start.getTime() <= now.getTime())
     conflict('APPOINTMENT_STARTED', 'لغو فقط پیش از شروع نوبت ممکن است.');
   if (version !== expected)

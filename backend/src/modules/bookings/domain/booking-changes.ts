@@ -15,7 +15,11 @@ export function canCustomerChange(a: ChangeableAppointment, now: Date): boolean 
   );
 }
 export function ensureCustomerChange(a: ChangeableAppointment, now: Date, version?: number): void {
-  if (a.status !== 'confirmed') conflict('ALREADY_CANCELLED', 'این نوبت لغو شده است.');
+  if (a.status !== 'confirmed')
+    conflict(
+      a.status === 'cancelled' ? 'ALREADY_CANCELLED' : 'INVALID_TRANSITION',
+      'این نوبت دیگر قابل لغو یا تغییر نیست.',
+    );
   if (!canCustomerChange(a, now))
     conflict('CHANGE_DEADLINE_PASSED', 'مهلت لغو یا تغییر آنلاین گذشته است؛ با سالن تماس بگیرید.');
   if (version !== undefined && version !== a.version)
@@ -52,9 +56,10 @@ export interface BookingMoment {
 }
 export interface BookingChangeEvent {
   version: number;
-  action: 'created' | 'cancelled' | 'rescheduled';
+  action: 'created' | 'cancelled' | 'rescheduled' | 'outcome' | 'corrected';
   actor: 'customer' | 'owner';
   reason: string | null;
+  result_status?: 'confirmed' | 'completed' | 'no_show' | null;
   occurred_at: string;
   before: BookingMoment | null;
   after: BookingMoment | null;

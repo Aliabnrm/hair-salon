@@ -252,7 +252,7 @@ test('owner publishes immediately, customer books the same salon and moderation 
     await expect(readiness.getByRole('link', { name: 'مشاهده صفحه عمومی و رزرو' })).toBeVisible();
     await readiness.getByRole('link', { name: 'نوبت‌های مشتریان این سالن' }).click();
     await expect(
-      page.getByRole('heading', { name: 'برای این روز و متخصص نوبتی ثبت نشده' }),
+      page.getByRole('heading', { name: 'برای این بازه و فیلتر نوبتی پیدا نشد' }),
     ).toBeVisible();
     for (let i = 0; i < 4; i++)
       await page.getByRole('button', { name: 'روز بعد', exact: true }).click();

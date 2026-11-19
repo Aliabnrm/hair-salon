@@ -21,7 +21,7 @@ export interface Appointment {
   staff_id: string;
   code: string;
   source: 'online' | 'manual';
-  status: 'confirmed' | 'cancelled';
+  status: 'confirmed' | 'cancelled' | 'completed' | 'no_show';
   version: number;
   starts_at: string;
   ends_at: string;

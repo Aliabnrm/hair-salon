@@ -1,3 +1,4 @@
+import { statusLabels } from '../model/appointment-status';
 import Link from 'next/link';
 import type { Appointment } from '../model/booking.types';
 import { appointmentTime, tehranDate } from '../model/booking-values';
@@ -17,9 +18,9 @@ export function AppointmentCard({ item, owner = false }: { item: Appointment; ow
           </span>
         </p>
         <span
-          className={`rounded-full px-3 py-1 text-xs font-bold ${item.status === 'confirmed' ? 'bg-petrol-soft text-petrol-deep' : 'bg-danger-soft text-danger'}`}
+          className={`rounded-full px-3 py-1 text-xs font-bold ${item.status === 'confirmed' || item.status === 'completed' ? 'bg-petrol-soft text-petrol-deep' : 'bg-danger-soft text-danger'}`}
         >
-          {item.status === 'confirmed' ? 'قطعی' : 'لغوشده'}
+          {statusLabels[item.status]}
         </span>
       </div>
       <h2 className="break-words text-lg font-bold">

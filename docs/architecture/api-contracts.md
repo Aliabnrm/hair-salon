@@ -236,3 +236,16 @@ POST publication/requests دیگر pending تازه تولید نمی‌کند؛
 خطاها:401نشست،403Origin،404عدم دسترسی/خدمت یا متخصص عمومی ناموجود،422ورودی،428نسخه غایب،429نرخ با Retry-After و503اختلال.409شامل CHANGE_DEADLINE_PASSED،REPLACEMENT_TOO_SOON،VERSION_CONFLICT،UNCHANGED_APPOINTMENT،SLOT_UNAVAILABLE وIDEMPOTENCY_CONFLICT است. اطلاعات حساس در error/log نمی‌روند.
 
 resolve در /me/booking-intents/{key} اکنون operation=customer-cancel/reschedule را نیز می‌پذیرد؛ مجوز فعلی حفظ و وضعیت فعلی نوبت بازگردانده می‌شود. خطای مقصد یا rollback به لغو جداگانه نوبت قبلی منجر نمی‌شود. OpenAPI schema ورودی،history و policy120 را مستند می‌کند.
+
+## قرارداد افزوده اسپرینت۹
+
+همه مسیرها session/owner، no-store و همان envelope فعلی دارند؛ POSTها Origin/CSRF، Idempotency-Key و محدودیت۳۰تغییر/دقیقه دارند. outcome/release به If-Match نیاز دارند؛ خطاهای۴۰۹/۴۲۲/۴۲۸ و نتیجه مبهم با همان intent پیگیری می‌شوند. قرارداد ماشین‌خوان در salon-operations-api/controller است.
+
+- GET `/businesses/:businessId/appointments?date=YYYY-MM-DD&to=YYYY-MM-DD&staff_id=any&status=any&limit=20&cursor=UUID`: to شامل روز انتهایی و حداکثر۷روز؛ status=confirmed/cancelled/completed/no_show؛ پاسخ همان items/next_cursor. cursor باید عضو همان مجموعه مجاز و فیلترشده باشد.
+- GET `/businesses/:businessId/agenda-overview` با همان فیلترها: checked_at، summary شامل total/confirmed/completed/cancelled/no_show/awaiting_outcome، blocks حداکثر۲۰۰ و blocks_truncated. summary پیش از فیلتر status/pagination است؛ blocks با هم‌پوشانی بازه/متخصص خوانده می‌شوند. دلیل مسدودی خصوصی است.
+- POST `/businesses/:businessId/appointments/:id/outcome`: فقط status و reason اختیاری؛ اصلاح نتیجه reason لازم دارد؛ پاسخ Appointment. operation=outcome در GET `/me/booking-intents/:key` نیز مجاز است.
+- POST `/businesses/:businessId/schedule-blocks`: staff_id/starts_at/ends_at/reason؛ پاسخ۲۰۱ ScheduleBlock شامل id/business_id/staff_id/staff_name/starts_at/ends_at/reason/version/released_at/release_reason. ورودی UTC، آینده، گام۱۵دقیقه، حداکثر۲۴ساعت در افق۳۰روز.
+- POST `/businesses/:businessId/schedule-blocks/:id/release`: reason لازم و پاسخ۲۰۰ وضعیت فعلی ScheduleBlock.
+- GET `/businesses/:businessId/block-intents/:key?operation=block-create|block-release`: مجوز مالک و منبع همان سالن، پاسخ فعلی block؛ کلید به‌تنهایی مجوز نیست.
+
+Appointment اکنون completed/no_show نیز دارد؛ تاریخچه outcome/corrected با result_status و دلیل را برمی‌گرداند. عدم ثبت نتیجه، confirmed باقی می‌ماند. لغوشده پایانی است؛ اصلاح نتیجه به confirmed مجاز و مستند است.

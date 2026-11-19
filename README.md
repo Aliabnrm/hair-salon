@@ -267,3 +267,7 @@ API: `GET /api/v1/catalog/salons/<businessId>/availability?service_id=<serviceId
 مسیر تازه `/appointments/{appointmentId}/reschedule` است. مشتری پس از مهلت یا برای نوبت لغوشده، دکمه تغییر فعال نمی‌بیند. شماره تماس، رزرو دستی را به حسابی متصل نمی‌کند. همه migrationها از جمله0006 باید پیش از اجرای API تازه اعمال شوند؛ migration جدید داده قبلی را نگه می‌دارد.
 
 [طرح۸](docs/planning/sprints/sprint-08-plan.md)، [پرامپت۸](docs/prompts/sprint-08.md)، [ADR-014](docs/architecture/adr/ADR-014-customer-booking-changes.md)، [رابط۸](docs/architecture/sprint-08-ui.md) و [درس فارسی۸](docs/learning/sprint-08.md). نتیجه اجرای واقعی در [گزارش۸](docs/planning/sprints/sprint-08-report.md) ثبت می‌شود.
+
+## اسپرینت۹ — عملیات روزانه سالن
+
+دفتر روز/۷روز با خلاصه و فیلتر، نتیجه مراجعه و اصلاح دارای دلیل، مسدودی متخصص و رفع آن در ظرفیت مشترک. [طرح۹](docs/planning/sprints/sprint-09-plan.md)، [گزارش۹](docs/planning/sprints/sprint-09-report.md) و [درس۹](docs/learning/sprint-09.md) مرجع دامنه/نتیجه‌اند.

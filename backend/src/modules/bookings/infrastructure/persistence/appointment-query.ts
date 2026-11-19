@@ -7,7 +7,7 @@ export interface AppointmentRow {
   staff_id: string;
   code: string;
   source: 'online' | 'manual';
-  status: 'confirmed' | 'cancelled';
+  status: 'confirmed' | 'cancelled' | 'completed' | 'no_show';
   version: number;
   starts_at: Date;
   ends_at: Date;
